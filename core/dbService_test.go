@@ -2,8 +2,6 @@ package realbase
 
 import (
 	"testing"
-	"net/http"
-	"github.com/gngeorgiev/sockjs-go/sockjs"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -13,42 +11,45 @@ var (
 	defaultCollection = "test"
 )
 
+func init() {
+	Initialize(defaultConnectionString)
+}
+
 func getDefaultDbService() DbService {
 	return getDbService(defaultCollection)
 }
 
 func getDbService(collection string) DbService {
-	return &dbService{defaultConnectionString,
-		defaultDatabase, collection, &fakeMessageService{}}
+	return NewDbService(defaultDatabase, collection)
 }
 
 func ErrorTestField(t *testing.T, field string, expected, actual interface{}) {
 	t.Error("expected", field, "to", "equal", expected, "got", actual);
 }
 
-type fakeMessageService struct {
-	broadcastCalledTimes, broadcastJsonCalledTimes int
-	lastMessage string
-	lastJson map[string]interface{}
-}
-
-func (m *fakeMessageService) InitSocketHandler() http.Handler {
-	return nil
-}
-
-func (m *fakeMessageService) GetSessions() []sockjs.Session {
-	return nil
-}
-
-func (m *fakeMessageService) Broadcast(message string) {
-	m.broadcastCalledTimes++
-	m.lastMessage = message
-}
-
-func (m *fakeMessageService) BroadcastJSON(message map[string]interface{}) {
-	m.broadcastJsonCalledTimes++
-	m.lastJson = message
-}
+//type fakeMessageService struct {
+//	broadcastCalledTimes, broadcastJsonCalledTimes int
+//	lastMessage string
+//	lastJson map[string]interface{}
+//}
+//
+//func (m *fakeMessageService) InitSocketHandler() http.Handler {
+//	return nil
+//}
+//
+//func (m *fakeMessageService) GetSessions() []sockjs.Session {
+//	return nil
+//}
+//
+//func (m *fakeMessageService) Broadcast(message string) {
+//	m.broadcastCalledTimes++
+//	m.lastMessage = message
+//}
+//
+//func (m *fakeMessageService) BroadcastJSON(message map[string]interface{}) {
+//	m.broadcastJsonCalledTimes++
+//	m.lastJson = message
+//}
 
 func TestDbServiceGetSettings(t *testing.T) {
 	d := getDefaultDbService()
@@ -100,35 +101,6 @@ func TestDbServiceInsertAndFindId(t *testing.T) {
 	d.Insert(doc)
 
 	res, err := d.FindId("pesho")
-
-	_m := d.GetMessageService()
-	m, ok := _m.(*fakeMessageService)
-
-	if !ok {
-		t.Fatal("Message service is of wrong type")
-	}
-
-	if m.broadcastCalledTimes != 0 {
-		t.Error("Incorect number of broadcasts, 0 got", m.broadcastCalledTimes)
-	}
-
-	if m.broadcastJsonCalledTimes != 1 {
-		t.Error("Incorrect number of broadcasts, ", m.broadcastCalledTimes, "expected 1")
-	}
-
-	message := m.lastJson
-
-	if message["origin"] != "db" {
-		t.Error("Wrong message origin")
-	}
-
-	if message["data"] == nil {
-		t.Error("Wrong message data")
-	}
-
-	if message["operation"] != "insert" {
-		t.Error("Wrong message operation")
-	}
 
 	if err != nil {
 		t.Fatal(err)

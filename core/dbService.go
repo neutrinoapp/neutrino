@@ -8,7 +8,6 @@ import (
 type DbService interface {
 	GetSettings() map[string]string
 	GetSession() *mgo.Session
-	GetMessageService() MessageService
 	GetDb() *mgo.Database
 	GetCollection() *mgo.Collection
 	Insert(doc bson.M) error
@@ -17,22 +16,26 @@ type DbService interface {
 
 type dbService struct {
 	connectionString, dbName, colName string
-	messageService MessageService
 }
 
-func constructMessage(doc bson.M, operation string) bson.M {
-	message := make(map[string]interface{})
+//func constructMessage(doc bson.M, operation string) bson.M {
+//	message := make(map[string]interface{})
+//
+//	message["origin"] = "db"
+//	message["data"] = doc
+//	message["operation"] = operation
+//
+//	return message
+//}
 
-	message["origin"] = "db"
-	message["data"] = doc
-	message["operation"] = operation
-
-	return message
-}
-
-func GetDbService(connectionString, dbName, colName string) *dbService {
-	d := dbService{connectionString, dbName, colName, NewMessageService()}
+func NewDbService(dbName, colName string) *dbService {
+	connectionString := GetConfig().GetConnectionString()
+	d := dbService{connectionString, dbName, colName}
 	return &d
+}
+
+func NewUsersDbService() *dbService {
+	return NewDbService(Constants.DatabaseName(), Constants.UsersCollection())
 }
 
 func (d *dbService) GetSettings() map[string]string {
@@ -54,10 +57,6 @@ func (d *dbService) GetSession() *mgo.Session {
 	return session
 }
 
-func (d *dbService) GetMessageService() MessageService {
-	return d.messageService
-}
-
 func (d *dbService) GetDb() *mgo.Database {
 	db := d.GetSession().DB(d.dbName)
 	return db
@@ -70,8 +69,8 @@ func (d *dbService) GetCollection() *mgo.Collection {
 
 func (d *dbService) Insert(doc bson.M) error {
 	err := d.GetCollection().Insert(doc)
-	message := constructMessage(doc, "insert")
-	d.messageService.BroadcastJSON(message)
+	//message := constructMessage(doc, "insert")
+	//d.messageService.BroadcastJSON(message)
 
 	return err
 }

@@ -1,0 +1,69 @@
+<component name="libraryTable">
+  <library name="GOPATH &lt;realbase&gt;">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/../gopkg.in" />
+      <root url="file://$PROJECT_DIR$/../github.com" />
+      <root url="file://$PROJECT_DIR$/../golang.org" />
+      <root url="file://$PROJECT_DIR$/../9fans.net" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <excluded>
+      <root url="file://$PROJECT_DIR$/../github.com/labstack/echo/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/tools/godep/Godeps/_workspace" />
+      <root url="file://$PROJECT_DIR$/../gopkg.in/mgo.v2/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/derekparker/delve/dwarf/frame/testdata" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/tools/cmd/stringer/testdata" />
+      <root url="file://$PROJECT_DIR$/../github.com/rogpeppe/godef/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/gngeorgiev/sockjs-go/.git" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/crypto/sha3/testdata" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/ssa/interp/testdata" />
+      <root url="file://$PROJECT_DIR$/../github.com/igm/sockjs-go/.git" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/loader/testdata" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/tools/refactor/eg/testdata" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/tools/cmd/callgraph/testdata" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/tools/cmd/vet/testdata" />
+      <root url="file://$PROJECT_DIR$/../github.com/golang/lint/testdata" />
+      <root url="file://$PROJECT_DIR$/../github.com/golang/lint/.git" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/tools/cmd/fiximports/testdata" />
+      <root url="file://$PROJECT_DIR$/../github.com/rogpeppe/godef/go/printer/testdata" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/pointer/testdata" />
+      <root url="file://$PROJECT_DIR$" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/net/.git" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/ssa/ssautil/testdata" />
+      <root url="file://$PROJECT_DIR$/../gopkg.in/igm/sockjs-go.v2/.git" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/tools/oracle/testdata" />
+      <root url="file://$PROJECT_DIR$/../github.com/nsf/gocode/_gccgo" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/crypto/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/nsf/gocode/_goremote" />
+      <root url="file://$PROJECT_DIR$/../github.com/inconshreveable/mousetrap/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/nsf/gocode/_testing" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/net/html/testdata" />
+      <root url="file://$PROJECT_DIR$/../9fans.net/go/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/spf13/cobra/.git" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/sys/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/derekparker/delve/_fixtures" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/tools/cmd/cover/testdata" />
+      <root url="file://$PROJECT_DIR$/../github.com/nsf/gocode/.git" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/net/html/charset/testdata" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/types/testdata" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/crypto/ssh/testdata" />
+      <root url="file://$PROJECT_DIR$/../github.com/derekparker/delve/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/googollee/go-engine.io/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/labstack/gommon/.git" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/tools/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/peterh/liner/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/spf13/pflag/.git" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/callgraph/cha/testdata" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/callgraph/rta/testdata" />
+      <root url="file://$PROJECT_DIR$/../github.com/bradfitz/http2/testdata" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/gcimporter/testdata" />
+      <root url="file://$PROJECT_DIR$/../github.com/gorilla/websocket/.git" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/gccgoimporter/testdata" />
+      <root url="file://$PROJECT_DIR$/../github.com/tools/godep/.git" />
+      <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/ssa/testdata" />
+      <root url="file://$PROJECT_DIR$/../github.com/bradfitz/http2/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/googollee/go-socket.io/.git" />
+    </excluded>
+  </library>
+</component>

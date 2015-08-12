@@ -1,13 +1,26 @@
 package realbase
 
-import "gopkg.in/mgo.v2"
+type Config interface {
+	GetConnectionString() string
+}
 
-func Connect(host string) *mgo.Session {
-	session, err := mgo.Dial(host)
+type config struct {
+	connectionString string
+}
 
-	if err != nil {
-		panic(err)
+var c *config = nil
+func Initialize(connectionString string) {
+	if c != nil {
+		panic("Initialize must be called once")
 	}
 
-	return session
+	c = &config{connectionString}
+}
+
+func GetConfig() Config {
+	return c
+}
+
+func (c *config) GetConnectionString() string {
+	return c.connectionString
 }
