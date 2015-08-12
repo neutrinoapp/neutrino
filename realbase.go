@@ -21,8 +21,8 @@ func initRoutes(e *echo.Echo) {
 		c.String(http.StatusOK, "haha")
 	})
 
-	e.Post("/auth", func (c *echo.Context) {
-		api.RegisterUserHandler(c)
+	e.Post("/auth", func (c *echo.Context) error {
+		return api.RegisterUserHandler(c)
 	})
 }
 
