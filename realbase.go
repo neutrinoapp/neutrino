@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo"
 	mw "github.com/labstack/echo/middleware"
 	"realbase/core"
+	"fmt"
 )
 
 func initMiddleware(e *echo.Echo) {
@@ -17,13 +18,12 @@ func initMiddleware(e *echo.Echo) {
 }
 
 func initRoutes(e *echo.Echo) {
-	e.Get("/", func (c *echo.Context) {
+	e.Get("/", func (c *echo.Context) error {
 		c.String(http.StatusOK, "haha")
+		return nil
 	})
 
-	e.Post("/auth", func (c *echo.Context) error {
-		return api.RegisterUserHandler(c)
-	})
+	e.Post("/auth", api.RegisterUserHandler)
 }
 
 func main() {
@@ -34,7 +34,11 @@ func main() {
 	initMiddleware(e)
 	initRoutes(e)
 
-	e.Run(":1234")
+
+	port := ":1234";
+
+	fmt.Println("Listening on port", port)
+	e.Run(port)
 
 //	mongodbHost := "localhost:27017"
 //

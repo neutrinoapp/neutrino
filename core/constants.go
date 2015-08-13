@@ -6,9 +6,9 @@ type constants struct {
 var Constants = &constants{}
 
 func (c *constants) DatabaseName() string {
-	return "Realbase"
+	return "realbase"
 }
 
 func (c *constants) UsersCollection() string {
-	return "Users"
+	return "users"
 }
