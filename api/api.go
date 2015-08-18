@@ -1,9 +1,12 @@
 package api
+
 import (
 	"github.com/labstack/echo"
 	"net/http"
 	mw "github.com/labstack/echo/middleware"
 )
+
+var initialized bool
 
 func initMiddleware(e *echo.Echo) {
 	e.Use(mw.Logger())
@@ -21,7 +24,7 @@ func initMiddleware(e *echo.Echo) {
 
 func initRoutes(e *echo.Echo) {
 	e.Get("/", func (c *echo.Context) error {
-		c.String(http.StatusOK, "haha")
+		c.String(http.StatusOK, "All functional!")
 		return nil
 	})
 
@@ -29,6 +32,11 @@ func initRoutes(e *echo.Echo) {
 }
 
 func Initialize(e *echo.Echo) {
+	if initialized {
+		return
+	}
+
+	initialized = true
 	initMiddleware(e)
 	initRoutes(e)
 }
