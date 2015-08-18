@@ -5,10 +5,11 @@ import (
 	"realbase/core"
 	"golang.org/x/crypto/bcrypt"
 	"errors"
+	"time"
 )
 
 func RegisterUserHandler(c *echo.Context) error {
-	b, err := JsonBody(c.Request())
+	b, err := GetBody(c)
 
 	if err != nil {
 		return err
@@ -33,6 +34,7 @@ func RegisterUserHandler(c *echo.Context) error {
 		"_id": username,
 		"email": email,
 		"password": hashedPassword,
+		"createdAt": time.Now(),
 	}
 
 	return db.Insert(doc)

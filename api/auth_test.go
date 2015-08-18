@@ -9,43 +9,53 @@ import (
 	"math/rand"
 	"strconv"
 	"encoding/json"
+	"realbase/core"
+	"time"
 )
 
 func TestRegisterUser(t *testing.T) {
+	rand.Seed(time.Now().UnixNano())
+
 	body := map[string]interface{}{
 		"username": "u" + strconv.Itoa(rand.Int()),
 		"password": "pass",
 		"email": "e" + strconv.Itoa(rand.Int()) + "@gmail.com",
 	}
 
-	statusCode, _ := requestPut("/auth", body, RegisterUserHandler)
+	statusCode, _ := RequestPut("/auth", body, RegisterUserHandler)
 	if statusCode != http.StatusOK {
 		t.Fatal("Wrong status code expected 200, got", statusCode);
 	}
+
+	res, err := realbase.NewUsersDbService().FindId(body["username"])
+
+	if res == nil || err != nil {
+		t.Fatal("User not created correctly", res, err);
+	}
 }
 
-func requestPut(path string, body map[string]interface{}, handler (func(*echo.Context) error)) (int, string) {
+func RequestPut(path string, body map[string]interface{}, handler (func(*echo.Context) error)) (int, string) {
 	e := echo.New()
 	e.Put(path, handler)
 	r := request(echo.PUT, path, body, e)
 	return r.Code, r.Body.String()
 }
 
-func requestPost(path string, body map[string]interface{}, handler (func(*echo.Context) error)) (int, string) {
+func RequestPost(path string, body map[string]interface{}, handler (func(*echo.Context) error)) (int, string) {
 	e := echo.New()
 	e.Post(path, handler)
 	r := request(echo.POST, path, body, e)
 	return r.Code, r.Body.String()
 }
 
-func requestGet(path string, handler (func(*echo.Context) error)) (int, string) {
+func RequestGet(path string, handler (func(*echo.Context) error)) (int, string) {
 	e := echo.New()
 	e.Get(path, handler)
 	r := request(echo.GET, path, make(map[string]interface{}), e)
 	return r.Code, r.Body.String()
 }
 
-func requestDelete(path string, handler (func(*echo.Context) error)) (int, string) {
+func RequestDelete(path string, handler (func(*echo.Context) error)) (int, string) {
 	e := echo.New()
 	e.Delete(path, handler)
 	r := request(echo.DELETE, path, make(map[string]interface{}), e)
@@ -53,6 +63,8 @@ func requestDelete(path string, handler (func(*echo.Context) error)) (int, strin
 }
 
 func request(method, path string, body map[string]interface{}, e *echo.Echo) (*httptest.ResponseRecorder) {
+	Initialize(e)
+
 	bodyStr, _ := json.Marshal(body)
 	bodyBuf := bytes.NewBuffer([]byte(bodyStr))
 

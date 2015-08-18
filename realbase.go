@@ -4,36 +4,17 @@ import (
 //	"fmt"
 //	"gopkg.in/mgo.v2/bson"
 //	"realbase/core"
-	"net/http"
-	"realbase/api"
 	"github.com/labstack/echo"
-	mw "github.com/labstack/echo/middleware"
 	"realbase/core"
 	"fmt"
+	"realbase/api"
 )
 
-func initMiddleware(e *echo.Echo) {
-	e.Use(mw.Logger())
-	e.Use(mw.Recover())
-}
-
-func initRoutes(e *echo.Echo) {
-	e.Get("/", func (c *echo.Context) error {
-		c.String(http.StatusOK, "haha")
-		return nil
-	})
-
-	e.Put("/auth", api.RegisterUserHandler)
-}
-
 func main() {
-	realbase.Initialize("localhost:27017")
-
 	e := echo.New()
 
-	initMiddleware(e)
-	initRoutes(e)
-
+	realbase.Initialize("localhost:27017")
+	api.Initialize(e)
 
 	port := ":1234";
 

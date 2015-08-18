@@ -1,22 +1,12 @@
 package api
 
 import (
-	"net/http"
-	"encoding/json"
+	"github.com/labstack/echo"
 )
 
-func JsonBody(r *http.Request) (map[string]interface{}, error) {
-	var t map[string]interface{}
+func GetBody(c *echo.Context) (map[string]interface{}, error) {
+	b := make(map[string]interface{})
+	err := c.Bind(&b)
 
-	if r.Body == nil {
-		return t, RestErrorInvalidBody()
-	}
-
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&t)
-	if err != nil {
-		return t, err
-	}
-
-	return t, nil
+	return b, err
 }
