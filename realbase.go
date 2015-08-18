@@ -5,7 +5,7 @@ import (
 //	"gopkg.in/mgo.v2/bson"
 //	"realbase/core"
 	"net/http"
-	"./api"
+	"realbase/api"
 	"github.com/labstack/echo"
 	mw "github.com/labstack/echo/middleware"
 	"realbase/core"
@@ -23,7 +23,7 @@ func initRoutes(e *echo.Echo) {
 		return nil
 	})
 
-	e.Post("/auth", api.RegisterUserHandler)
+	e.Put("/auth", api.RegisterUserHandler)
 }
 
 func main() {

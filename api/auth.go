@@ -8,7 +8,12 @@ import (
 )
 
 func RegisterUserHandler(c *echo.Context) error {
-	b := JsonBody(c.Request())
+	b, err := JsonBody(c.Request())
+
+	if err != nil {
+		return err
+	}
+
 	username, email := b["username"], b["email"]
 	val, ok := b["password"].(string)
 
@@ -25,7 +30,7 @@ func RegisterUserHandler(c *echo.Context) error {
 
 	db := realbase.NewUsersDbService()
 	doc := map[string]interface{}{
-		"username": username,
+		"_id": username,
 		"email": email,
 		"password": hashedPassword,
 	}

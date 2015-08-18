@@ -5,13 +5,18 @@ import (
 	"encoding/json"
 )
 
-func JsonBody(r *http.Request) map[string]interface{} {
-	decoder := json.NewDecoder(r.Body)
+func JsonBody(r *http.Request) (map[string]interface{}, error) {
 	var t map[string]interface{}
-	err := decoder.Decode(&t)
-	if err != nil {
-		panic(err)
+
+	if r.Body == nil {
+		return t, RestErrorInvalidBody()
 	}
 
-	return t
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&t)
+	if err != nil {
+		return t, err
+	}
+
+	return t, nil
 }

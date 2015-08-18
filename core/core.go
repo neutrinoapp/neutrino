@@ -18,6 +18,10 @@ func Initialize(connectionString string) {
 }
 
 func GetConfig() Config {
+	if c == nil {
+		c = &config{"localhost:27017"}
+	}
+
 	return c
 }
 
