@@ -7,25 +7,45 @@ import (
 	"strconv"
 	"realbase/core"
 	"time"
+	"strings"
 )
 
-func TestRegisterUser(t *testing.T) {
+func registerUser(t *testing.T) *UserModel {
 	rand.Seed(time.Now().UnixNano())
 
-	body := map[string]interface{}{
-		"username": "u" + strconv.Itoa(rand.Int()),
-		"password": "pass",
-		"email": "e" + strconv.Itoa(rand.Int()) + "@gmail.com",
+	body := &UserModel{
+		Username: "u" + strconv.Itoa(rand.Int()),
+		Password: "pass",
+		Email: "e" + strconv.Itoa(rand.Int()) + "@gmail.com",
 	}
 
-	statusCode, _ := RequestPut("/auth", body, RegisterUserHandler)
-	if statusCode != http.StatusOK {
-		t.Fatal("Wrong status code expected 200, got", statusCode);
-	}
+	rec := SendRequest("PUT", "/auth", body, t)
+	rec.CodeIs(http.StatusOK)
 
-	res, err := realbase.NewUsersDbService().FindId(body["username"])
+	return body
+}
+
+func TestRegisterUser(t *testing.T) {
+	body := registerUser(t)
+
+	res, err := realbase.NewUsersDbService().FindId(body.Username)
 
 	if res == nil || err != nil {
 		t.Fatal("User not created correctly", res, err);
+	}
+}
+
+func TestLoginUser(t *testing.T) {
+	body := registerUser(t)
+
+	rec := SendRequest("POST", "/auth", body, t)
+	rec.CodeIs(http.StatusOK)
+
+	bodyStr := rec.Recorder.Body.String()
+
+	contains := strings.Contains(bodyStr, "token")
+
+	if !contains {
+		t.Fatal("Incorrect login response")
 	}
 }

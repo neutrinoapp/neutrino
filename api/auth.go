@@ -1,43 +1,79 @@
 package api
 
 import (
-	"github.com/labstack/echo"
 	"realbase/core"
 	"golang.org/x/crypto/bcrypt"
-	"errors"
+	"gopkg.in/dgrijalva/jwt-go.v2"
 	"time"
+	"github.com/ant0ine/go-json-rest/rest"
+	"net/http"
+	"gopkg.in/mgo.v2/bson"
 )
 
-func RegisterUserHandler(c *echo.Context) error {
-	b, err := GetBody(c)
+type UserModel struct {
+	Username string `json: "username"`
+	Password string `json: "password"`
+	Email string `json: "email`
+}
 
-	if err != nil {
-		return err
+func RegisterUserHandler (w rest.ResponseWriter, r *rest.Request) {
+	u := UserModel{}
+
+	if err := r.DecodeJsonPayload(&u); err != nil {
+		rest.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
-	username, email := b["username"], b["email"]
-	val, ok := b["password"].(string)
-
-	if !ok {
-		return errors.New("Invalid password type")
-	}
-
-	password := []byte(val)
-
-	hashedPassword, err := bcrypt.GenerateFromPassword(password, 10)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), 10)
 	if err != nil {
-		return err;
+		rest.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	db := realbase.NewUsersDbService()
-	doc := map[string]interface{}{
-		"_id": username,
-		"email": email,
+	doc := bson.M{
+		"_id": u.Username,
+		"email": u.Email,
 		"password": hashedPassword,
 		"createdAt": time.Now(),
 	}
 
-	return db.Insert(doc)
+	if err := db.Insert(doc); err != nil {
+		rest.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-	//err = bcrypt.CompareHashAndPassword(hashedPassword, password)
+	w.WriteHeader(http.StatusOK)
+}
+
+func LoginUserHandler(w rest.ResponseWriter, r *rest.Request) {
+	u := UserModel{}
+	if err := r.DecodeJsonPayload(&u); err != nil {
+		rest.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	db := realbase.NewUsersDbService()
+	existingUser, err := db.FindId(u.Username)
+
+	if err != nil {
+		rest.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	err = bcrypt.CompareHashAndPassword(existingUser["password"].([]byte), []byte(u.Password))
+
+	if err != nil {
+		return
+	}
+
+	token := jwt.New(jwt.GetSigningMethod("HS256"))
+	token.Claims["user"] = existingUser["username"]
+	token.Claims["expiration"] = time.Now().Add(time.Minute + 60).Unix()
+
+	tokenStr, err := token.SignedString([]byte(""))
+
+	if err != nil {
+		rest.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	w.WriteJson(map[string]string{"token": tokenStr})
 }

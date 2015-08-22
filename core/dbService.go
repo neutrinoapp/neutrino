@@ -5,6 +5,8 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
+var connectionPool map[string]*mgo.Session
+
 type DbService interface {
 	GetSettings() map[string]string
 	GetSession() *mgo.Session
@@ -38,6 +40,10 @@ func NewUsersDbService() *dbService {
 	return NewDbService(Constants.DatabaseName(), Constants.UsersCollection())
 }
 
+func NewApplicationsDbService() *dbService {
+	return NewDbService(Constants.DatabaseName(), Constants.ApplicationsCollection())
+}
+
 func (d *dbService) GetSettings() map[string]string {
 	m := make(map[string]string)
 	m["ConnectionString"] = d.connectionString
@@ -48,13 +54,23 @@ func (d *dbService) GetSettings() map[string]string {
 }
 
 func (d *dbService) GetSession() *mgo.Session {
-	session, err := mgo.Dial(d.connectionString)
-
-	if err != nil {
-		panic(err)
+	if connectionPool == nil {
+		connectionPool = make(map[string]*mgo.Session)
 	}
 
-	return session
+	storedSession := connectionPool[d.connectionString]
+
+	if storedSession == nil {
+		session, err := mgo.Dial(d.connectionString)
+		if err != nil {
+			panic(err)
+		}
+
+		connectionPool[d.connectionString] = session
+		storedSession = session
+	}
+
+	return storedSession.Copy()
 }
 
 func (d *dbService) GetDb() *mgo.Database {

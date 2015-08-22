@@ -1,42 +1,86 @@
 package api
 
 import (
-	"github.com/labstack/echo"
-	"net/http"
-	mw "github.com/labstack/echo/middleware"
+	"github.com/ant0ine/go-json-rest/rest"
+	"log"
+	"strings"
+	"gopkg.in/dgrijalva/jwt-go.v2"
 )
 
 var initialized bool
 
-func initMiddleware(e *echo.Echo) {
-	e.Use(mw.Logger())
-	e.Use(mw.Recover())
-	e.Use(func (c *echo.Context) error {
-		h := c.Request().Header
-		ctHeader := h.Get("Content-Type")
-		if ctHeader == "" {
-			h.Set("Content-Type", "application/json")
+type authMiddleware struct {
+}
+
+func (a *authMiddleware) MiddlewareFunc(handler rest.HandlerFunc) rest.HandlerFunc {
+	return func(w rest.ResponseWriter, r *rest.Request) {
+		authHeader := r.Header.Get("Authorization")
+
+		if authHeader == "" {
+			rest.Error(w, "Not authorized", 401)
+			return
 		}
 
-		return nil
+		authHeaderParts := strings.SplitN(authHeader, " ", 2)
+		if len(authHeaderParts) != 2 || authHeaderParts[0] != "Bearer" {
+			rest.Error(w, "Not authorized", 401)
+			return
+		}
+
+		token, err := jwt.Parse(authHeaderParts[1], func(token *jwt.Token) (interface{}, error) {
+			if(jwt.GetSigningMethod("HS256") != token.Method){
+				rest.Error(w, "Invalid signing token algorithm", 500)
+				return nil, nil
+			}
+
+			return []byte(""), nil
+		})
+
+		r.Env["token"] = token
+		r.Env["user"] = token.Claims["user"]
+
+		if err != nil {
+			rest.Error(w, err.Error(), 500)
+			return
+		}
+	}
+}
+
+func initMiddleware(restApi *rest.Api) {
+	restApi.Use(rest.DefaultDevStack...)
+	restApi.Use(&rest.IfMiddleware{
+		Condition: func(request *rest.Request) bool {
+			return request.URL.Path != "/auth"
+		},
+		IfTrue: &authMiddleware{},
 	})
 }
 
-func initRoutes(e *echo.Echo) {
-	e.Get("/", func (c *echo.Context) error {
-		c.String(http.StatusOK, "All functional!")
-		return nil
-	})
+func initRoutes(restApi *rest.Api) {
+	router, err := rest.MakeRouter(
+		rest.Put("/auth", RegisterUserHandler),
+		rest.Post("/auth", LoginUserHandler),
 
-	e.Put("/auth", RegisterUserHandler)
+		rest.Post("/application", CreateApplicationHandler),
+	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	restApi.SetApp(router)
 }
 
-func Initialize(e *echo.Echo) {
-	if initialized {
+func Initialize(restApi *rest.Api) {
+	if IsInitialized() {
 		return
 	}
 
 	initialized = true
-	initMiddleware(e)
-	initRoutes(e)
+	initMiddleware(restApi)
+	initRoutes(restApi)
+}
+
+func IsInitialized() bool {
+	return initialized
 }

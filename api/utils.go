@@ -10,3 +10,4 @@ func GetBody(c *echo.Context) (map[string]interface{}, error) {
 
 	return b, err
 }
+

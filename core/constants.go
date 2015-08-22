@@ -12,3 +12,7 @@ func (c *constants) DatabaseName() string {
 func (c *constants) UsersCollection() string {
 	return "users"
 }
+
+func (c *constants) ApplicationsCollection() string {
+	return "applications"
+}
