@@ -14,7 +14,12 @@ func CreateApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
 	body := &ApplicationModel{}
 
 	if err := r.DecodeJsonPayload(body); err != nil {
-		rest.Error(w, err.Error(), 500)
+		RestGeneralError(w, err)
+		return
+	}
+
+	if body.Name == "" {
+		RestErrorInvalidBody(w)
 		return
 	}
 
@@ -24,10 +29,11 @@ func CreateApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
 	doc := bson.M{
 		"name": body.Name,
 		"owner": username,
+		"apiKey": GetCleanUUID(),
 	}
 
 	if err := db.Insert(doc); err != nil {
-		rest.Error(w, err.Error(), 500)
+		RestGeneralError(w, err)
 		return
 	}
 }

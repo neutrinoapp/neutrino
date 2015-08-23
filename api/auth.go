@@ -20,13 +20,13 @@ func RegisterUserHandler (w rest.ResponseWriter, r *rest.Request) {
 	u := UserModel{}
 
 	if err := r.DecodeJsonPayload(&u); err != nil {
-		rest.Error(w, err.Error(), http.StatusBadRequest)
+		RestErrorInvalidBody(w)
 		return
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), 10)
 	if err != nil {
-		rest.Error(w, err.Error(), http.StatusInternalServerError)
+		RestGeneralError(w, err)
 		return
 	}
 
@@ -35,11 +35,10 @@ func RegisterUserHandler (w rest.ResponseWriter, r *rest.Request) {
 		"_id": u.Username,
 		"email": u.Email,
 		"password": hashedPassword,
-		"createdAt": time.Now(),
 	}
 
 	if err := db.Insert(doc); err != nil {
-		rest.Error(w, err.Error(), http.StatusInternalServerError)
+		RestGeneralError(w, err)
 		return
 	}
 
@@ -49,30 +48,34 @@ func RegisterUserHandler (w rest.ResponseWriter, r *rest.Request) {
 func LoginUserHandler(w rest.ResponseWriter, r *rest.Request) {
 	u := UserModel{}
 	if err := r.DecodeJsonPayload(&u); err != nil {
-		rest.Error(w, err.Error(), http.StatusBadRequest)
+		RestGeneralError(w, err)
+		return
 	}
 
 	db := realbase.NewUsersDbService()
 	existingUser, err := db.FindId(u.Username)
 
 	if err != nil {
-		rest.Error(w, err.Error(), http.StatusInternalServerError)
+		RestGeneralError(w, err)
+		return
 	}
 
 	err = bcrypt.CompareHashAndPassword(existingUser["password"].([]byte), []byte(u.Password))
 
 	if err != nil {
+		RestGeneralError(w, err)
 		return
 	}
 
 	token := jwt.New(jwt.GetSigningMethod("HS256"))
-	token.Claims["user"] = existingUser["username"]
+	token.Claims["user"] = u.Username
 	token.Claims["expiration"] = time.Now().Add(time.Minute + 60).Unix()
 
 	tokenStr, err := token.SignedString([]byte(""))
 
 	if err != nil {
-		rest.Error(w, err.Error(), http.StatusInternalServerError)
+		RestGeneralError(w, err)
+		return
 	}
 
 	w.WriteJson(map[string]string{"token": tokenStr})

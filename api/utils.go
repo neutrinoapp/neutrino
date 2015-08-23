@@ -1,13 +1,14 @@
 package api
 
 import (
-	"github.com/labstack/echo"
+	"github.com/twinj/uuid"
+	"strings"
 )
 
-func GetBody(c *echo.Context) (map[string]interface{}, error) {
-	b := make(map[string]interface{})
-	err := c.Bind(&b)
-
-	return b, err
+func GetUUID() string {
+	return uuid.NewV4().String()
 }
 
+func GetCleanUUID() string {
+	return strings.Replace(GetUUID(), "-", "", -1)
+}

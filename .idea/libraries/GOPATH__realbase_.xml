@@ -17,8 +17,10 @@
       <root url="file://$PROJECT_DIR$/../github.com/rogpeppe/godef/.git" />
       <root url="file://$PROJECT_DIR$/../github.com/gngeorgiev/sockjs-go/.git" />
       <root url="file://$PROJECT_DIR$/../github.com/ant0ine/go-json-rest/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/mailgun/godebug/testdata" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/crypto/sha3/testdata" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/ssa/interp/testdata" />
+      <root url="file://$PROJECT_DIR$/../github.com/mailgun/godebug/.git" />
       <root url="file://$PROJECT_DIR$/../github.com/igm/sockjs-go/.git" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/loader/testdata" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/refactor/eg/testdata" />
@@ -27,9 +29,11 @@
       <root url="file://$PROJECT_DIR$/../github.com/golang/lint/testdata" />
       <root url="file://$PROJECT_DIR$/../github.com/golang/lint/.git" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/cmd/fiximports/testdata" />
+      <root url="file://$PROJECT_DIR$/../github.com/mailgun/godebug/Godeps/_workspace" />
       <root url="file://$PROJECT_DIR$/../github.com/rogpeppe/godef/go/printer/testdata" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/pointer/testdata" />
       <root url="file://$PROJECT_DIR$" />
+      <root url="file://$PROJECT_DIR$/../gopkg.in/yaml.v2/.git" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/net/.git" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/ssa/ssautil/testdata" />
       <root url="file://$PROJECT_DIR$/../gopkg.in/igm/sockjs-go.v2/.git" />
@@ -39,9 +43,12 @@
       <root url="file://$PROJECT_DIR$/../github.com/nsf/gocode/_goremote" />
       <root url="file://$PROJECT_DIR$/../github.com/inconshreveable/mousetrap/.git" />
       <root url="file://$PROJECT_DIR$/../github.com/nsf/gocode/_testing" />
+      <root url="file://$PROJECT_DIR$/../github.com/twinj/uuid/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/shurcooL/sanitized_anchor_name/.git" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/net/html/testdata" />
       <root url="file://$PROJECT_DIR$/../9fans.net/go/.git" />
       <root url="file://$PROJECT_DIR$/../github.com/spf13/cobra/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/cpuguy83/go-md2man/.git" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/sys/.git" />
       <root url="file://$PROJECT_DIR$/../github.com/derekparker/delve/_fixtures" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/cmd/cover/testdata" />
@@ -51,7 +58,9 @@
       <root url="file://$PROJECT_DIR$/../golang.org/x/crypto/ssh/testdata" />
       <root url="file://$PROJECT_DIR$/../github.com/derekparker/delve/.git" />
       <root url="file://$PROJECT_DIR$/../github.com/googollee/go-engine.io/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/russross/blackfriday/testdata" />
       <root url="file://$PROJECT_DIR$/../github.com/labstack/gommon/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/russross/blackfriday/.git" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/.git" />
       <root url="file://$PROJECT_DIR$/../github.com/peterh/liner/.git" />
       <root url="file://$PROJECT_DIR$/../github.com/spf13/pflag/.git" />

@@ -43,6 +43,8 @@ func (a *authMiddleware) MiddlewareFunc(handler rest.HandlerFunc) rest.HandlerFu
 			rest.Error(w, err.Error(), 500)
 			return
 		}
+
+		handler(w, r)
 	}
 }
 
