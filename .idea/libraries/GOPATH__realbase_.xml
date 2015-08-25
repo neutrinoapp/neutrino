@@ -26,6 +26,7 @@
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/refactor/eg/testdata" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/cmd/callgraph/testdata" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/cmd/vet/testdata" />
+      <root url="file://$PROJECT_DIR$/../github.com/codegangsta/envy/.git" />
       <root url="file://$PROJECT_DIR$/../github.com/golang/lint/testdata" />
       <root url="file://$PROJECT_DIR$/../github.com/golang/lint/.git" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/cmd/fiximports/testdata" />
@@ -65,6 +66,7 @@
       <root url="file://$PROJECT_DIR$/../github.com/peterh/liner/.git" />
       <root url="file://$PROJECT_DIR$/../github.com/spf13/pflag/.git" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/callgraph/cha/testdata" />
+      <root url="file://$PROJECT_DIR$/../github.com/codegangsta/gin/.git" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/callgraph/rta/testdata" />
       <root url="file://$PROJECT_DIR$/../github.com/bradfitz/http2/testdata" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/gcimporter/testdata" />
@@ -75,6 +77,7 @@
       <root url="file://$PROJECT_DIR$/../gopkg.in/dgrijalva/jwt-go.v2/.git" />
       <root url="file://$PROJECT_DIR$/../github.com/bradfitz/http2/.git" />
       <root url="file://$PROJECT_DIR$/../github.com/googollee/go-socket.io/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/codegangsta/cli/.git" />
     </excluded>
   </library>
 </component>

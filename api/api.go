@@ -64,6 +64,10 @@ func initRoutes(restApi *rest.Api) {
 		rest.Post("/auth", LoginUserHandler),
 
 		rest.Post("/application", CreateApplicationHandler),
+		//TODO: moar apps
+
+		rest.Post("/#appId/types", CreateTypeHandler),
+
 	)
 
 	if err != nil {

@@ -29,7 +29,8 @@ func CreateApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
 	doc := bson.M{
 		"name": body.Name,
 		"owner": username,
-		"apiKey": GetCleanUUID(),
+		"types": []string{"users"},
+		"keys": []string{},//TODO:
 	}
 
 	if err := db.Insert(doc); err != nil {
