@@ -4,7 +4,32 @@ import (
 	"testing"
 )
 
-func TestCreateApplication(t *testing.T) {
-	rec := sendAuthenticatedRequest("POST", "application", ApplicationModel{randomString()}, t)
+func createApp(t *testing.T) *ApplicationModel {
+	app := &ApplicationModel{
+		Name:randomString(),
+	}
+
+	rec := sendAuthenticatedRequest("POST", "/applications", app, t)
 	rec.CodeIs(200)
+
+	return app
+}
+
+func TestCreateAndGetApplication(t *testing.T) {
+	app := createApp(t)
+
+	getRec := sendAuthenticatedRequest("GET", "/applications", nil, t)
+	getRec.CodeIs(200)
+
+	var result []*ApplicationModel
+	getRec.DecodeJsonPayload(&result)
+
+
+	if len(result) == 0 {
+		t.Error("Application not created")
+	}
+
+	if result[0].Name != app.Name {
+		t.Error("Application not created correctly")
+	}
 }

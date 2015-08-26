@@ -11,6 +11,7 @@
     <excluded>
       <root url="file://$PROJECT_DIR$/../github.com/labstack/echo/.git" />
       <root url="file://$PROJECT_DIR$/../github.com/tools/godep/Godeps/_workspace" />
+      <root url="file://$PROJECT_DIR$/../github.com/gin-gonic/gin/.git" />
       <root url="file://$PROJECT_DIR$/../gopkg.in/mgo.v2/.git" />
       <root url="file://$PROJECT_DIR$/../github.com/derekparker/delve/dwarf/frame/testdata" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/cmd/stringer/testdata" />
@@ -21,9 +22,11 @@
       <root url="file://$PROJECT_DIR$/../golang.org/x/crypto/sha3/testdata" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/ssa/interp/testdata" />
       <root url="file://$PROJECT_DIR$/../github.com/mailgun/godebug/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/mattn/go-colorable/_example" />
       <root url="file://$PROJECT_DIR$/../github.com/igm/sockjs-go/.git" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/loader/testdata" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/refactor/eg/testdata" />
+      <root url="file://$PROJECT_DIR$/../github.com/mattn/go-colorable/.git" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/cmd/callgraph/testdata" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/cmd/vet/testdata" />
       <root url="file://$PROJECT_DIR$/../github.com/codegangsta/envy/.git" />
@@ -65,10 +68,12 @@
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/.git" />
       <root url="file://$PROJECT_DIR$/../github.com/peterh/liner/.git" />
       <root url="file://$PROJECT_DIR$/../github.com/spf13/pflag/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/manucorporat/sse/.git" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/callgraph/cha/testdata" />
       <root url="file://$PROJECT_DIR$/../github.com/codegangsta/gin/.git" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/callgraph/rta/testdata" />
       <root url="file://$PROJECT_DIR$/../github.com/bradfitz/http2/testdata" />
+      <root url="file://$PROJECT_DIR$/../gopkg.in/bluesuncorp/validator.v5/.git" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/gcimporter/testdata" />
       <root url="file://$PROJECT_DIR$/../github.com/gorilla/websocket/.git" />
       <root url="file://$PROJECT_DIR$/../golang.org/x/tools/go/gccgoimporter/testdata" />

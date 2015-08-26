@@ -11,7 +11,6 @@ import (
 )
 
 type UserModel struct {
-	Username string `json: "username"`
 	Password string `json: "password"`
 	Email string `json: "email`
 }
@@ -32,8 +31,7 @@ func RegisterUserHandler (w rest.ResponseWriter, r *rest.Request) {
 
 	db := realbase.NewUsersDbService()
 	doc := bson.M{
-		"_id": u.Username,
-		"email": u.Email,
+		"_id": u.Email,
 		"password": hashedPassword,
 	}
 
@@ -53,7 +51,7 @@ func LoginUserHandler(w rest.ResponseWriter, r *rest.Request) {
 	}
 
 	db := realbase.NewUsersDbService()
-	existingUser, err := db.FindId(u.Username)
+	existingUser, err := db.FindId(u.Email, nil)
 
 	if err != nil {
 		RestGeneralError(w, err)
@@ -68,7 +66,7 @@ func LoginUserHandler(w rest.ResponseWriter, r *rest.Request) {
 	}
 
 	token := jwt.New(jwt.GetSigningMethod("HS256"))
-	token.Claims["user"] = u.Username
+	token.Claims["user"] = u.Email
 	token.Claims["expiration"] = time.Now().Add(time.Minute + 60).Unix()
 
 	tokenStr, err := token.SignedString([]byte(""))

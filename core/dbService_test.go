@@ -3,6 +3,7 @@ package realbase
 import (
 	"testing"
 	"gopkg.in/mgo.v2/bson"
+	"gopkg.in/mgo.v2"
 )
 
 var (
@@ -20,7 +21,7 @@ func getDefaultDbService() DbService {
 }
 
 func getDbService(collection string) DbService {
-	return NewDbService(defaultDatabase, collection)
+	return NewDbService(defaultDatabase, collection, mgo.Index{})
 }
 
 func ErrorTestField(t *testing.T, field string, expected, actual interface{}) {
@@ -100,7 +101,7 @@ func TestDbServiceInsertAndFindId(t *testing.T) {
 	doc := bson.M{"_id": "pesho", "number": 5}
 	d.Insert(doc)
 
-	res, err := d.FindId("pesho")
+	res, err := d.FindId("pesho", nil)
 
 	if err != nil {
 		t.Fatal(err)

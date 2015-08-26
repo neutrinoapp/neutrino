@@ -5,12 +5,14 @@ import (
 	"log"
 	"strings"
 	"gopkg.in/dgrijalva/jwt-go.v2"
+	"realbase/core"
+	"gopkg.in/mgo.v2/bson"
 )
 
 var initialized bool
 
-type authMiddleware struct {
-}
+type authMiddleware struct {}
+type environmentMiddleware struct {}
 
 func (a *authMiddleware) MiddlewareFunc(handler rest.HandlerFunc) rest.HandlerFunc {
 	return func(w rest.ResponseWriter, r *rest.Request) {
@@ -48,14 +50,54 @@ func (a *authMiddleware) MiddlewareFunc(handler rest.HandlerFunc) rest.HandlerFu
 	}
 }
 
+func (e *environmentMiddleware) MiddlewareFunc(handler rest.HandlerFunc) rest.HandlerFunc {
+	return func(w rest.ResponseWriter, r *rest.Request) {
+		appId := r.PathParam("appId")
+
+		if appId != "" {
+			//TODO: cache this
+			appDb := realbase.NewApplicationsDbService()
+			id := bson.ObjectId(appId)
+			app, err := appDb.FindId(id, nil)
+
+			if err != nil {
+				RestGeneralError(w, err)
+				handler(w, r)
+				return
+			}
+
+			r.Env["app"] = ApplicationModel{
+				Id: app["_id"].(bson.ObjectId),
+				Name: app["Name"].(string),
+			}
+		}
+
+		handler(w, r)
+	}
+}
+
 func initMiddleware(restApi *rest.Api) {
-	restApi.Use(rest.DefaultDevStack...)
-	restApi.Use(&rest.IfMiddleware{
-		Condition: func(request *rest.Request) bool {
-			return request.URL.Path != "/auth"
+	restApi.Use(
+		&rest.AccessLogJsonMiddleware{},
+		&rest.TimerMiddleware{},
+		&rest.RecorderMiddleware{},
+		&rest.PoweredByMiddleware{"Realbase"},
+		&rest.RecoverMiddleware{EnableResponseStackTrace: true},
+		&rest.JsonIndentMiddleware{},
+		&rest.ContentTypeCheckerMiddleware{},
+		&rest.IfMiddleware{
+			Condition: func(request *rest.Request) bool {
+				return request.URL.Path != "/auth"
+			},
+			IfTrue: &authMiddleware{},
 		},
-		IfTrue: &authMiddleware{},
-	})
+		&rest.IfMiddleware{
+			Condition: func(request *rest.Request) bool {
+				return request.URL.Path != "/auth" && request.URL.Path != "/applications"
+			},
+			IfTrue: &environmentMiddleware{},
+		},
+	)
 }
 
 func initRoutes(restApi *rest.Api) {
@@ -63,11 +105,12 @@ func initRoutes(restApi *rest.Api) {
 		rest.Put("/auth", RegisterUserHandler),
 		rest.Post("/auth", LoginUserHandler),
 
-		rest.Post("/application", CreateApplicationHandler),
+		rest.Post("/applications", CreateApplicationHandler),
+		rest.Get("/applications", GetApplicationsHandler),
+		rest.Get("/applications/#appId", GetApplicationHandler),
 		//TODO: moar apps
 
 		rest.Post("/#appId/types", CreateTypeHandler),
-
 	)
 
 	if err != nil {

@@ -38,14 +38,13 @@ func sendRequest(method, path string, body interface{}, t *testing.T) *test.Reco
 }
 
 func randomString() string {
+	rand.Seed(time.Now().UnixNano())
+
 	return "r" + strconv.Itoa(rand.Int())
 }
 
 func register(t *testing.T) *UserModel {
-	rand.Seed(time.Now().UnixNano())
-
 	body := &UserModel{
-		Username: randomString(),
 		Password: "pass",
 		Email: randomString() + "@gmail.com",
 	}
@@ -59,12 +58,12 @@ func register(t *testing.T) *UserModel {
 func login(t *testing.T) (*UserModel, string) {
 	if token == "" {
 		user = register(t)
+		rec := sendRequest("POST", "/auth", user, t)
+
+		var response map[string]interface{}
+		rec.DecodeJsonPayload(&response)
+		token = response["token"].(string)
 	}
 
-	rec := sendRequest("POST", "/auth", user, t)
-
-	response := make(map[string]interface)
-	rec.DecodeJsonPayload(&response)
-
-	return user, response["token"]
+	return user, token
 }

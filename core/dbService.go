@@ -15,7 +15,9 @@ type DbService interface {
 	GetDb() *mgo.Database
 	GetCollection() *mgo.Collection
 	Insert(doc bson.M) error
-	FindId(id interface{}) (map[string]interface{}, error)
+	Update(q, u bson.M) error
+	FindId(id, fields interface{}) (bson.M, error)
+	Find(query, fields interface{}) ([]bson.M, error)
 }
 
 type dbService struct {
@@ -41,6 +43,10 @@ func NewDbService(dbName, colName string, index mgo.Index) *dbService {
 
 func NewUsersDbService() *dbService {
 	return NewDbService(Constants.DatabaseName(), Constants.UsersCollection(), mgo.Index{})
+}
+
+func NewTypeDbService(appId, typeName string) *dbService {
+	return NewDbService(Constants.DatabaseName(), appId + "." + typeName, mgo.Index{})
 }
 
 func NewApplicationsDbService() *dbService {
@@ -101,20 +107,26 @@ func (d *dbService) GetCollection() *mgo.Collection {
 }
 
 func (d *dbService) Insert(doc bson.M) error {
-	doc["createdAt"] = time.Now()
+	t := time.Now()
+	doc["createdAt"] = t
 
-	err := d.GetCollection().Insert(doc)
-	//message := constructMessage(doc, "insert")
-	//d.messageService.BroadcastJSON(message)
-
-	return err
+	return d.GetCollection().Insert(doc)
 }
 
-func (d *dbService) FindId(id interface{}) (map[string]interface{}, error) {
-	result := bson.M{}
-	err := d.GetCollection().FindId(id).One(&result)
+func (d *dbService) Update(q, u bson.M) error {
+	return d.GetCollection().Update(q, u)
+}
 
-	//TODO: do we need to broadcast reads? I guess not
+func (d *dbService) FindId(id, fields interface{}) (bson.M, error) {
+	result := bson.M{}
+	err := d.GetCollection().FindId(id).Select(fields).One(&result)
+
+	return result, err;
+}
+
+func (d *dbService) Find(query, fields interface{}) ([]bson.M, error) {
+	result := []bson.M{}
+	err := d.GetCollection().Find(query).Select(fields).All(&result)
 
 	return result, err;
 }

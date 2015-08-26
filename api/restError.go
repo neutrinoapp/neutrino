@@ -2,6 +2,7 @@ package api
 import (
 	"net/http"
 	"github.com/ant0ine/go-json-rest/rest"
+	"runtime/debug"
 )
 
 type RestError struct {
@@ -10,6 +11,7 @@ type RestError struct {
 
 func restError(w rest.ResponseWriter, statusCode int, message string) {
 	rest.Error(w, message, statusCode)
+	debug.PrintStack()
 }
 
 func RestErrorInvalidBody(w rest.ResponseWriter) {

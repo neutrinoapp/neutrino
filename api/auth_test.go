@@ -10,7 +10,7 @@ import (
 func TestRegisterUser(t *testing.T) {
 	body := register(t)
 
-	res, err := realbase.NewUsersDbService().FindId(body.Username)
+	res, err := realbase.NewUsersDbService().FindId(body.Email, nil)
 
 	if res == nil || err != nil {
 		t.Fatal("User not created correctly", res, err);
