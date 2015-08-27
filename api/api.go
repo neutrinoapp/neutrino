@@ -5,8 +5,6 @@ import (
 	"log"
 	"strings"
 	"gopkg.in/dgrijalva/jwt-go.v2"
-	"realbase/core"
-	"gopkg.in/mgo.v2/bson"
 )
 
 var initialized bool
@@ -52,26 +50,6 @@ func (a *authMiddleware) MiddlewareFunc(handler rest.HandlerFunc) rest.HandlerFu
 
 func (e *environmentMiddleware) MiddlewareFunc(handler rest.HandlerFunc) rest.HandlerFunc {
 	return func(w rest.ResponseWriter, r *rest.Request) {
-		appId := r.PathParam("appId")
-
-		if appId != "" {
-			//TODO: cache this
-			appDb := realbase.NewApplicationsDbService()
-			id := bson.ObjectId(appId)
-			app, err := appDb.FindId(id, nil)
-
-			if err != nil {
-				RestGeneralError(w, err)
-				handler(w, r)
-				return
-			}
-
-			r.Env["app"] = ApplicationModel{
-				Id: app["_id"].(bson.ObjectId),
-				Name: app["Name"].(string),
-			}
-		}
-
 		handler(w, r)
 	}
 }
@@ -107,10 +85,10 @@ func initRoutes(restApi *rest.Api) {
 
 		rest.Post("/applications", CreateApplicationHandler),
 		rest.Get("/applications", GetApplicationsHandler),
-		rest.Get("/applications/#appId", GetApplicationHandler),
+		rest.Get("/applications/:appId", GetApplicationHandler),
 		//TODO: moar apps
 
-		rest.Post("/#appId/types", CreateTypeHandler),
+		rest.Post("/:appId/types", CreateTypeHandler),
 	)
 
 	if err != nil {

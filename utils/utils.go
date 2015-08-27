@@ -1,4 +1,4 @@
-package api
+package utils
 
 import (
 	"github.com/twinj/uuid"

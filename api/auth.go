@@ -11,8 +11,9 @@ import (
 )
 
 type UserModel struct {
+	Id string `json: "_id"`
+	Email string `json: "_id"`
 	Password string `json: "password"`
-	Email string `json: "email`
 }
 
 func RegisterUserHandler (w rest.ResponseWriter, r *rest.Request) {
@@ -45,6 +46,7 @@ func RegisterUserHandler (w rest.ResponseWriter, r *rest.Request) {
 
 func LoginUserHandler(w rest.ResponseWriter, r *rest.Request) {
 	u := UserModel{}
+
 	if err := r.DecodeJsonPayload(&u); err != nil {
 		RestGeneralError(w, err)
 		return

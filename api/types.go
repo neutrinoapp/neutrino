@@ -12,12 +12,17 @@ func CreateTypeHandler(w rest.ResponseWriter, r *rest.Request) {
 	r.DecodeJsonPayload(&body)
 	typeName := body["name"]
 
-	app := r.Env["app"].(ApplicationModel)
+	app, err := GetAppFromRequest(r)
+
+	if err != nil {
+		RestGeneralError(w, err)
+		return
+	}
 
 	appsDb := realbase.NewApplicationsDbService()
 	appsDb.Update(
 		bson.M{
-			"_id": app.Id,
+			"_id": app["_id"],
 		},
 		bson.M{
 			"$push": bson.M{

@@ -21,9 +21,9 @@ func TestCreateType(t *testing.T) {
 	var createdApp map[string]interface{}
 	getRec.DecodeJsonPayload(&createdApp)
 
-	types := createdApp["types"].([]string)
+	types := createdApp["types"].([]interface{})
 
-	if types[1] != typeName {
+	if types[1].(string) != typeName {
 		t.Error("Type not created correctly")
 	}
 }

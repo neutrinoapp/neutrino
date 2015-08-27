@@ -4,11 +4,25 @@ import (
 	"github.com/ant0ine/go-json-rest/rest"
 	"realbase/core"
 	"gopkg.in/mgo.v2/bson"
+	"realbase/utils"
+	"errors"
 )
 
 type ApplicationModel struct {
-	Id bson.ObjectId `json: _id`
+	Id string `json: _id`
 	Name string `json: "name"`
+}
+
+func GetAppFromRequest(r *rest.Request) (map[string]interface{}, error) {
+	appId := r.PathParam("appId")
+
+	if appId != "" {
+		//TODO: cache this
+		appDb := realbase.NewApplicationsDbService()
+		return appDb.FindId(appId, nil)
+	} else {
+		return nil, errors.New("Invalid app id.")
+	}
 }
 
 func CreateApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
@@ -28,12 +42,13 @@ func CreateApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
 
 	username := r.Env["user"].(string)
 	doc := bson.M{
+		"_id": utils.GetCleanUUID(),
 		"name": body.Name,
 		"owner": username,
 		"types": []string{"users"},
 		"keys": bson.M{ //TODO:
 			"Master Key": bson.M{
-				"key": GetCleanUUID(),
+				"key": utils.GetCleanUUID(),
 				"name": "Master Key",
 				"permissions": bson.M{
 					"types": bson.M{
@@ -49,6 +64,10 @@ func CreateApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
 		RestGeneralError(w, err)
 		return
 	}
+
+	w.WriteJson(map[string]interface{}{
+		"_id": doc["_id"],
+	})
 }
 
 func GetApplicationsHandler(w rest.ResponseWriter, r *rest.Request) {
@@ -72,12 +91,12 @@ func GetApplicationsHandler(w rest.ResponseWriter, r *rest.Request) {
 }
 
 func GetApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
-	res, err := realbase.NewApplicationsDbService().FindId(r.PathParam("appId"), nil)
+	app, err := GetAppFromRequest(r)
 
 	if err != nil {
 		RestGeneralError(w, err)
 		return
 	}
 
-	w.WriteJson(res)
+	w.WriteJson(app)
 }

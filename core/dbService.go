@@ -5,6 +5,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"log"
 	"time"
+	"realbase/utils"
 )
 
 var connectionPool map[string]*mgo.Session
@@ -110,6 +111,10 @@ func (d *dbService) Insert(doc bson.M) error {
 	t := time.Now()
 	doc["createdAt"] = t
 
+	if _, ok := doc["_id"]; !ok {
+		doc["_id"] = utils.GetCleanUUID()
+	}
+
 	return d.GetCollection().Insert(doc)
 }
 
@@ -119,6 +124,7 @@ func (d *dbService) Update(q, u bson.M) error {
 
 func (d *dbService) FindId(id, fields interface{}) (bson.M, error) {
 	result := bson.M{}
+
 	err := d.GetCollection().FindId(id).Select(fields).One(&result)
 
 	return result, err;

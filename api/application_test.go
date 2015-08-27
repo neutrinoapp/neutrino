@@ -6,11 +6,16 @@ import (
 
 func createApp(t *testing.T) *ApplicationModel {
 	app := &ApplicationModel{
-		Name:randomString(),
+		Name: randomString(),
 	}
 
 	rec := sendAuthenticatedRequest("POST", "/applications", app, t)
 	rec.CodeIs(200)
+
+	var res map[string]interface{}
+	rec.DecodeJsonPayload(&res)
+
+	app.Id = res["_id"].(string)
 
 	return app
 }
