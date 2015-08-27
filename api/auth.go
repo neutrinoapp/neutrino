@@ -34,6 +34,7 @@ func RegisterUserHandler (w rest.ResponseWriter, r *rest.Request) {
 	doc := bson.M{
 		"_id": u.Email,
 		"password": hashedPassword,
+		"createdAt": time.Now(),
 	}
 
 	if err := db.Insert(doc); err != nil {

@@ -4,7 +4,6 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/mgo.v2"
 	"log"
-	"time"
 	"realbase/utils"
 )
 
@@ -108,9 +107,6 @@ func (d *dbService) GetCollection() *mgo.Collection {
 }
 
 func (d *dbService) Insert(doc bson.M) error {
-	t := time.Now()
-	doc["createdAt"] = t
-
 	if _, ok := doc["_id"]; !ok {
 		doc["_id"] = utils.GetCleanUUID()
 	}

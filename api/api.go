@@ -89,6 +89,7 @@ func initRoutes(restApi *rest.Api) {
 		//TODO: moar apps
 
 		rest.Post("/:appId/types", CreateTypeHandler),
+		rest.Post("/:appId/types/:typeName", InsertInTypeHandler),
 	)
 
 	if err != nil {
@@ -110,4 +111,10 @@ func Initialize(restApi *rest.Api) {
 
 func IsInitialized() bool {
 	return initialized
+}
+
+func RespondId(id interface{}, w rest.ResponseWriter) {
+	w.WriteJson(map[string]interface{}{
+		"_id": id,
+	})
 }

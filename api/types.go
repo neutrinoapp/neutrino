@@ -33,3 +33,20 @@ func CreateTypeHandler(w rest.ResponseWriter, r *rest.Request) {
 
 	w.WriteHeader(http.StatusOK)
 }
+
+func InsertInTypeHandler(w rest.ResponseWriter, r *rest.Request) {
+	appId := r.PathParam("appId")
+	typeName := r.PathParam("typeName")
+	var body map[string]interface{}
+	r.DecodeJsonPayload(&body)
+
+	db := realbase.NewTypeDbService(appId, typeName)
+	err := db.Insert(body)
+
+	if err != nil {
+		RestGeneralError(w, err)
+		return
+	}
+
+	RespondId(body["_id"], w)
+}

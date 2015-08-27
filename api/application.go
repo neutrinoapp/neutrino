@@ -6,6 +6,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"realbase/utils"
 	"errors"
+	"time"
 )
 
 type ApplicationModel struct {
@@ -42,10 +43,10 @@ func CreateApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
 
 	username := r.Env["user"].(string)
 	doc := bson.M{
-		"_id": utils.GetCleanUUID(),
 		"name": body.Name,
 		"owner": username,
 		"types": []string{"users"},
+		"createdAt": time.Now(),
 		"keys": bson.M{ //TODO:
 			"Master Key": bson.M{
 				"key": utils.GetCleanUUID(),
@@ -65,9 +66,7 @@ func CreateApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
 		return
 	}
 
-	w.WriteJson(map[string]interface{}{
-		"_id": doc["_id"],
-	})
+	RespondId(doc["_id"], w)
 }
 
 func GetApplicationsHandler(w rest.ResponseWriter, r *rest.Request) {
