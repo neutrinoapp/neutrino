@@ -2,11 +2,11 @@ package api
 
 import (
 	"github.com/ant0ine/go-json-rest/rest"
-	"realbase/core"
 	"gopkg.in/mgo.v2/bson"
-	"realbase/utils"
 	"errors"
 	"time"
+	"github.com/realbas3/realbas3/core"
+	"github.com/realbas3/realbas3/utils"
 )
 
 type ApplicationModel struct {
