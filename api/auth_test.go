@@ -3,8 +3,8 @@ package api
 import (
 	"testing"
 	"net/http"
-	"realbase/core"
 	"strings"
+	"github.com/realbas3/realbas3/core"
 )
 
 func TestRegisterUser(t *testing.T) {

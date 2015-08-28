@@ -2,9 +2,9 @@ package api
 
 import (
 	"github.com/ant0ine/go-json-rest/rest"
-	"realbase/core"
 	"gopkg.in/mgo.v2/bson"
 	"net/http"
+	"github.com/realbas3/realbas3/core"
 )
 
 func CreateTypeHandler(w rest.ResponseWriter, r *rest.Request) {

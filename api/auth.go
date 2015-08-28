@@ -1,13 +1,13 @@
 package api
 
 import (
-	"realbase/core"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/dgrijalva/jwt-go.v2"
 	"time"
 	"github.com/ant0ine/go-json-rest/rest"
 	"net/http"
 	"gopkg.in/mgo.v2/bson"
+	"github.com/realbas3/realbas3/core"
 )
 
 type UserModel struct {

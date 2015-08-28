@@ -4,7 +4,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/mgo.v2"
 	"log"
-	"realbase/utils"
+	"github.com/realbas3/realbas3/utils"
 )
 
 var connectionPool map[string]*mgo.Session
