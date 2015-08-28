@@ -1,12 +1,12 @@
 package main
 
 import (
-	"realbase/core"
-	"realbase/api"
 	"github.com/ant0ine/go-json-rest/rest"
 	"fmt"
 	"net/http"
 	"log"
+	"github.com/realbas3/realbas3/core"
+	"github.com/realbas3/realbas3/api"
 )
 
 func main() {
