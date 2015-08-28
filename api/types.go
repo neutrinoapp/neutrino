@@ -50,3 +50,36 @@ func InsertInTypeHandler(w rest.ResponseWriter, r *rest.Request) {
 
 	RespondId(body["_id"], w)
 }
+
+func GetTypeDataHandler(w rest.ResponseWriter, r *rest.Request) {
+	appId := r.PathParam("appId")
+	typeName := r.PathParam("typeName")
+
+	db := realbase.NewTypeDbService(appId, typeName)
+
+	typeData, err := db.Find(nil, nil)
+
+	if err != nil {
+		RestGeneralError(w, err)
+		return
+	}
+
+	w.WriteJson(typeData)
+}
+
+func GetTypeItemById(w rest.ResponseWriter, r *rest.Request) {
+	appId := r.PathParam("appId")
+	typeName := r.PathParam("typeName")
+	itemId := r.PathParam("itemId")
+
+	db := realbase.NewTypeDbService(appId, typeName)
+
+	item, err := db.FindId(itemId, nil)
+
+	if (err != nil) {
+		RestGeneralError(w, err)
+		return
+	}
+
+	w.WriteJson(item)
+}

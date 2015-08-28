@@ -3,66 +3,19 @@ package api
 import (
 	"github.com/ant0ine/go-json-rest/rest"
 	"log"
-	"strings"
-	"gopkg.in/dgrijalva/jwt-go.v2"
 )
 
 var initialized bool
 
-type authMiddleware struct {}
-type environmentMiddleware struct {}
-
-func (a *authMiddleware) MiddlewareFunc(handler rest.HandlerFunc) rest.HandlerFunc {
-	return func(w rest.ResponseWriter, r *rest.Request) {
-		authHeader := r.Header.Get("Authorization")
-
-		if authHeader == "" {
-			rest.Error(w, "Not authorized", 401)
-			return
-		}
-
-		authHeaderParts := strings.SplitN(authHeader, " ", 2)
-		if len(authHeaderParts) != 2 || authHeaderParts[0] != "Bearer" {
-			rest.Error(w, "Not authorized", 401)
-			return
-		}
-
-		token, err := jwt.Parse(authHeaderParts[1], func(token *jwt.Token) (interface{}, error) {
-			if(jwt.GetSigningMethod("HS256") != token.Method){
-				rest.Error(w, "Invalid signing token algorithm", 500)
-				return nil, nil
-			}
-
-			return []byte(""), nil
-		})
-
-		r.Env["token"] = token
-		r.Env["user"] = token.Claims["user"]
-
-		if err != nil {
-			rest.Error(w, err.Error(), 500)
-			return
-		}
-
-		handler(w, r)
-	}
-}
-
-func (e *environmentMiddleware) MiddlewareFunc(handler rest.HandlerFunc) rest.HandlerFunc {
-	return func(w rest.ResponseWriter, r *rest.Request) {
-		handler(w, r)
-	}
-}
-
 func initMiddleware(restApi *rest.Api) {
 	restApi.Use(
+		&defaultContentTypeMiddleware{"application/json"},
 		&rest.AccessLogJsonMiddleware{},
 		&rest.TimerMiddleware{},
 		&rest.RecorderMiddleware{},
-		&rest.PoweredByMiddleware{"Realbase"},
-		&rest.RecoverMiddleware{EnableResponseStackTrace: true},
+		&rest.PoweredByMiddleware{"realbase"},
+		&rest.RecoverMiddleware{EnableResponseStackTrace: false},
 		&rest.JsonIndentMiddleware{},
-		&rest.ContentTypeCheckerMiddleware{},
 		&rest.IfMiddleware{
 			Condition: func(request *rest.Request) bool {
 				return request.URL.Path != "/auth"
@@ -90,6 +43,8 @@ func initRoutes(restApi *rest.Api) {
 
 		rest.Post("/:appId/types", CreateTypeHandler),
 		rest.Post("/:appId/types/:typeName", InsertInTypeHandler),
+		rest.Get("/:appId/types/:typeName", GetTypeDataHandler),
+		rest.Get("/:appId/types/:typeName/:itemId", GetTypeItemById),
 	)
 
 	if err != nil {
