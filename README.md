@@ -25,3 +25,24 @@ $ go test -v ./..
 
 # Goals for the initial release
 
+- [x] MongoDB to store the data
+- [x] User management with JWT 
+- [ ] Landing page
+- [ ] App portal (app.realbase.co)
+- [ ] CI
+- [ ] REST API
+  - [x] Create Applications
+  - [x] Read Applications
+  - [ ] Delete Applications
+  - [x] Create types
+  - [ ] Edit types
+  - [ ] Delete types
+  - [x] Insert types data
+  - [x] Read types data
+  - [ ] Edit types data
+  - [ ] Delete types data
+  - [ ] In-app user management
+  - [x] Integration tests
+- [ ] WebSockets API - Realtime API
+  - [ ] Types support
+  - [ ] Javascript SDK
