@@ -5,8 +5,8 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"errors"
 	"time"
-	"github.com/realbas3/realbas3/core"
-	"github.com/realbas3/realbas3/utils"
+	"github.com/go-realbase/realbase/core"
+	"github.com/go-realbase/realbase/utils"
 )
 
 type ApplicationModel struct {

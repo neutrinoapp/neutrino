@@ -7,7 +7,7 @@ import (
 	"github.com/ant0ine/go-json-rest/rest"
 	"net/http"
 	"gopkg.in/mgo.v2/bson"
-	"github.com/realbas3/realbas3/core"
+	"github.com/go-realbase/realbase/core"
 )
 
 type UserModel struct {

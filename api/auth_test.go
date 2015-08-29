@@ -4,7 +4,7 @@ import (
 	"testing"
 	"net/http"
 	"strings"
-	"github.com/realbas3/realbas3/core"
+	"github.com/go-realbase/realbase/core"
 )
 
 func TestRegisterUser(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"github.com/ant0ine/go-json-rest/rest"
 	"gopkg.in/mgo.v2/bson"
 	"net/http"
-	"github.com/realbas3/realbas3/core"
+	"github.com/go-realbase/realbase/core"
 )
 
 func CreateTypeHandler(w rest.ResponseWriter, r *rest.Request) {

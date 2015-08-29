@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"log"
-	"github.com/realbas3/realbas3/core"
-	"github.com/realbas3/realbas3/api"
+	"github.com/go-realbase/realbase/core"
+	"github.com/go-realbase/realbase/api"
 )
 
 func main() {
