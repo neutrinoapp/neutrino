@@ -1,4 +1,5 @@
 package api
+
 import (
 	"net/http"
 	"github.com/ant0ine/go-json-rest/rest"
@@ -10,10 +11,28 @@ type RestError struct {
 	error
 }
 
+var falsePositiveStatusCodes map[int]bool
+
+func init() {
+	falsePositiveStatusCodes = map[int]bool{
+		http.StatusNotFound: true,
+	}
+}
+
 func restError(w rest.ResponseWriter, statusCode int, message string) {
-	rest.Error(w, message, statusCode)
-	log.Println(message)
-	debug.PrintStack()
+	w.WriteHeader(statusCode)
+	err := w.WriteJson(map[string]interface{}{
+		"error": message,
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	if _, ok := falsePositiveStatusCodes[statusCode]; !ok {
+		log.Println(message)
+		debug.PrintStack()
+	}
 }
 
 func RestErrorInvalidBody(w rest.ResponseWriter) {
@@ -21,5 +40,10 @@ func RestErrorInvalidBody(w rest.ResponseWriter) {
 }
 
 func RestGeneralError(w rest.ResponseWriter, e error) {
-	restError(w, http.StatusInternalServerError, e.Error())
+	status := http.StatusInternalServerError
+	if e.Error() == "not found" {
+		status = http.StatusNotFound
+	}
+
+	restError(w, status, e.Error())
 }

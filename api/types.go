@@ -19,7 +19,7 @@ func CreateTypeHandler(w rest.ResponseWriter, r *rest.Request) {
 		return
 	}
 
-	appsDb := realbase.NewApplicationsDbService()
+	appsDb := realbase.NewApplicationsDbService(r.Env["user"].(string))
 	appsDb.Update(
 		bson.M{
 			"_id": app["_id"],

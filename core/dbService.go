@@ -18,6 +18,7 @@ type DbService interface {
 	Update(q, u bson.M) error
 	FindId(id, fields interface{}) (bson.M, error)
 	Find(query, fields interface{}) ([]bson.M, error)
+	RemoveId(id interface{}) error
 }
 
 type dbService struct {
@@ -49,7 +50,7 @@ func NewTypeDbService(appId, typeName string) *dbService {
 	return NewDbService(Constants.DatabaseName(), appId + "." + typeName, mgo.Index{})
 }
 
-func NewApplicationsDbService() *dbService {
+func NewApplicationsDbService(user string) *dbService {
 	index := mgo.Index{
 		Key: []string{"$text:name"},
 		Unique: true,
@@ -58,7 +59,7 @@ func NewApplicationsDbService() *dbService {
 		Sparse: false,
 	}
 
-	return NewDbService(Constants.DatabaseName(), Constants.ApplicationsCollection(), index)
+	return NewDbService(Constants.DatabaseName(), user + "." + Constants.ApplicationsCollection(), index)
 }
 
 func (d *dbService) GetSettings() map[string]string {
@@ -131,4 +132,8 @@ func (d *dbService) Find(query, fields interface{}) ([]bson.M, error) {
 	err := d.GetCollection().Find(query).Select(fields).All(&result)
 
 	return result, err;
+}
+
+func (d *dbService) RemoveId(id interface{}) error {
+	return d.GetCollection().RemoveId(id)
 }

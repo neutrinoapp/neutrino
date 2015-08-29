@@ -38,3 +38,44 @@ func TestCreateAndGetApplication(t *testing.T) {
 		t.Error("Application not created correctly")
 	}
 }
+
+func TestDeleteApplication(t *testing.T) {
+	app := createApp(t);
+
+	delRec := sendAuthenticatedRequest("DELETE", "/applications/" + app.Id, nil, t)
+	delRec.CodeIs(200)
+
+	getRec := sendAuthenticatedRequest("GET", "/applications/" + app.Id, nil, t)
+	getRec.CodeIs(404)
+
+	var result map[string]interface{}
+	getRec.DecodeJsonPayload(&result)
+
+	err := result["error"]
+
+	if err != "not found" {
+		t.Fatal("App not deleted")
+	}
+}
+
+func TestUpdateApplication(t *testing.T) {
+	app := createApp(t);
+
+	randomName := randomString() + "updated!"
+	putRec := sendAuthenticatedRequest("PUT", "/applications/" + app.Id, map[string]interface{}{
+		"name": randomName,
+	}, t)
+	putRec.CodeIs(200)
+
+	getRec := sendAuthenticatedRequest("GET", "/applications/" + app.Id, nil, t)
+	getRec.CodeIs(200)
+
+	var result map[string]interface{}
+	getRec.DecodeJsonPayload(&result)
+
+	res := result["name"]
+
+	if res != randomName {
+		t.Fatal("App not updated")
+	}
+}

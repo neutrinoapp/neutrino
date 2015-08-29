@@ -7,6 +7,7 @@ import (
 	"time"
 	"github.com/go-realbase/realbase/core"
 	"github.com/go-realbase/realbase/utils"
+	"net/http"
 )
 
 type ApplicationModel struct {
@@ -19,7 +20,7 @@ func GetAppFromRequest(r *rest.Request) (map[string]interface{}, error) {
 
 	if appId != "" {
 		//TODO: cache this
-		appDb := realbase.NewApplicationsDbService()
+		appDb := realbase.NewApplicationsDbService(r.Env["user"].(string))
 		return appDb.FindId(appId, nil)
 	} else {
 		return nil, errors.New("Invalid app id.")
@@ -39,7 +40,7 @@ func CreateApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
 		return
 	}
 
-	db := realbase.NewApplicationsDbService()
+	db := realbase.NewApplicationsDbService(r.Env["user"].(string))
 
 	username := r.Env["user"].(string)
 	doc := bson.M{
@@ -70,7 +71,7 @@ func CreateApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
 }
 
 func GetApplicationsHandler(w rest.ResponseWriter, r *rest.Request) {
-	db := realbase.NewApplicationsDbService()
+	db := realbase.NewApplicationsDbService(r.Env["user"].(string))
 
 	res, err := db.Find(
 		bson.M{
@@ -98,4 +99,37 @@ func GetApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
 	}
 
 	w.WriteJson(app)
+}
+
+func DeleteApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
+	appId := r.PathParam("appId")
+
+	db := realbase.NewApplicationsDbService(r.Env["user"].(string))
+	err := db.RemoveId(appId)
+
+	if err != nil {
+		RestGeneralError(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func UpdateApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
+	appId := r.PathParam("appId")
+	db := realbase.NewApplicationsDbService(r.Env["user"].(string))
+	doc := utils.WhitelistFields([]string{"name"}, utils.GetBody(r))
+
+	err := db.Update(bson.M{
+		"_id": appId,
+	}, bson.M{
+		"$set": doc,
+	})
+
+	if err != nil {
+		RestGeneralError(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

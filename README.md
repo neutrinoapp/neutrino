@@ -35,13 +35,14 @@ $ go test -v ./..
 - [ ] REST API
   - [x] Create Applications
   - [x] Read Applications
-  - [ ] Delete Applications
+  - [x] Delete Applications
+  - [x] Update Applications
   - [x] Create types
-  - [ ] Edit types
+  - [ ] Update types
   - [ ] Delete types
   - [x] Insert types data
   - [x] Read types data
-  - [ ] Edit types data
+  - [ ] Update types data
   - [ ] Delete types data
   - [ ] In-app user management
   - [x] Integration tests

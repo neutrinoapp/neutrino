@@ -39,7 +39,8 @@ func initRoutes(restApi *rest.Api) {
 		rest.Post("/applications", CreateApplicationHandler),
 		rest.Get("/applications", GetApplicationsHandler),
 		rest.Get("/applications/:appId", GetApplicationHandler),
-		//TODO: moar apps
+		rest.Delete("/applications/:appId", DeleteApplicationHandler),
+		rest.Put("/applications/:appId", UpdateApplicationHandler),
 
 		rest.Post("/:appId/types", CreateTypeHandler),
 		rest.Post("/:appId/types/:typeName", InsertInTypeHandler),
