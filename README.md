@@ -30,6 +30,8 @@ $ go test -v ./..
 - [ ] Landing page
 - [ ] App portal (http://app.realbase.co)
 - [ ] CI
+- [x] Docs
+- [x] Postman Collection
 - [ ] REST API
   - [x] Create Applications
   - [x] Read Applications
