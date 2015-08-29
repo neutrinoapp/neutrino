@@ -2,4 +2,4 @@
 
 # REALBASE
 --------------
-Hybrid realtime-REST database written in Go with MongoDB as a backend.
+Hybrid realtime-REST backend written in Go with MongoDB as a database.
