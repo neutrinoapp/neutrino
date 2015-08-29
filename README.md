@@ -28,7 +28,7 @@ $ go test -v ./..
 - [x] MongoDB to store the data
 - [x] User management with JWT 
 - [ ] Landing page
-- [ ] App portal (app.realbase.co)
+- [ ] App portal (http://app.realbase.co)
 - [ ] CI
 - [ ] REST API
   - [x] Create Applications
