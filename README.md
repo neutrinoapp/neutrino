@@ -1,4 +1,5 @@
 # REALBASE
+[![Build Status](https://travis-ci.org/go-realbase/realbase.svg?branch=master)](https://travis-ci.org/go-realbase/realbase)
 --------------
 Realbase is hybrid realtime-REST backend written in Go with MongoDB as a database.
 
@@ -29,7 +30,7 @@ $ go test -v ./..
 - [x] User management with JWT 
 - [ ] Landing page (http://real-base.com)
 - [ ] App portal (http://app.real-base.com)
-- [ ] CI
+- [x] CI
 - [x] Docs
 - [x] Postman Collection
 - [ ] REST API
