@@ -7,7 +7,14 @@ import (
 	"github.com/go-realbase/realbase/core"
 )
 
-func CreateTypeHandler(w rest.ResponseWriter, r *rest.Request) {
+type TypesController struct {
+}
+
+func (t *TypesController) Path() string {
+	return "/types"
+}
+
+func (t *TypesController) CreateTypeHandler(w rest.ResponseWriter, r *rest.Request) {
 	var body map[string]string
 	r.DecodeJsonPayload(&body)
 	typeName := body["name"]
@@ -34,7 +41,7 @@ func CreateTypeHandler(w rest.ResponseWriter, r *rest.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func InsertInTypeHandler(w rest.ResponseWriter, r *rest.Request) {
+func (t *TypesController) InsertInTypeHandler(w rest.ResponseWriter, r *rest.Request) {
 	appId := r.PathParam("appId")
 	typeName := r.PathParam("typeName")
 	var body map[string]interface{}
@@ -51,7 +58,7 @@ func InsertInTypeHandler(w rest.ResponseWriter, r *rest.Request) {
 	RespondId(body["_id"], w)
 }
 
-func GetTypeDataHandler(w rest.ResponseWriter, r *rest.Request) {
+func (t *TypesController) GetTypeDataHandler(w rest.ResponseWriter, r *rest.Request) {
 	appId := r.PathParam("appId")
 	typeName := r.PathParam("typeName")
 
@@ -67,7 +74,7 @@ func GetTypeDataHandler(w rest.ResponseWriter, r *rest.Request) {
 	w.WriteJson(typeData)
 }
 
-func GetTypeItemById(w rest.ResponseWriter, r *rest.Request) {
+func (t *TypesController) GetTypeItemById(w rest.ResponseWriter, r *rest.Request) {
 	appId := r.PathParam("appId")
 	typeName := r.PathParam("typeName")
 	itemId := r.PathParam("itemId")

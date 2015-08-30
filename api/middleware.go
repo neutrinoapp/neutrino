@@ -1,7 +1,7 @@
 package api
 import (
-"github.com/ant0ine/go-json-rest/rest"
-"strings"
+	"github.com/ant0ine/go-json-rest/rest"
+	"strings"
 	"gopkg.in/dgrijalva/jwt-go.v2"
 )
 

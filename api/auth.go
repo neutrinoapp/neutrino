@@ -16,7 +16,14 @@ type UserModel struct {
 	Password string `json: "password"`
 }
 
-func RegisterUserHandler (w rest.ResponseWriter, r *rest.Request) {
+type AuthController struct {
+}
+
+func (a *AuthController) Path() string {
+	return "/auth"
+}
+
+func (a *AuthController) RegisterUserHandler (w rest.ResponseWriter, r *rest.Request) {
 	u := UserModel{}
 
 	if err := r.DecodeJsonPayload(&u); err != nil {
@@ -45,7 +52,7 @@ func RegisterUserHandler (w rest.ResponseWriter, r *rest.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func LoginUserHandler(w rest.ResponseWriter, r *rest.Request) {
+func (a *AuthController) LoginUserHandler(w rest.ResponseWriter, r *rest.Request) {
 	u := UserModel{}
 
 	if err := r.DecodeJsonPayload(&u); err != nil {

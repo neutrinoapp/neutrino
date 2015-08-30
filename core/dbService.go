@@ -26,31 +26,21 @@ type dbService struct {
 	index mgo.Index
 }
 
-//func constructMessage(doc bson.M, operation string) bson.M {
-//	message := make(map[string]interface{})
-//
-//	message["origin"] = "db"
-//	message["data"] = doc
-//	message["operation"] = operation
-//
-//	return message
-//}
-
-func NewDbService(dbName, colName string, index mgo.Index) *dbService {
+func NewDbService(dbName, colName string, index mgo.Index) DbService {
 	connectionString := GetConfig().GetConnectionString()
 	d := dbService{connectionString, dbName, colName, index}
 	return &d
 }
 
-func NewUsersDbService() *dbService {
+func NewUsersDbService() DbService {
 	return NewDbService(Constants.DatabaseName(), Constants.UsersCollection(), mgo.Index{})
 }
 
-func NewTypeDbService(appId, typeName string) *dbService {
+func NewTypeDbService(appId, typeName string) DbService {
 	return NewDbService(Constants.DatabaseName(), appId + "." + typeName, mgo.Index{})
 }
 
-func NewApplicationsDbService(user string) *dbService {
+func NewApplicationsDbService(user string) DbService {
 	index := mgo.Index{
 		Key: []string{"$text:name"},
 		Unique: true,

@@ -15,6 +15,13 @@ type ApplicationModel struct {
 	Name string `json: "name"`
 }
 
+type ApplicationController struct {
+}
+
+func (a *ApplicationController) Path() string {
+	return "/applications"
+}
+
 func GetAppFromRequest(r *rest.Request) (map[string]interface{}, error) {
 	appId := r.PathParam("appId")
 
@@ -27,7 +34,7 @@ func GetAppFromRequest(r *rest.Request) (map[string]interface{}, error) {
 	}
 }
 
-func CreateApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
+func (a *ApplicationController) CreateApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
 	body := &ApplicationModel{}
 
 	if err := r.DecodeJsonPayload(body); err != nil {
@@ -70,7 +77,7 @@ func CreateApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
 	RespondId(doc["_id"], w)
 }
 
-func GetApplicationsHandler(w rest.ResponseWriter, r *rest.Request) {
+func (a *ApplicationController) GetApplicationsHandler(w rest.ResponseWriter, r *rest.Request) {
 	db := realbase.NewApplicationsDbService(r.Env["user"].(string))
 
 	res, err := db.Find(
@@ -90,7 +97,7 @@ func GetApplicationsHandler(w rest.ResponseWriter, r *rest.Request) {
 	w.WriteJson(res)
 }
 
-func GetApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
+func (a *ApplicationController) GetApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
 	app, err := GetAppFromRequest(r)
 
 	if err != nil {
@@ -101,7 +108,7 @@ func GetApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
 	w.WriteJson(app)
 }
 
-func DeleteApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
+func (a *ApplicationController) DeleteApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
 	appId := r.PathParam("appId")
 
 	db := realbase.NewApplicationsDbService(r.Env["user"].(string))
@@ -115,7 +122,7 @@ func DeleteApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func UpdateApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
+func (a *ApplicationController) UpdateApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
 	appId := r.PathParam("appId")
 	db := realbase.NewApplicationsDbService(r.Env["user"].(string))
 	doc := utils.WhitelistFields([]string{"name"}, utils.GetBody(r))

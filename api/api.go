@@ -32,20 +32,24 @@ func initMiddleware(restApi *rest.Api) {
 }
 
 func initRoutes(restApi *rest.Api) {
+	authController := &AuthController{}
+	appController := &ApplicationController{}
+	typesController := &TypesController{}
+
 	router, err := rest.MakeRouter(
-		rest.Put("/auth", RegisterUserHandler),
-		rest.Post("/auth", LoginUserHandler),
+		rest.Put(authController.Path(), authController.RegisterUserHandler),
+		rest.Post(authController.Path(), authController.LoginUserHandler),
 
-		rest.Post("/applications", CreateApplicationHandler),
-		rest.Get("/applications", GetApplicationsHandler),
-		rest.Get("/applications/:appId", GetApplicationHandler),
-		rest.Delete("/applications/:appId", DeleteApplicationHandler),
-		rest.Put("/applications/:appId", UpdateApplicationHandler),
+		rest.Post(appController.Path(), appController.CreateApplicationHandler),
+		rest.Get(appController.Path(), appController.GetApplicationsHandler),
+		rest.Get(appController.Path() + "/:appId", appController.GetApplicationHandler),
+		rest.Delete(appController.Path() + "/:appId", appController.DeleteApplicationHandler),
+		rest.Put(appController.Path() + "/:appId", appController.UpdateApplicationHandler),
 
-		rest.Post("/:appId/types", CreateTypeHandler),
-		rest.Post("/:appId/types/:typeName", InsertInTypeHandler),
-		rest.Get("/:appId/types/:typeName", GetTypeDataHandler),
-		rest.Get("/:appId/types/:typeName/:itemId", GetTypeItemById),
+		rest.Post("/:appId" + typesController.Path(), typesController.CreateTypeHandler),
+		rest.Post("/:appId" + typesController.Path() + "/:typeName", typesController.InsertInTypeHandler),
+		rest.Get("/:appId" + typesController.Path() + "/:typeName", typesController.GetTypeDataHandler),
+		rest.Get("/:appId" + typesController.Path() + "/:typeName/:itemId", typesController.GetTypeItemById),
 	)
 
 	if err != nil {
