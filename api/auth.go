@@ -33,7 +33,7 @@ func (a *AuthController) RegisterUserHandler (w rest.ResponseWriter, r *rest.Req
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), 10)
 	if err != nil {
-		RestGeneralError(w, err)
+		RestError(w, err)
 		return
 	}
 
@@ -45,7 +45,7 @@ func (a *AuthController) RegisterUserHandler (w rest.ResponseWriter, r *rest.Req
 	}
 
 	if err := db.Insert(doc); err != nil {
-		RestGeneralError(w, err)
+		RestError(w, err)
 		return
 	}
 
@@ -56,7 +56,7 @@ func (a *AuthController) LoginUserHandler(w rest.ResponseWriter, r *rest.Request
 	u := UserModel{}
 
 	if err := r.DecodeJsonPayload(&u); err != nil {
-		RestGeneralError(w, err)
+		RestError(w, err)
 		return
 	}
 
@@ -64,14 +64,14 @@ func (a *AuthController) LoginUserHandler(w rest.ResponseWriter, r *rest.Request
 	existingUser, err := db.FindId(u.Email, nil)
 
 	if err != nil {
-		RestGeneralError(w, err)
+		RestError(w, err)
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword(existingUser["password"].([]byte), []byte(u.Password))
 
 	if err != nil {
-		RestGeneralError(w, err)
+		RestError(w, err)
 		return
 	}
 
@@ -82,7 +82,7 @@ func (a *AuthController) LoginUserHandler(w rest.ResponseWriter, r *rest.Request
 	tokenStr, err := token.SignedString([]byte(""))
 
 	if err != nil {
-		RestGeneralError(w, err)
+		RestError(w, err)
 		return
 	}
 

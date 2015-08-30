@@ -39,8 +39,7 @@ $ go test -v ./..
   - [x] Delete Applications
   - [x] Update Applications
   - [x] Create types
-  - [ ] Update types
-  - [ ] Delete types
+  - [x] Delete types
   - [x] Insert types data
   - [x] Read types data
   - [ ] Update types data

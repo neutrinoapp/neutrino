@@ -34,6 +34,26 @@ func TestCreateType(t *testing.T) {
 	}
 }
 
+func TestDeleteType(t *testing.T) {
+	_, app, typeName := setupTypeTests(t)
+
+	deleteReq := sendAuthenticatedRequest("DELETE", "/" + app.Id + "/types/" + typeName, nil, t)
+	deleteReq.CodeIs(200)
+
+	getReq := sendAuthenticatedRequest("GET", "/" + app.Id + "/types/" + typeName, nil, t)
+	getReq.CodeIs(404)
+
+	appReq := sendAuthenticatedRequest("GET", "/applications/" + app.Id, nil, t)
+	var updatedApp map[string]interface{}
+	appReq.DecodeJsonPayload(&updatedApp)
+
+	types := updatedApp["types"].([]interface{})
+
+	if len(types) > 1 {
+		t.Error("Type not deleted correctly")
+	}
+}
+
 func TestGetAndInsertTypeData(t *testing.T) {
 	_, app, typeName := setupTypeTests(t)
 

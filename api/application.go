@@ -38,7 +38,7 @@ func (a *ApplicationController) CreateApplicationHandler(w rest.ResponseWriter, 
 	body := &ApplicationModel{}
 
 	if err := r.DecodeJsonPayload(body); err != nil {
-		RestGeneralError(w, err)
+		RestError(w, err)
 		return
 	}
 
@@ -70,7 +70,7 @@ func (a *ApplicationController) CreateApplicationHandler(w rest.ResponseWriter, 
 	}
 
 	if err := db.Insert(doc); err != nil {
-		RestGeneralError(w, err)
+		RestError(w, err)
 		return
 	}
 
@@ -90,7 +90,7 @@ func (a *ApplicationController) GetApplicationsHandler(w rest.ResponseWriter, r 
 	)
 
 	if err != nil {
-		RestGeneralError(w, err)
+		RestError(w, err)
 		return
 	}
 
@@ -101,7 +101,7 @@ func (a *ApplicationController) GetApplicationHandler(w rest.ResponseWriter, r *
 	app, err := GetAppFromRequest(r)
 
 	if err != nil {
-		RestGeneralError(w, err)
+		RestError(w, err)
 		return
 	}
 
@@ -115,7 +115,7 @@ func (a *ApplicationController) DeleteApplicationHandler(w rest.ResponseWriter, 
 	err := db.RemoveId(appId)
 
 	if err != nil {
-		RestGeneralError(w, err)
+		RestError(w, err)
 		return
 	}
 
@@ -134,7 +134,7 @@ func (a *ApplicationController) UpdateApplicationHandler(w rest.ResponseWriter, 
 	})
 
 	if err != nil {
-		RestGeneralError(w, err)
+		RestError(w, err)
 		return
 	}
 

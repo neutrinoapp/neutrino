@@ -22,7 +22,7 @@ func (t *TypesController) CreateTypeHandler(w rest.ResponseWriter, r *rest.Reque
 	app, err := GetAppFromRequest(r)
 
 	if err != nil {
-		RestGeneralError(w, err)
+		RestError(w, err)
 		return
 	}
 
@@ -41,6 +41,40 @@ func (t *TypesController) CreateTypeHandler(w rest.ResponseWriter, r *rest.Reque
 	w.WriteHeader(http.StatusOK)
 }
 
+func (t * TypesController) DeleteType(w rest.ResponseWriter, r *rest.Request) {
+	appId := r.PathParam("appId")
+	typeName := r.PathParam("typeName")
+
+	app, err := GetAppFromRequest(r)
+
+	if err != nil {
+		RestError(w, err)
+		return
+	}
+
+	appsDb := realbase.NewApplicationsDbService(r.Env["user"].(string))
+	appsDb.Update(
+		bson.M{
+			"_id": app["_id"],
+		},
+		bson.M{
+			"$pull": bson.M{
+				"types": typeName,
+			},
+		},
+	)
+
+	db := realbase.NewTypeDbService(appId, typeName)
+	dropError := db.GetCollection().DropCollection()
+
+	if dropError != nil {
+		RestError(w, dropError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
 func (t *TypesController) InsertInTypeHandler(w rest.ResponseWriter, r *rest.Request) {
 	appId := r.PathParam("appId")
 	typeName := r.PathParam("typeName")
@@ -51,7 +85,7 @@ func (t *TypesController) InsertInTypeHandler(w rest.ResponseWriter, r *rest.Req
 	err := db.Insert(body)
 
 	if err != nil {
-		RestGeneralError(w, err)
+		RestError(w, err)
 		return
 	}
 
@@ -62,12 +96,34 @@ func (t *TypesController) GetTypeDataHandler(w rest.ResponseWriter, r *rest.Requ
 	appId := r.PathParam("appId")
 	typeName := r.PathParam("typeName")
 
+	app, appErr := GetAppFromRequest(r)
+	if appErr != nil {
+		RestError(w, appErr)
+		return
+	}
+
+	types := app["types"].([]interface{})
+
+	found := false
+
+	for _, t := range types {
+		if value, ok := t.(string); ok && value == typeName {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		RestErrorNotFound(w)
+		return
+	}
+
 	db := realbase.NewTypeDbService(appId, typeName)
 
 	typeData, err := db.Find(nil, nil)
 
 	if err != nil {
-		RestGeneralError(w, err)
+		RestError(w, err)
 		return
 	}
 
@@ -84,7 +140,7 @@ func (t *TypesController) GetTypeItemById(w rest.ResponseWriter, r *rest.Request
 	item, err := db.FindId(itemId, nil)
 
 	if (err != nil) {
-		RestGeneralError(w, err)
+		RestError(w, err)
 		return
 	}
 
