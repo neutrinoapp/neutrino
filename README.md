@@ -35,7 +35,7 @@ $ go test -v ./..
 - [x] CI
 - [x] Docs
 - [x] Postman Collection
-- [ ] REST API
+- [x] REST API
   - [x] Create Applications
   - [x] Read Applications
   - [x] Delete Applications
@@ -46,7 +46,7 @@ $ go test -v ./..
   - [x] Read types data
   - [x] Update types data
   - [x] Delete types data
-  - [ ] In-app user management
+  - [x] In-app user management
   - [x] Integration tests
 - [ ] WebSockets API - Realtime API
   - [ ] Types support
