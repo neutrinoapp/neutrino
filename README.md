@@ -3,6 +3,8 @@
 --------------
 Realbase is hybrid realtime-REST backend written in Go with MongoDB as a database.
 
+### Any kind of feedback or contribution is welcomed warmly.
+
 # Docs
 
 Interactive documentation can be found [here](http://docs.realbas3.apiary.io/#reference).
