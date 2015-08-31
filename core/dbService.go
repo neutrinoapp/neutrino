@@ -41,7 +41,7 @@ func NewTypeDbService(appId, typeName string) DbService {
 	return NewDbService(Constants.DatabaseName(), appId + "." + typeName, mgo.Index{})
 }
 
-func NewApplicationsDbService(user string) DbService {
+func NewAppsDbService(user string) DbService {
 	index := mgo.Index{
 		Key: []string{"$text:name"},
 		Unique: true,
@@ -51,6 +51,10 @@ func NewApplicationsDbService(user string) DbService {
 	}
 
 	return NewDbService(Constants.DatabaseName(), user + "." + Constants.ApplicationsCollection(), index)
+}
+
+func NewAppUsersDbService(appId string) DbService {
+	return NewDbService(Constants.DatabaseName(), appId	 + "." + "users", mgo.Index{})
 }
 
 func (d *dbService) GetSettings() map[string]string {

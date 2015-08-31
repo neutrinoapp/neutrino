@@ -39,6 +39,8 @@ func initRoutes(restApi *rest.Api) {
 	router, err := rest.MakeRouter(
 		rest.Put(authController.Path(), authController.RegisterUserHandler),
 		rest.Post(authController.Path(), authController.LoginUserHandler),
+		rest.Put("/:appId" + authController.Path(), authController.AppRegisterUserHandler),
+		rest.Post("/:appId" + authController.Path(), authController.AppLoginUserHandler),
 
 		rest.Post(appController.Path(), appController.CreateApplicationHandler),
 		rest.Get(appController.Path(), appController.GetApplicationsHandler),

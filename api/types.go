@@ -26,7 +26,7 @@ func (t *TypesController) CreateTypeHandler(w rest.ResponseWriter, r *rest.Reque
 		return
 	}
 
-	appsDb := realbase.NewApplicationsDbService(r.Env["user"].(string))
+	appsDb := realbase.NewAppsDbService(r.Env["user"].(string))
 	appsDb.UpdateId(app["_id"],
 		bson.M{
 			"$push": bson.M{
@@ -49,7 +49,7 @@ func (t * TypesController) DeleteType(w rest.ResponseWriter, r *rest.Request) {
 		return
 	}
 
-	appsDb := realbase.NewApplicationsDbService(r.Env["user"].(string))
+	appsDb := realbase.NewAppsDbService(r.Env["user"].(string))
 	appsDb.UpdateId(app["_id"],
 		bson.M{
 			"$pull": bson.M{
