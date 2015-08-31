@@ -11,8 +11,8 @@ import (
 )
 
 type UserModel struct {
-	Id string `json: "_id,email"`
-	Email string `json: "_id,email"`
+	Id string `json: "_id"`
+	Email string `json: "email"`
 	Password string `json: "password"`
 }
 
@@ -52,21 +52,21 @@ func registerUser(w rest.ResponseWriter, r *rest.Request, db realbase.DbService)
 }
 
 func loginUser(w rest.ResponseWriter, r *rest.Request, db realbase.DbService) {
-	u := UserModel{}
+	var u bson.M
 
 	if err := r.DecodeJsonPayload(&u); err != nil {
 		RestError(w, err)
 		return
 	}
 
-	existingUser, err := db.FindId(u.Id, nil)
+	existingUser, err := db.FindId(u["email"].(string), nil)
 
 	if err != nil {
 		RestError(w, err)
 		return
 	}
 
-	err = bcrypt.CompareHashAndPassword(existingUser["password"].([]byte), []byte(u.Password))
+	err = bcrypt.CompareHashAndPassword(existingUser["password"].([]byte), []byte(u["password"].(string)))
 
 	if err != nil {
 		RestError(w, err)
@@ -74,7 +74,7 @@ func loginUser(w rest.ResponseWriter, r *rest.Request, db realbase.DbService) {
 	}
 
 	token := jwt.New(jwt.GetSigningMethod("HS256"))
-	token.Claims["user"] = u.Id
+	token.Claims["user"] = u["email"].(string)
 	token.Claims["expiration"] = time.Now().Add(time.Minute + 60).Unix()
 
 	tokenStr, err := token.SignedString([]byte(""))

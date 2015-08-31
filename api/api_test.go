@@ -44,21 +44,29 @@ func randomString() string {
 }
 
 func register(t *testing.T) *UserModel {
-	body := &UserModel{
-		Password: "pass",
-		Email: randomString() + "@gmail.com",
+	b := map[string]interface{}{
+		"email": randomString() + "@gmail.com",
+		"password": "pass",
 	}
 
-	rec := sendRequest("PUT", "/auth", body, t)
+	rec := sendRequest("PUT", "/auth", b, t)
+
 	rec.CodeIs(http.StatusOK)
 
-	return body
+	return &UserModel{
+		Id: b["email"].(string),
+		Email: b["email"].(string),
+		Password: b["password"].(string),
+	}
 }
 
 func login(t *testing.T) (*UserModel, string) {
 	if token == "" {
 		user = register(t)
-		rec := sendRequest("POST", "/auth", user, t)
+		rec := sendRequest("POST", "/auth", map[string]interface{}{
+			"email": user.Email,
+			"password": user.Password,
+		}, t)
 
 		var response map[string]interface{}
 		rec.DecodeJsonPayload(&response)
