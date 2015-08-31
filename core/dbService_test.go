@@ -80,20 +80,24 @@ func TestDbServiceGetSession(t *testing.T) {
 
 func TestDbServiceGetDb(t *testing.T) {
 	d := getDefaultDbService()
-	db := d.GetDb()
+	session, db := d.GetDb()
 
 	if db == nil {
 		t.Error("Database is nil")
 	}
+
+	session.Close()
 }
 
 func TestDbServicGetCollection(t *testing.T) {
 	d := getDefaultDbService()
-	c := d.GetCollection()
+	session, c := d.GetCollection()
 
 	if c == nil {
 		t.Error("Collection is nil")
 	}
+
+	session.Close()
 }
 
 func TestDbServiceInsertAndFindId(t *testing.T) {

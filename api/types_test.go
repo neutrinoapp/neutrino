@@ -95,3 +95,50 @@ func TestGetByIdTypeData(t *testing.T) {
 		t.Error("Item not written correctly")
 	}
 }
+
+func TestUpdateTypeItemById(t *testing.T) {
+	_, app, typeName := setupTypeTests(t)
+
+	rec := sendAuthenticatedRequest("POST", "/" + app.Id + "/types/" + typeName, map[string]interface{}{
+		"field1": "test",
+		"field2": "test",
+	}, t)
+	rec.CodeIs(200)
+
+	var res map[string]interface{}
+	rec.DecodeJsonPayload(&res)
+	id := res["_id"].(string)
+
+
+	sendAuthenticatedRequest("PUT", "/" + app.Id + "/types/" + typeName + "/" + id, map[string]interface{}{
+		"field1": "testupdated",
+		"field2": "testupdated",
+	}, t)
+
+	rec1 := sendAuthenticatedRequest("GET", "/" + app.Id + "/types/" + typeName + "/" + id, nil, t)
+	var item map[string]interface{}
+	rec1.DecodeJsonPayload(&item)
+
+	if item["field1"] != "testupdated" || item["field2"] != "testupdated" {
+		t.Fatal("Item not updated correctly")
+	}
+}
+
+func TestDeleteTypeItemById(t *testing.T) {
+	_, app, typeName := setupTypeTests(t)
+
+	rec := sendAuthenticatedRequest("POST", "/" + app.Id + "/types/" + typeName, map[string]interface{}{
+		"field1": "test",
+		"field2": "test",
+	}, t)
+	rec.CodeIs(200)
+
+	var res map[string]interface{}
+	rec.DecodeJsonPayload(&res)
+	id := res["_id"].(string)
+
+	sendAuthenticatedRequest("DELETE", "/" + app.Id + "/types/" + typeName + "/" + id, nil, t)
+
+	rec1 := sendAuthenticatedRequest("GET", "/" + app.Id + "/types/" + typeName + "/" + id, nil, t)
+	rec1.CodeIs(404)
+}

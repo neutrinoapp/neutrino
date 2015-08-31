@@ -27,10 +27,7 @@ func (t *TypesController) CreateTypeHandler(w rest.ResponseWriter, r *rest.Reque
 	}
 
 	appsDb := realbase.NewApplicationsDbService(r.Env["user"].(string))
-	appsDb.Update(
-		bson.M{
-			"_id": app["_id"],
-		},
+	appsDb.UpdateId(app["_id"],
 		bson.M{
 			"$push": bson.M{
 				"types": typeName,
@@ -53,10 +50,7 @@ func (t * TypesController) DeleteType(w rest.ResponseWriter, r *rest.Request) {
 	}
 
 	appsDb := realbase.NewApplicationsDbService(r.Env["user"].(string))
-	appsDb.Update(
-		bson.M{
-			"_id": app["_id"],
-		},
+	appsDb.UpdateId(app["_id"],
 		bson.M{
 			"$pull": bson.M{
 				"types": typeName,
@@ -65,7 +59,10 @@ func (t * TypesController) DeleteType(w rest.ResponseWriter, r *rest.Request) {
 	)
 
 	db := realbase.NewTypeDbService(appId, typeName)
-	dropError := db.GetCollection().DropCollection()
+	session, collection := db.GetCollection()
+	defer session.Close()
+
+	dropError := collection.DropCollection()
 
 	if dropError != nil {
 		RestError(w, dropError)
@@ -145,4 +142,41 @@ func (t *TypesController) GetTypeItemById(w rest.ResponseWriter, r *rest.Request
 	}
 
 	w.WriteJson(item)
+}
+
+func (t *TypesController) UpdateTypeItemById(w rest.ResponseWriter, r *rest.Request) {
+	appId := r.PathParam("appId")
+	typeName := r.PathParam("typeName")
+	itemId := r.PathParam("itemId")
+
+	db := realbase.NewTypeDbService(appId, typeName)
+
+	var body bson.M
+	r.DecodeJsonPayload(&body)
+
+	err := db.UpdateId(itemId, body)
+
+	if err != nil {
+		RestError(w, err)
+		return
+	}
+
+	w.WriteHeader(200)
+}
+
+func (t *TypesController) DeleteTypeItemById(w rest.ResponseWriter, r *rest.Request) {
+	appId := r.PathParam("appId")
+	typeName := r.PathParam("typeName")
+	itemId := r.PathParam("itemId")
+
+	db := realbase.NewTypeDbService(appId, typeName)
+
+	err := db.RemoveId(itemId)
+
+	if err != nil {
+		RestError(w, err)
+		return
+	}
+
+	w.WriteHeader(200)
 }

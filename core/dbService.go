@@ -12,13 +12,14 @@ var connectionPool map[string]*mgo.Session
 type DbService interface {
 	GetSettings() map[string]string
 	GetSession() *mgo.Session
-	GetDb() *mgo.Database
-	GetCollection() *mgo.Collection
+	GetDb() (*mgo.Session, *mgo.Database)
+	GetCollection() (*mgo.Session, *mgo.Collection)
 	Insert(doc bson.M) error
 	Update(q, u bson.M) error
 	FindId(id, fields interface{}) (bson.M, error)
 	Find(query, fields interface{}) ([]bson.M, error)
 	RemoveId(id interface{}) error
+	UpdateId(id, u interface{}) error
 }
 
 type dbService struct {
@@ -77,8 +78,10 @@ func (d *dbService) GetSession() *mgo.Session {
 		connectionPool[d.connectionString] = session
 		storedSession = session
 
+		_, collection := d.GetCollection()
+
 		if len(d.index.Key) > 0 {
-			if err := d.GetCollection().EnsureIndex(d.index); err != nil {
+			if err := collection.EnsureIndex(d.index); err != nil {
 				log.Fatal(err)
 			}
 		}
@@ -87,14 +90,16 @@ func (d *dbService) GetSession() *mgo.Session {
 	return storedSession.Copy()
 }
 
-func (d *dbService) GetDb() *mgo.Database {
-	db := d.GetSession().DB(d.dbName)
-	return db
+func (d *dbService) GetDb() (*mgo.Session, *mgo.Database) {
+	session := d.GetSession()
+	db := session.DB(d.dbName)
+	return session, db
 }
 
-func (d *dbService) GetCollection() *mgo.Collection {
-	col := d.GetDb().C(d.colName)
-	return col
+func (d *dbService) GetCollection() (*mgo.Session, *mgo.Collection) {
+	session, db := d.GetDb()
+	col := db.C(d.colName)
+	return session, col
 }
 
 func (d *dbService) Insert(doc bson.M) error {
@@ -102,28 +107,50 @@ func (d *dbService) Insert(doc bson.M) error {
 		doc["_id"] = utils.GetCleanUUID()
 	}
 
-	return d.GetCollection().Insert(doc)
+	session, collection := d.GetCollection()
+
+	defer session.Close()
+	return collection.Insert(doc)
 }
 
 func (d *dbService) Update(q, u bson.M) error {
-	return d.GetCollection().Update(q, u)
+	session, collection := d.GetCollection()
+
+	defer session.Close()
+	return collection.Update(q, u)
 }
 
 func (d *dbService) FindId(id, fields interface{}) (bson.M, error) {
 	result := bson.M{}
 
-	err := d.GetCollection().FindId(id).Select(fields).One(&result)
+	session, collection := d.GetCollection()
+
+	defer session.Close()
+	err := collection.FindId(id).Select(fields).One(&result)
 
 	return result, err;
 }
 
 func (d *dbService) Find(query, fields interface{}) ([]bson.M, error) {
 	result := []bson.M{}
-	err := d.GetCollection().Find(query).Select(fields).All(&result)
+	session, collection := d.GetCollection()
+
+	defer session.Close()
+	err := collection.Find(query).Select(fields).All(&result)
 
 	return result, err;
 }
 
 func (d *dbService) RemoveId(id interface{}) error {
-	return d.GetCollection().RemoveId(id)
+	session, collection := d.GetCollection()
+
+	defer session.Close()
+	return collection.RemoveId(id)
+}
+
+func (d *dbService) UpdateId(id, u interface{}) error {
+	session, collection := d.GetCollection()
+	defer session.Close()
+
+	return collection.UpdateId(id, u)
 }

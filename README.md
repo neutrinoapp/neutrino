@@ -42,8 +42,8 @@ $ go test -v ./..
   - [x] Delete types
   - [x] Insert types data
   - [x] Read types data
-  - [ ] Update types data
-  - [ ] Delete types data
+  - [x] Update types data
+  - [x] Delete types data
   - [ ] In-app user management
   - [x] Integration tests
 - [ ] WebSockets API - Realtime API

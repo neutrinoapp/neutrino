@@ -51,6 +51,8 @@ func initRoutes(restApi *rest.Api) {
 		rest.Post("/:appId" + typesController.Path() + "/:typeName", typesController.InsertInTypeHandler),
 		rest.Get("/:appId" + typesController.Path() + "/:typeName", typesController.GetTypeDataHandler),
 		rest.Get("/:appId" + typesController.Path() + "/:typeName/:itemId", typesController.GetTypeItemById),
+		rest.Put("/:appId" + typesController.Path() + "/:typeName/:itemId", typesController.UpdateTypeItemById),
+		rest.Delete("/:appId" + typesController.Path() + "/:typeName/:itemId", typesController.DeleteTypeItemById),
 	)
 
 	if err != nil {
