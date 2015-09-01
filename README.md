@@ -1,4 +1,10 @@
+#WIP
+
+### Readbase is under heavy development, there are still some rough edges.
+
 # REALBASE
+[![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](http://forthebadge.com)
+
 [![Build Status](https://travis-ci.org/go-realbase/realbase.svg?branch=master)](https://travis-ci.org/go-realbase/realbase)
 --------------
 Realbase is hybrid realtime-REST backend written in Go with MongoDB as a database.
@@ -32,6 +38,7 @@ $ go test -v ./..
 - [x] User management with JWT 
 - [ ] Landing page (http://real-base.com)
 - [ ] App portal (http://app.real-base.com)
+- [ ] API server (http://api.real-base.com)
 - [x] CI
 - [x] Docs
 - [x] Postman Collection
