@@ -3,6 +3,9 @@
 ### Neutrino is under heavy development, there are still some rough edges.
 
 # NEUTRINO
+
+![Neutrino](https://media.giphy.com/media/3o85xnGaP3m49VmBDW/giphy.gif)
+
 [![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](http://forthebadge.com)
 
 [![Build Status](https://travis-ci.org/go-neutrino/neutrino-core.svg?branch=master)](https://travis-ci.org/go-neutrino/neutrino-core)
