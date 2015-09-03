@@ -5,7 +5,7 @@
 # NEUTRINO
 [![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](http://forthebadge.com)
 
-[![Build Status](https://travis-ci.org/go-realbase/realbase.svg?branch=master)](https://travis-ci.org/go-realbase/realbase)
+[![Build Status](https://travis-ci.org/go-neutrino/neutrino-core.svg?branch=master)](https://travis-ci.org/go-neutrino/neutrino-core)
 --------------
 Neutrino is hybrid realtime-REST backend written in Go with MongoDB as a database.
 
