@@ -1,4 +1,5 @@
 package api
+
 import (
 	"github.com/ant0ine/go-json-rest/rest"
 	"strings"

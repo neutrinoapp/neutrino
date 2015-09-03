@@ -1,4 +1,4 @@
-package realbase
+package neutrino
 
 type constants struct {
 }
@@ -6,7 +6,7 @@ type constants struct {
 var Constants = &constants{}
 
 func (c *constants) DatabaseName() string {
-	return "realbase"
+	return "neutrino"
 }
 
 func (c *constants) UsersCollection() string {

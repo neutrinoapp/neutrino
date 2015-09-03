@@ -4,7 +4,7 @@ import (
 	"github.com/ant0ine/go-json-rest/rest"
 	"gopkg.in/mgo.v2/bson"
 	"net/http"
-	"github.com/go-realbase/realbase/core"
+	"github.com/go-neutrino/neutrino-core/core"
 )
 
 type TypesController struct {
@@ -26,7 +26,7 @@ func (t *TypesController) CreateTypeHandler(w rest.ResponseWriter, r *rest.Reque
 		return
 	}
 
-	appsDb := realbase.NewAppsDbService(r.Env["user"].(string))
+	appsDb := neutrino.NewAppsDbService(r.Env["user"].(string))
 	appsDb.UpdateId(app["_id"],
 		bson.M{
 			"$push": bson.M{
@@ -49,7 +49,7 @@ func (t * TypesController) DeleteType(w rest.ResponseWriter, r *rest.Request) {
 		return
 	}
 
-	appsDb := realbase.NewAppsDbService(r.Env["user"].(string))
+	appsDb := neutrino.NewAppsDbService(r.Env["user"].(string))
 	appsDb.UpdateId(app["_id"],
 		bson.M{
 			"$pull": bson.M{
@@ -58,7 +58,7 @@ func (t * TypesController) DeleteType(w rest.ResponseWriter, r *rest.Request) {
 		},
 	)
 
-	db := realbase.NewTypeDbService(appId, typeName)
+	db := neutrino.NewTypeDbService(appId, typeName)
 	session, collection := db.GetCollection()
 	defer session.Close()
 
@@ -78,7 +78,7 @@ func (t *TypesController) InsertInTypeHandler(w rest.ResponseWriter, r *rest.Req
 	var body map[string]interface{}
 	r.DecodeJsonPayload(&body)
 
-	db := realbase.NewTypeDbService(appId, typeName)
+	db := neutrino.NewTypeDbService(appId, typeName)
 	err := db.Insert(body)
 
 	if err != nil {
@@ -115,7 +115,7 @@ func (t *TypesController) GetTypeDataHandler(w rest.ResponseWriter, r *rest.Requ
 		return
 	}
 
-	db := realbase.NewTypeDbService(appId, typeName)
+	db := neutrino.NewTypeDbService(appId, typeName)
 
 	typeData, err := db.Find(nil, nil)
 
@@ -132,7 +132,7 @@ func (t *TypesController) GetTypeItemById(w rest.ResponseWriter, r *rest.Request
 	typeName := r.PathParam("typeName")
 	itemId := r.PathParam("itemId")
 
-	db := realbase.NewTypeDbService(appId, typeName)
+	db := neutrino.NewTypeDbService(appId, typeName)
 
 	item, err := db.FindId(itemId, nil)
 
@@ -149,7 +149,7 @@ func (t *TypesController) UpdateTypeItemById(w rest.ResponseWriter, r *rest.Requ
 	typeName := r.PathParam("typeName")
 	itemId := r.PathParam("itemId")
 
-	db := realbase.NewTypeDbService(appId, typeName)
+	db := neutrino.NewTypeDbService(appId, typeName)
 
 	var body bson.M
 	r.DecodeJsonPayload(&body)
@@ -169,7 +169,7 @@ func (t *TypesController) DeleteTypeItemById(w rest.ResponseWriter, r *rest.Requ
 	typeName := r.PathParam("typeName")
 	itemId := r.PathParam("itemId")
 
-	db := realbase.NewTypeDbService(appId, typeName)
+	db := neutrino.NewTypeDbService(appId, typeName)
 
 	err := db.RemoveId(itemId)
 

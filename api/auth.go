@@ -7,7 +7,7 @@ import (
 	"github.com/ant0ine/go-json-rest/rest"
 	"net/http"
 	"gopkg.in/mgo.v2/bson"
-	"github.com/go-realbase/realbase/core"
+	"github.com/go-neutrino/neutrino-core/core"
 )
 
 type UserModel struct {
@@ -23,7 +23,7 @@ func (a *AuthController) Path() string {
 	return "/auth"
 }
 
-func registerUser(w rest.ResponseWriter, r *rest.Request, db realbase.DbService) {
+func registerUser(w rest.ResponseWriter, r *rest.Request, db neutrino.DbService) {
 	var u bson.M
 
 	if err := r.DecodeJsonPayload(&u); err != nil {
@@ -51,7 +51,7 @@ func registerUser(w rest.ResponseWriter, r *rest.Request, db realbase.DbService)
 	w.WriteHeader(http.StatusOK)
 }
 
-func loginUser(w rest.ResponseWriter, r *rest.Request, db realbase.DbService) {
+func loginUser(w rest.ResponseWriter, r *rest.Request, db neutrino.DbService) {
 	var u bson.M
 
 	if err := r.DecodeJsonPayload(&u); err != nil {
@@ -88,17 +88,17 @@ func loginUser(w rest.ResponseWriter, r *rest.Request, db realbase.DbService) {
 }
 
 func (a *AuthController) RegisterUserHandler (w rest.ResponseWriter, r *rest.Request) {
-	registerUser(w, r, realbase.NewUsersDbService())
+	registerUser(w, r, neutrino.NewUsersDbService())
 }
 
 func (a *AuthController) AppRegisterUserHandler (w rest.ResponseWriter, r *rest.Request) {
-	registerUser(w, r, realbase.NewAppUsersDbService(r.PathParam("appId")))
+	registerUser(w, r, neutrino.NewAppUsersDbService(r.PathParam("appId")))
 }
 
 func (a *AuthController) LoginUserHandler(w rest.ResponseWriter, r *rest.Request) {
-	loginUser(w, r, realbase.NewUsersDbService())
+	loginUser(w, r, neutrino.NewUsersDbService())
 }
 
 func (a *AuthController) AppLoginUserHandler(w rest.ResponseWriter, r *rest.Request) {
-	loginUser(w, r, realbase.NewAppUsersDbService(r.PathParam("appId")))
+	loginUser(w, r, neutrino.NewAppUsersDbService(r.PathParam("appId")))
 }

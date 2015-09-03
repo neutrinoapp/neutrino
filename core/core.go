@@ -1,4 +1,4 @@
-package realbase
+package neutrino
 
 type Config interface {
 	GetConnectionString() string

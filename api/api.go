@@ -13,7 +13,7 @@ func initMiddleware(restApi *rest.Api) {
 		&rest.AccessLogJsonMiddleware{},
 		&rest.TimerMiddleware{},
 		&rest.RecorderMiddleware{},
-		&rest.PoweredByMiddleware{"realbase"},
+		&rest.PoweredByMiddleware{"neutrino"},
 		&rest.RecoverMiddleware{EnableResponseStackTrace: false},
 		&rest.JsonIndentMiddleware{},
 		&rest.IfMiddleware{

@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"net/http"
 	"log"
-	"github.com/go-realbase/realbase/core"
-	"github.com/go-realbase/realbase/api"
+	"github.com/go-neutrino/neutrino-core/core"
+"github.com/go-neutrino/neutrino-core/api"
 )
 
 func main() {
 	restApi := rest.NewApi()
 
-	realbase.Initialize("localhost:27017")
+	neutrino.Initialize("localhost:27017")
 	api.Initialize(restApi)
 
 	port := ":1234";

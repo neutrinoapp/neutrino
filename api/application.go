@@ -5,9 +5,9 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"errors"
 	"time"
-	"github.com/go-realbase/realbase/core"
-	"github.com/go-realbase/realbase/utils"
 	"net/http"
+	"github.com/go-neutrino/neutrino-core/core"
+	"github.com/go-neutrino/neutrino-core/utils"
 )
 
 type ApplicationModel struct {
@@ -27,7 +27,7 @@ func GetAppFromRequest(r *rest.Request) (map[string]interface{}, error) {
 
 	if appId != "" {
 		//TODO: cache this
-		appDb := realbase.NewAppsDbService(r.Env["user"].(string))
+		appDb := neutrino.NewAppsDbService(r.Env["user"].(string))
 		return appDb.FindId(appId, nil)
 	} else {
 		return nil, errors.New("Invalid app id.")
@@ -47,7 +47,7 @@ func (a *ApplicationController) CreateApplicationHandler(w rest.ResponseWriter, 
 		return
 	}
 
-	db := realbase.NewAppsDbService(r.Env["user"].(string))
+	db := neutrino.NewAppsDbService(r.Env["user"].(string))
 
 	username := r.Env["user"].(string)
 	doc := bson.M{
@@ -78,7 +78,7 @@ func (a *ApplicationController) CreateApplicationHandler(w rest.ResponseWriter, 
 }
 
 func (a *ApplicationController) GetApplicationsHandler(w rest.ResponseWriter, r *rest.Request) {
-	db := realbase.NewAppsDbService(r.Env["user"].(string))
+	db := neutrino.NewAppsDbService(r.Env["user"].(string))
 
 	res, err := db.Find(
 		bson.M{
@@ -111,7 +111,7 @@ func (a *ApplicationController) GetApplicationHandler(w rest.ResponseWriter, r *
 func (a *ApplicationController) DeleteApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
 	appId := r.PathParam("appId")
 
-	db := realbase.NewAppsDbService(r.Env["user"].(string))
+	db := neutrino.NewAppsDbService(r.Env["user"].(string))
 	err := db.RemoveId(appId)
 
 	if err != nil {
@@ -124,7 +124,7 @@ func (a *ApplicationController) DeleteApplicationHandler(w rest.ResponseWriter, 
 
 func (a *ApplicationController) UpdateApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
 	appId := r.PathParam("appId")
-	db := realbase.NewAppsDbService(r.Env["user"].(string))
+	db := neutrino.NewAppsDbService(r.Env["user"].(string))
 	doc := utils.WhitelistFields([]string{"name"}, utils.GetBody(r))
 
 	err := db.Update(bson.M{

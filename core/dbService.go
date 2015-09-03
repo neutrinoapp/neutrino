@@ -1,10 +1,10 @@
-package realbase
+package neutrino
 
 import (
 	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/mgo.v2"
 	"log"
-	"github.com/go-realbase/realbase/utils"
+	"github.com/go-neutrino/neutrino-core/utils"
 )
 
 var connectionPool map[string]*mgo.Session

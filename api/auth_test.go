@@ -4,13 +4,13 @@ import (
 	"testing"
 	"net/http"
 	"strings"
-	"github.com/go-realbase/realbase/core"
+	"github.com/go-neutrino/neutrino-core/core"
 )
 
 func TestRegisterUser(t *testing.T) {
 	body := register(t)
 
-	res, err := realbase.NewUsersDbService().FindId(body.Email, nil)
+	res, err := neutrino.NewUsersDbService().FindId(body.Email, nil)
 
 	if res == nil || err != nil {
 		t.Fatal("User not created correctly", res, err);
@@ -42,7 +42,7 @@ func TestAppRegisterUser(t *testing.T) {
 	r := sendAuthenticatedRequest("PUT", "/" + app.Id + "/auth", b, t)
 	r.CodeIs(200)
 
-	res, err := realbase.NewAppUsersDbService(app.Id).FindId(b["email"], nil)
+	res, err := neutrino.NewAppUsersDbService(app.Id).FindId(b["email"], nil)
 
 	if res == nil || err != nil {
 		t.Fatal("User not created correctly", res, err);
