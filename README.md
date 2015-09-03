@@ -39,7 +39,7 @@ $ go test -v ./..
 
 - [x] MongoDB to store the data
 - [x] User management with JWT 
-- [ ] Landing page (http://neutrinoapp.com)
+- [x] Landing page (http://neutrinoapp.com)
 - [ ] App portal (http://app.neutrinoapp.com)
 - [ ] API server (http://api.neutrinoapp.com)
 - [x] CI
