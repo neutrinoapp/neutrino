@@ -2,12 +2,12 @@
 
 ### Neutrino is under heavy development, there are still some rough edges.
 
-# REALBASE
+# NEUTRINO
 [![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](http://forthebadge.com)
 
 [![Build Status](https://travis-ci.org/go-realbase/realbase.svg?branch=master)](https://travis-ci.org/go-realbase/realbase)
 --------------
-Realbase is hybrid realtime-REST backend written in Go with MongoDB as a database.
+Neutrino is hybrid realtime-REST backend written in Go with MongoDB as a database.
 
 ### Any kind of feedback or contribution is welcomed warmly.
 
