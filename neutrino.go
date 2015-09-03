@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"log"
 	"github.com/go-neutrino/neutrino-core/core"
-"github.com/go-neutrino/neutrino-core/api"
+	"github.com/go-neutrino/neutrino-core/api"
 )
 
 func main() {
