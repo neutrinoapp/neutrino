@@ -1,6 +1,6 @@
 #WIP
 
-### Readbase is under heavy development, there are still some rough edges.
+### Neutrino is under heavy development, there are still some rough edges.
 
 # REALBASE
 [![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](http://forthebadge.com)
@@ -19,13 +19,13 @@ Interactive documentation can be found [here](http://docs.realbas3.apiary.io/#re
 --------------
 
 ```bash
-$ go get github.com/go-realbase/realbase
+$ go get github.com/go-neutrino/neutrino-core
 ```
 
-In the root of the project - `$GOPATH/src/github.com/go-realbase/realbase` you can execute the following:
+In the root of the project - `$GOPATH/src/github.com/go-neutrino/neutrino` you can execute the following:
 
 ```bash
-$ go run realbase.go
+$ go run neutrino.go
 ```
 
 ```bash
@@ -36,9 +36,9 @@ $ go test -v ./..
 
 - [x] MongoDB to store the data
 - [x] User management with JWT 
-- [ ] Landing page (http://real-base.com)
-- [ ] App portal (http://app.real-base.com)
-- [ ] API server (http://api.real-base.com)
+- [ ] Landing page (http://neutrinoapp.com)
+- [ ] App portal (http://app.neutrinoapp.com)
+- [ ] API server (http://api.neutrinoapp.com)
 - [x] CI
 - [x] Docs
 - [x] Postman Collection
