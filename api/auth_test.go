@@ -10,7 +10,7 @@ import (
 func TestRegisterUser(t *testing.T) {
 	body := register(t)
 
-	res, err := neutrino.NewUsersDbService().FindId(body.Email, nil)
+	res, err := neutrino.NewUsersDbService().FindId(body["email"], nil)
 
 	if res == nil || err != nil {
 		t.Fatal("User not created correctly", res, err);

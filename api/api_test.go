@@ -12,7 +12,7 @@ import (
 
 var (
 	apiHandler http.Handler
-	user *UserModel
+	user map[string]interface{}
 	token string
 )
 
@@ -43,7 +43,7 @@ func randomString() string {
 	return "r" + strconv.Itoa(rand.Int())
 }
 
-func register(t *testing.T) *UserModel {
+func register(t *testing.T) map[string]interface{} {
 	b := map[string]interface{}{
 		"email": randomString() + "@gmail.com",
 		"password": "pass",
@@ -53,19 +53,15 @@ func register(t *testing.T) *UserModel {
 
 	rec.CodeIs(http.StatusOK)
 
-	return &UserModel{
-		Id: b["email"].(string),
-		Email: b["email"].(string),
-		Password: b["password"].(string),
-	}
+	return b
 }
 
 func login(t *testing.T) (*UserModel, string) {
 	if token == "" {
 		user = register(t)
 		rec := sendRequest("POST", "/auth", map[string]interface{}{
-			"email": user.Email,
-			"password": user.Password,
+			"email": user["email"],
+			"password": user["password"],
 		}, t)
 
 		var response map[string]interface{}
@@ -73,5 +69,8 @@ func login(t *testing.T) (*UserModel, string) {
 		token = response["token"].(string)
 	}
 
-	return user, token
+	return &UserModel{
+		Email: user["email"].(string),
+		Password: user["password"].(string),
+	}, token
 }
