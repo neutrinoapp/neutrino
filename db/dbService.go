@@ -1,7 +1,6 @@
-package neutrino
+package db
 
 import (
-	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/mgo.v2"
 	"log"
 	"github.com/go-neutrino/neutrino-core/utils"
@@ -14,10 +13,10 @@ type DbService interface {
 	GetSession() *mgo.Session
 	GetDb() (*mgo.Session, *mgo.Database)
 	GetCollection() (*mgo.Session, *mgo.Collection)
-	Insert(doc bson.M) error
-	Update(q, u bson.M) error
-	FindId(id, fields interface{}) (bson.M, error)
-	Find(query, fields interface{}) ([]bson.M, error)
+	Insert(doc map[string]interface{}) error
+	Update(q, u map[string]interface{}) error
+	FindId(id, fields interface{}) (map[string]interface{}, error)
+	Find(query, fields interface{}) ([]map[string]interface{}, error)
 	RemoveId(id interface{}) error
 	UpdateId(id, u interface{}) error
 }
@@ -106,7 +105,7 @@ func (d *dbService) GetCollection() (*mgo.Session, *mgo.Collection) {
 	return session, col
 }
 
-func (d *dbService) Insert(doc bson.M) error {
+func (d *dbService) Insert(doc map[string]interface{}) error {
 	if _, ok := doc["_id"]; !ok {
 		doc["_id"] = utils.GetCleanUUID()
 	}
@@ -117,15 +116,15 @@ func (d *dbService) Insert(doc bson.M) error {
 	return collection.Insert(doc)
 }
 
-func (d *dbService) Update(q, u bson.M) error {
+func (d *dbService) Update(q, u map[string]interface{}) error {
 	session, collection := d.GetCollection()
 
 	defer session.Close()
 	return collection.Update(q, u)
 }
 
-func (d *dbService) FindId(id, fields interface{}) (bson.M, error) {
-	result := bson.M{}
+func (d *dbService) FindId(id, fields interface{}) (map[string]interface{}, error) {
+	result := map[string]interface{}{}
 
 	session, collection := d.GetCollection()
 
@@ -135,8 +134,8 @@ func (d *dbService) FindId(id, fields interface{}) (bson.M, error) {
 	return result, err;
 }
 
-func (d *dbService) Find(query, fields interface{}) ([]bson.M, error) {
-	result := []bson.M{}
+func (d *dbService) Find(query, fields interface{}) ([]map[string]interface{}, error) {
+	result := []map[string]interface{}{}
 	session, collection := d.GetCollection()
 
 	defer session.Close()

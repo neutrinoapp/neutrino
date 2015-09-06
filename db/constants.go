@@ -1,4 +1,4 @@
-package neutrino
+package db
 
 type constants struct {
 }

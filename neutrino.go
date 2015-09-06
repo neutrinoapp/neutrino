@@ -1,22 +1,17 @@
 package main
 
 import (
-	"github.com/ant0ine/go-json-rest/rest"
-	"fmt"
-	"net/http"
-	"log"
-	"github.com/go-neutrino/neutrino-core/core"
+	"github.com/gin-gonic/gin"
+	"github.com/go-neutrino/neutrino-core/db"
 	"github.com/go-neutrino/neutrino-core/api"
 )
 
 func main() {
-	restApi := rest.NewApi()
+	engine := gin.Default()
 
-	neutrino.Initialize("localhost:27017")
-	api.Initialize(restApi)
+	db.Initialize("localhost:27017")
+	api.Initialize(engine)
 
 	port := ":1234";
-
-	fmt.Println("Listening on port", port)
-	log.Fatal(http.ListenAndServe(port, restApi.MakeHandler()))
+	engine.Run(port)
 }

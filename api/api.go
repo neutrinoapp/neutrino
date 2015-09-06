@@ -1,85 +1,80 @@
 package api
 
 import (
-	"github.com/ant0ine/go-json-rest/rest"
-	"log"
+	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 var initialized bool
 
-func initMiddleware(restApi *rest.Api) {
-	restApi.Use(
-		&defaultContentTypeMiddleware{"application/json"},
-		&rest.AccessLogJsonMiddleware{},
-		&rest.TimerMiddleware{},
-		&rest.RecorderMiddleware{},
-		&rest.PoweredByMiddleware{"neutrino"},
-		&rest.RecoverMiddleware{EnableResponseStackTrace: false},
-		&rest.JsonIndentMiddleware{},
-		&rest.IfMiddleware{
-			Condition: func(request *rest.Request) bool {
-				return request.URL.Path != "/auth"
-			},
-			IfTrue: &authMiddleware{},
-		},
-		&rest.IfMiddleware{
-			Condition: func(request *rest.Request) bool {
-				return request.URL.Path != "/auth" && request.URL.Path != "/applications"
-			},
-			IfTrue: &environmentMiddleware{},
-		},
-	)
+func initMiddleware(e *gin.Engine) {
+	e.Use(defaultContentTypeMiddleware())
 }
 
-func initRoutes(restApi *rest.Api) {
+func initRoutes(e *gin.Engine) {
 	authController := &AuthController{}
 	appController := &ApplicationController{}
 	typesController := &TypesController{}
 
-	router, err := rest.MakeRouter(
-		rest.Put(authController.Path(), authController.RegisterUserHandler),
-		rest.Post(authController.Path(), authController.LoginUserHandler),
-		rest.Put("/:appId" + authController.Path(), authController.AppRegisterUserHandler),
-		rest.Post("/:appId" + authController.Path(), authController.AppLoginUserHandler),
+	v1 := e.Group("/v1")
+	{
+		v1.POST("/login", authController.LoginUserHandler)
+		v1.POST("/register", authController.RegisterUserHandler)
 
-		rest.Post(appController.Path(), appController.CreateApplicationHandler),
-		rest.Get(appController.Path(), appController.GetApplicationsHandler),
-		rest.Get(appController.Path() + "/:appId", appController.GetApplicationHandler),
-		rest.Delete(appController.Path() + "/:appId", appController.DeleteApplicationHandler),
-		rest.Put(appController.Path() + "/:appId", appController.UpdateApplicationHandler),
+		appGroup := v1.Group("/app", authorizeMiddleware(), injectAppMiddleware())
+		{
+			appGroup.POST("/", appController.CreateApplicationHandler)
+			appGroup.GET("/", appController.GetApplicationsHandler)
 
-		rest.Post("/:appId" + typesController.Path(), typesController.CreateTypeHandler),
-		rest.Delete("/:appId" + typesController.Path() + "/:typeName", typesController.DeleteType),
-		rest.Post("/:appId" + typesController.Path() + "/:typeName", typesController.InsertInTypeHandler),
-		rest.Get("/:appId" + typesController.Path() + "/:typeName", typesController.GetTypeDataHandler),
-		rest.Get("/:appId" + typesController.Path() + "/:typeName/:itemId", typesController.GetTypeItemById),
-		rest.Put("/:appId" + typesController.Path() + "/:typeName/:itemId", typesController.UpdateTypeItemById),
-		rest.Delete("/:appId" + typesController.Path() + "/:typeName/:itemId", typesController.DeleteTypeItemById),
-	)
+			appIdGroup := appGroup.Group("/:appId")
+			{
+				appIdGroup.GET("/", appController.GetApplicationHandler)
+				appIdGroup.DELETE("/", appController.DeleteApplicationHandler)
+				appIdGroup.PUT("/", appController.UpdateApplicationHandler)
 
-	if err != nil {
-		log.Fatal(err)
+				appIdGroup.POST("/register", authController.AppRegisterUserHandler)
+				appIdGroup.POST("/login", authController.AppLoginUserHandler)
+
+				dataGroup := appIdGroup.Group("/data")
+				{
+					dataGroup.POST("/", typesController.CreateTypeHandler)
+					dataGroup.DELETE("/:typeName", typesController.DeleteType)
+					dataGroup.POST("/:typeName", typesController.InsertInTypeHandler)
+					dataGroup.GET("/:typeName", typesController.GetTypeDataHandler)
+					dataGroup.GET("/:typeName/:itemId", typesController.GetTypeItemById)
+					dataGroup.PUT("/:typeName/:itemId", typesController.UpdateTypeItemById)
+					dataGroup.DELETE("/:typeName/:itemId", typesController.DeleteTypeItemById)
+				}
+			}
+		}
 	}
-
-	restApi.SetApp(router)
 }
 
-func Initialize(restApi *rest.Api) {
+func Initialize(engine *gin.Engine) {
 	if IsInitialized() {
 		return
 	}
 
 	initialized = true
-	initMiddleware(restApi)
-	initRoutes(restApi)
+	initMiddleware(engine)
+	initRoutes(engine)
 }
 
 func IsInitialized() bool {
 	return initialized
 }
 
-func RespondId(id interface{}, w rest.ResponseWriter) {
-	w.WriteJson(map[string]interface{}{
-		"_id": id,
-	})
+func RespondId(id interface{}, c *gin.Context) {
+	var i interface{}
+
+	switch t := id.(type) {
+	case JSON:
+		i = JSON{
+			"_id": t["_id"],
+		}
+	default:
+		i = id
+	}
+
+	c.JSON(http.StatusOK, i)
 }

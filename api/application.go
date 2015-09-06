@@ -1,13 +1,11 @@
 package api
 
 import (
-	"github.com/ant0ine/go-json-rest/rest"
-	"gopkg.in/mgo.v2/bson"
-	"errors"
 	"time"
 	"net/http"
-	"github.com/go-neutrino/neutrino-core/core"
+	"github.com/go-neutrino/neutrino-core/db"
 	"github.com/go-neutrino/neutrino-core/utils"
+	"github.com/gin-gonic/gin"
 )
 
 type ApplicationModel struct {
@@ -18,125 +16,89 @@ type ApplicationModel struct {
 type ApplicationController struct {
 }
 
-func (a *ApplicationController) Path() string {
-	return "/applications"
-}
-
-func GetAppFromRequest(r *rest.Request) (map[string]interface{}, error) {
-	appId := r.PathParam("appId")
-
-	if appId != "" {
-		//TODO: cache this
-		appDb := neutrino.NewAppsDbService(r.Env["user"].(string))
-		return appDb.FindId(appId, nil)
-	} else {
-		return nil, errors.New("Invalid app id.")
-	}
-}
-
-func (a *ApplicationController) CreateApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
+func (a *ApplicationController) CreateApplicationHandler(c *gin.Context) {
 	body := &ApplicationModel{}
 
-	if err := r.DecodeJsonPayload(body); err != nil {
-		RestError(w, err)
+	if err := c.Bind(body); err != nil {
+		RestError(c, err)
 		return
 	}
 
 	if body.Name == "" {
-		RestErrorInvalidBody(w)
+		RestErrorInvalidBody(c)
 		return
 	}
 
-	db := neutrino.NewAppsDbService(r.Env["user"].(string))
+	d := db.NewAppsDbService(c.MustGet("user").(string))
 
-	username := r.Env["user"].(string)
-	doc := bson.M{
+	username := c.MustGet("user").(string)
+	doc := JSON{
 		"name": body.Name,
 		"owner": username,
 		"types": []string{"users"},
 		"createdAt": time.Now(),
-		"keys": bson.M{ //TODO:
-			"Master Key": bson.M{
-				"key": utils.GetCleanUUID(),
-				"name": "Master Key",
-				"permissions": bson.M{
-					"types": bson.M{
-						"read": true,
-						"write": true,
-					},
-				},
-			},
-		},
+		"masterKey": utils.GetCleanUUID(),
 	}
 
-	if err := db.Insert(doc); err != nil {
-		RestError(w, err)
+	if err := d.Insert(doc); err != nil {
+		RestError(c, err)
 		return
 	}
 
-	RespondId(doc["_id"], w)
+	RespondId(doc["_id"], c)
 }
 
-func (a *ApplicationController) GetApplicationsHandler(w rest.ResponseWriter, r *rest.Request) {
-	db := neutrino.NewAppsDbService(r.Env["user"].(string))
+func (a *ApplicationController) GetApplicationsHandler(c *gin.Context) {
+	user := c.MustGet("user").(string)
+	d := db.NewAppsDbService(user)
 
-	res, err := db.Find(
-		bson.M{
-			"owner": r.Env["user"],
+	res, err := d.Find(
+		JSON{
+			"owner": user,
 		},
-		bson.M{
+		JSON{
 			"name": 1,
 		},
 	)
 
 	if err != nil {
-		RestError(w, err)
+		RestError(c, err)
 		return
 	}
 
-	w.WriteJson(res)
+	c.JSON(http.StatusOK, res)
 }
 
-func (a *ApplicationController) GetApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
-	app, err := GetAppFromRequest(r)
+func (a *ApplicationController) GetApplicationHandler(c *gin.Context) {
+	app := c.MustGet("app")
+	c.JSON(http.StatusOK, app)
+}
+
+func (a *ApplicationController) DeleteApplicationHandler(c *gin.Context) {
+	appId := c.Param("id")
+
+	d := db.NewAppsDbService(c.MustGet("user").(string))
+	err := d.RemoveId(appId)
 
 	if err != nil {
-		RestError(w, err)
+		RestError(c, err)
 		return
 	}
-
-	w.WriteJson(app)
 }
 
-func (a *ApplicationController) DeleteApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
-	appId := r.PathParam("appId")
+func (a *ApplicationController) UpdateApplicationHandler(c *gin.Context) {
+	appId := c.Param("id")
+	d := db.NewAppsDbService(c.MustGet("user").(string))
+	doc := utils.WhitelistFields([]string{"name"}, utils.GetBody(c))
 
-	db := neutrino.NewAppsDbService(r.Env["user"].(string))
-	err := db.RemoveId(appId)
-
-	if err != nil {
-		RestError(w, err)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-}
-
-func (a *ApplicationController) UpdateApplicationHandler(w rest.ResponseWriter, r *rest.Request) {
-	appId := r.PathParam("appId")
-	db := neutrino.NewAppsDbService(r.Env["user"].(string))
-	doc := utils.WhitelistFields([]string{"name"}, utils.GetBody(r))
-
-	err := db.Update(bson.M{
+	err := d.Update(JSON{
 		"_id": appId,
-	}, bson.M{
+	}, JSON{
 		"$set": doc,
 	})
 
 	if err != nil {
-		RestError(w, err)
+		RestError(c, err)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
 }

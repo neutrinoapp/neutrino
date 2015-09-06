@@ -4,7 +4,7 @@ import (
 	"testing"
 	"net/http"
 	"strings"
-	"github.com/go-neutrino/neutrino-core/core"
+	"github.com/go-neutrino/neutrino-core/db"
 )
 
 func TestRegisterUser(t *testing.T) {

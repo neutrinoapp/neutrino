@@ -2,57 +2,37 @@ package api
 
 import (
 	"net/http"
-	"github.com/ant0ine/go-json-rest/rest"
-	"runtime/debug"
-	"log"
-	"os"
 	"errors"
+	"github.com/gin-gonic/gin"
 )
-
-var falsePositiveStatusCodes map[int]bool
-
-func init() {
-	falsePositiveStatusCodes = map[int]bool{
-		http.StatusNotFound: true,
-	}
+func RestErrorInvalidBody(c *gin.Context) {
+	RestError(c, "invalid request body")
 }
 
-func restError(w rest.ResponseWriter, statusCode int, message string) {
-	w.WriteHeader(statusCode)
-	err := w.WriteJson(map[string]interface{}{
-		"error": message,
-	})
-
-	if err != nil {
-		panic(err)
-	}
-
-	if _, ok := falsePositiveStatusCodes[statusCode]; !ok || os.Getenv("PROD") != "TRUE" {
-		log.Println(message)
-		debug.PrintStack()
-	}
+func RestErrorNotFound(c *gin.Context) {
+	RestError(c, "not found")
 }
 
-func RestErrorInvalidBody(w rest.ResponseWriter) {
-	RestError(w, errors.New("invalid request body"))
-}
-
-func RestErrorNotFound(w rest.ResponseWriter) {
-	RestError(w, errors.New("not found"))
-}
-
-func RestError(w rest.ResponseWriter, e error) {
+func RestError(c *gin.Context, err interface{}) {
 	status := http.StatusInternalServerError
-	errMsg := e.Error()
-	if errMsg == "not found" {
+
+	var msg string
+	switch t := err.(type) {
+	case error:
+		msg = t.Error()
+	case string:
+		msg = t
+	}
+
+	if msg == "not found" {
 		status = http.StatusNotFound
-	} else if errMsg == "invalid request body" {
+	} else if msg == "invalid request body" {
 		status = http.StatusBadRequest
-	} else if errMsg == "ns not found" {
+	} else if msg == "ns not found" {
 		//mongo throws this error when a collection does not exist
 		//but we call drop
 		return
 	}
 
-	restError(w, status, e.Error())
+	c.AbortWithError(status, errors.New(msg))
 }

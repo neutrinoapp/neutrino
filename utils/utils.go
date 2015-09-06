@@ -3,7 +3,7 @@ package utils
 import (
 	"github.com/twinj/uuid"
 	"strings"
-	"github.com/ant0ine/go-json-rest/rest"
+	"github.com/gin-gonic/gin"
 )
 
 func GetUUID() string {
@@ -24,8 +24,8 @@ func WhitelistFields(fields []string, obj map[string]interface{}) map[string]int
 	return result
 }
 
-func GetBody(r *rest.Request) map[string]interface{} {
+func GetBody(c *gin.Context) map[string]interface{} {
 	var res map[string]interface{}
-	r.DecodeJsonPayload(&res)
+	c.Bind(&res)
 	return res
 }

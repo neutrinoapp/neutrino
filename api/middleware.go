@@ -1,66 +1,98 @@
 package api
 
 import (
-	"github.com/ant0ine/go-json-rest/rest"
+	"github.com/gin-gonic/gin"
 	"strings"
 	"gopkg.in/dgrijalva/jwt-go.v2"
+	"github.com/go-neutrino/neutrino-core/db"
 )
 
-type authMiddleware struct {}
-type environmentMiddleware struct {}
-type defaultContentTypeMiddleware struct {
-	contentType string
+func authWithToken(c *gin.Context, userToken string) error {
+	token, err := jwt.Parse(userToken, func(token *jwt.Token) (interface{}, error) {
+		if(jwt.GetSigningMethod("HS256") != token.Method){
+			//TODO: "Invalid signing token algorithm."
+			return nil, nil
+		}
+
+		return []byte(""), nil
+	})
+
+	c.Set("token", token)
+	c.Set("user", token.Claims["user"])
+
+	return err
 }
 
-func (a *authMiddleware) MiddlewareFunc(handler rest.HandlerFunc) rest.HandlerFunc {
-	return func(w rest.ResponseWriter, r *rest.Request) {
-		authHeader := r.Header.Get("Authorization")
+func authWithMaster(c *gin.Context, key string) error {
+	return nil
+}
+
+func authorizeMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.Request.Header.Get("Authorization")
 
 		if authHeader == "" {
-			rest.Error(w, "Not authorized.", 401)
+			//TODO: not authorized
 			return
 		}
 
 		authHeaderParts := strings.SplitN(authHeader, " ", 2)
-		if len(authHeaderParts) != 2 || authHeaderParts[0] != "Bearer" {
-			rest.Error(w, "Not authorized.", 401)
+		if len(authHeaderParts) != 2 {
+			//TODO: not authorized
 			return
 		}
 
-		token, err := jwt.Parse(authHeaderParts[1], func(token *jwt.Token) (interface{}, error) {
-			if(jwt.GetSigningMethod("HS256") != token.Method){
-				rest.Error(w, "Invalid signing token algorithm.", 500)
-				return nil, nil
-			}
+		authType := authHeaderParts[0]
+		authValue := authHeaderParts[1]
 
-			return []byte(""), nil
-		})
-
-		r.Env["token"] = token
-		r.Env["user"] = token.Claims["user"]
+		var err error
+		if authType == "Bearer" {
+			err = authWithToken(c, authValue)
+		} else if authType == "MasterKey" {
+			err = authWithMaster(c, authValue)
+		}
 
 		if err != nil {
-			rest.Error(w, err.Error(), 500)
+			//TODO: err
 			return
 		}
 
-		handler(w, r)
+		c.Next()
 	}
 }
 
-func (e *environmentMiddleware) MiddlewareFunc(handler rest.HandlerFunc) rest.HandlerFunc {
-	return func(w rest.ResponseWriter, r *rest.Request) {
-		handler(w, r)
-	}
-}
-
-func (e *defaultContentTypeMiddleware) MiddlewareFunc(handler rest.HandlerFunc) rest.HandlerFunc {
-	return func(w rest.ResponseWriter, r *rest.Request) {
-		contentTypeHeader := r.Header.Get("Content-Type")
+func defaultContentTypeMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		contentTypeHeader := c.Request.Header.Get("Content-Type")
 		if contentTypeHeader == "" {
-			r.Header.Set("Content-Type", e.contentType)
+			c.Header("Content-Type", "application-json")
 		}
 
-		handler(w, r)
+		c.Next()
+	}
+}
+
+func injectAppMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		appId := c.Param("appId")
+
+		if appId == "" && c.Request.URL.Path == "/application" {
+			appId = c.Param("id")
+		}
+
+		if appId != "" {
+			//TODO: cache this
+			d := db.NewAppsDbService(c.MustGet("user").(string))
+			app, err := d.FindId(appId, nil)
+			if err != nil {
+				RestError(c, err)
+				return
+			}
+
+			c.Set("app", app)
+
+		} else {
+			RestError(c, "Invalid app id.")
+		}
 	}
 }

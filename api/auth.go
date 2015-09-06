@@ -4,10 +4,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/dgrijalva/jwt-go.v2"
 	"time"
-	"github.com/ant0ine/go-json-rest/rest"
+	"github.com/gin-gonic/gin"
 	"net/http"
-	"gopkg.in/mgo.v2/bson"
-	"github.com/go-neutrino/neutrino-core/core"
+	"github.com/go-neutrino/neutrino-core/db"
 )
 
 type UserModel struct {
@@ -19,57 +18,51 @@ type UserModel struct {
 type AuthController struct {
 }
 
-func (a *AuthController) Path() string {
-	return "/auth"
-}
+func registerUser(c *gin.Context, d db.DbService) {
+	var u JSON
 
-func registerUser(w rest.ResponseWriter, r *rest.Request, db neutrino.DbService) {
-	var u bson.M
-
-	if err := r.DecodeJsonPayload(&u); err != nil {
-		RestErrorInvalidBody(w)
+	if err := c.Bind(&u); err != nil {
+		RestErrorInvalidBody(c)
 		return
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u["password"].(string)), 10)
 	if err != nil {
-		RestError(w, err)
+		RestError(c, err)
 		return
 	}
 
-	doc := bson.M{
+	doc := JSON{
 		"_id": u["email"].(string),
 		"password": hashedPassword,
 		"createdAt": time.Now(),
 	}
 
-	if err := db.Insert(doc); err != nil {
-		RestError(w, err)
+	if err := d.Insert(doc); err != nil {
+		RestError(c, err)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
 }
 
-func loginUser(w rest.ResponseWriter, r *rest.Request, db neutrino.DbService) {
-	var u bson.M
+func loginUser(c *gin.Context, d db.DbService) {
+	var u JSON
 
-	if err := r.DecodeJsonPayload(&u); err != nil {
-		RestError(w, err)
+	if err := c.Bind(&u); err != nil {
+		RestError(c, err)
 		return
 	}
 
-	existingUser, err := db.FindId(u["email"].(string), nil)
+	existingUser, err := d.FindId(u["email"].(string), nil)
 
 	if err != nil {
-		RestError(w, err)
+		RestError(c, err)
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword(existingUser["password"].([]byte), []byte(u["password"].(string)))
 
 	if err != nil {
-		RestError(w, err)
+		RestError(c, err)
 		return
 	}
 
@@ -80,25 +73,25 @@ func loginUser(w rest.ResponseWriter, r *rest.Request, db neutrino.DbService) {
 	tokenStr, err := token.SignedString([]byte(""))
 
 	if err != nil {
-		RestError(w, err)
+		RestError(c, err)
 		return
 	}
 
-	w.WriteJson(map[string]string{"token": tokenStr})
+	c.JSON(http.StatusOK, JSON{"token": tokenStr})
 }
 
-func (a *AuthController) RegisterUserHandler (w rest.ResponseWriter, r *rest.Request) {
-	registerUser(w, r, neutrino.NewUsersDbService())
+func (a *AuthController) RegisterUserHandler (c *gin.Context) {
+	registerUser(c, db.NewUsersDbService())
 }
 
-func (a *AuthController) AppRegisterUserHandler (w rest.ResponseWriter, r *rest.Request) {
-	registerUser(w, r, neutrino.NewAppUsersDbService(r.PathParam("appId")))
+func (a *AuthController) AppRegisterUserHandler (c *gin.Context) {
+	registerUser(c, db.NewAppUsersDbService(c.Param("appId")))
 }
 
-func (a *AuthController) LoginUserHandler(w rest.ResponseWriter, r *rest.Request) {
-	loginUser(w, r, neutrino.NewUsersDbService())
+func (a *AuthController) LoginUserHandler(c *gin.Context) {
+	loginUser(c, db.NewUsersDbService())
 }
 
-func (a *AuthController) AppLoginUserHandler(w rest.ResponseWriter, r *rest.Request) {
-	loginUser(w, r, neutrino.NewAppUsersDbService(r.PathParam("appId")))
+func (a *AuthController) AppLoginUserHandler(c *gin.Context) {
+	loginUser(c, db.NewAppUsersDbService(c.Param("appId")))
 }

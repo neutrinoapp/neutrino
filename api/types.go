@@ -1,106 +1,80 @@
 package api
 
 import (
-	"github.com/ant0ine/go-json-rest/rest"
-	"gopkg.in/mgo.v2/bson"
+	"github.com/go-neutrino/neutrino-core/db"
+	"github.com/gin-gonic/gin"
+	"github.com/go-neutrino/neutrino-core/utils"
 	"net/http"
-	"github.com/go-neutrino/neutrino-core/core"
 )
 
 type TypesController struct {
 }
 
-func (t *TypesController) Path() string {
-	return "/types"
-}
-
-func (t *TypesController) CreateTypeHandler(w rest.ResponseWriter, r *rest.Request) {
-	var body map[string]string
-	r.DecodeJsonPayload(&body)
+func (t *TypesController) CreateTypeHandler(c *gin.Context) {
+	body := utils.GetBody(c)
 	typeName := body["name"]
 
-	app, err := GetAppFromRequest(r)
+	app := c.MustGet("app").(JSON)
 
-	if err != nil {
-		RestError(w, err)
-		return
-	}
-
-	appsDb := neutrino.NewAppsDbService(r.Env["user"].(string))
-	appsDb.UpdateId(app["_id"],
-		bson.M{
-			"$push": bson.M{
+	d := db.NewAppsDbService(c.MustGet("user").(string))
+	d.UpdateId(app["_id"],
+		JSON{
+			"$push": JSON{
 				"types": typeName,
 			},
 		},
 	)
-
-	w.WriteHeader(http.StatusOK)
 }
 
-func (t * TypesController) DeleteType(w rest.ResponseWriter, r *rest.Request) {
-	appId := r.PathParam("appId")
-	typeName := r.PathParam("typeName")
+func (t * TypesController) DeleteType(c *gin.Context) {
+	appId := c.Param("appId")
+	typeName := c.Param("typeName")
 
-	app, err := GetAppFromRequest(r)
+	app := c.MustGet("app").(JSON)
 
-	if err != nil {
-		RestError(w, err)
-		return
-	}
-
-	appsDb := neutrino.NewAppsDbService(r.Env["user"].(string))
-	appsDb.UpdateId(app["_id"],
-		bson.M{
-			"$pull": bson.M{
+	d := db.NewAppsDbService(c.MustGet("user").(string))
+	d.UpdateId(app["_id"],
+		JSON{
+			"$pull": JSON{
 				"types": typeName,
 			},
 		},
 	)
 
-	db := neutrino.NewTypeDbService(appId, typeName)
-	session, collection := db.GetCollection()
+	database := db.NewTypeDbService(appId, typeName)
+	session, collection := database.GetCollection()
 	defer session.Close()
 
 	dropError := collection.DropCollection()
 
 	if dropError != nil {
-		RestError(w, dropError)
+		RestError(c, dropError)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
 }
 
-func (t *TypesController) InsertInTypeHandler(w rest.ResponseWriter, r *rest.Request) {
-	appId := r.PathParam("appId")
-	typeName := r.PathParam("typeName")
-	var body map[string]interface{}
-	r.DecodeJsonPayload(&body)
+func (t *TypesController) InsertInTypeHandler(c *gin.Context) {
+	appId := c.Param("appId")
+	typeName := c.Param("typeName")
+	body := utils.GetBody(c)
 
-	db := neutrino.NewTypeDbService(appId, typeName)
-	err := db.Insert(body)
+	d := db.NewTypeDbService(appId, typeName)
+	err := d.Insert(body)
 
 	if err != nil {
-		RestError(w, err)
+		RestError(c, err)
 		return
 	}
 
-	RespondId(body["_id"], w)
+	RespondId(body["_id"], c)
 }
 
-func (t *TypesController) GetTypeDataHandler(w rest.ResponseWriter, r *rest.Request) {
-	appId := r.PathParam("appId")
-	typeName := r.PathParam("typeName")
+func (t *TypesController) GetTypeDataHandler(c *gin.Context) {
+	appId := c.Param("appId")
+	typeName := c.Param("typeName")
 
-	app, appErr := GetAppFromRequest(r)
-	if appErr != nil {
-		RestError(w, appErr)
-		return
-	}
-
+	app := c.MustGet("app").(JSON)
 	types := app["types"].([]interface{})
-
 	found := false
 
 	for _, t := range types {
@@ -111,72 +85,66 @@ func (t *TypesController) GetTypeDataHandler(w rest.ResponseWriter, r *rest.Requ
 	}
 
 	if !found {
-		RestErrorNotFound(w)
+		RestErrorNotFound(c)
 		return
 	}
 
-	db := neutrino.NewTypeDbService(appId, typeName)
+	d := db.NewTypeDbService(appId, typeName)
 
-	typeData, err := db.Find(nil, nil)
+	typeData, err := d.Find(nil, nil)
 
 	if err != nil {
-		RestError(w, err)
+		RestError(c, err)
 		return
 	}
 
-	w.WriteJson(typeData)
+	c.JSON(http.StatusOK, typeData)
 }
 
-func (t *TypesController) GetTypeItemById(w rest.ResponseWriter, r *rest.Request) {
-	appId := r.PathParam("appId")
-	typeName := r.PathParam("typeName")
-	itemId := r.PathParam("itemId")
+func (t *TypesController) GetTypeItemById(c *gin.Context) {
+	appId := c.Param("appId")
+	typeName := c.Param("typeName")
+	itemId := c.Param("itemId")
 
-	db := neutrino.NewTypeDbService(appId, typeName)
+	d := db.NewTypeDbService(appId, typeName)
 
-	item, err := db.FindId(itemId, nil)
+	item, err := d.FindId(itemId, nil)
 
 	if (err != nil) {
-		RestError(w, err)
+		RestError(c, err)
 		return
 	}
 
-	w.WriteJson(item)
+	c.JSON(http.StatusOK, item)
 }
 
-func (t *TypesController) UpdateTypeItemById(w rest.ResponseWriter, r *rest.Request) {
-	appId := r.PathParam("appId")
-	typeName := r.PathParam("typeName")
-	itemId := r.PathParam("itemId")
+func (t *TypesController) UpdateTypeItemById(c *gin.Context) {
+	appId := c.Param("appId")
+	typeName := c.Param("typeName")
+	itemId := c.Param("itemId")
 
-	db := neutrino.NewTypeDbService(appId, typeName)
+	d := db.NewTypeDbService(appId, typeName)
+	body := utils.GetBody(c)
 
-	var body bson.M
-	r.DecodeJsonPayload(&body)
-
-	err := db.UpdateId(itemId, body)
+	err := d.UpdateId(itemId, body)
 
 	if err != nil {
-		RestError(w, err)
+		RestError(c, err)
 		return
 	}
-
-	w.WriteHeader(200)
 }
 
-func (t *TypesController) DeleteTypeItemById(w rest.ResponseWriter, r *rest.Request) {
-	appId := r.PathParam("appId")
-	typeName := r.PathParam("typeName")
-	itemId := r.PathParam("itemId")
+func (t *TypesController) DeleteTypeItemById(c *gin.Context) {
+	appId := c.Param("appId")
+	typeName := c.Param("typeName")
+	itemId := c.Param("itemId")
 
-	db := neutrino.NewTypeDbService(appId, typeName)
+	d := db.NewTypeDbService(appId, typeName)
 
-	err := db.RemoveId(itemId)
+	err := d.RemoveId(itemId)
 
 	if err != nil {
-		RestError(w, err)
+		RestError(c, err)
 		return
 	}
-
-	w.WriteHeader(200)
 }
