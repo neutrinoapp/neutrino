@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 )
+
 func RestErrorInvalidBody(c *gin.Context) {
 	RestError(c, "invalid request body")
 }
@@ -34,5 +35,9 @@ func RestError(c *gin.Context, err interface{}) {
 		return
 	}
 
-	c.AbortWithError(status, errors.New(msg))
+	c.Error(errors.New(msg))
+
+	c.JSON(status, JSON{
+		"error": msg,
+	})
 }

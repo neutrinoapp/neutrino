@@ -4,6 +4,7 @@ import (
 	"github.com/twinj/uuid"
 	"strings"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 func GetUUID() string {
@@ -28,4 +29,8 @@ func GetBody(c *gin.Context) map[string]interface{} {
 	var res map[string]interface{}
 	c.Bind(&res)
 	return res
+}
+
+func OK(c *gin.Context) {
+	c.String(http.StatusOK, "")
 }

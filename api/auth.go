@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"github.com/go-neutrino/neutrino-core/db"
+"github.com/go-neutrino/neutrino-core/utils"
 )
 
 type UserModel struct {
@@ -42,6 +43,8 @@ func registerUser(c *gin.Context, d db.DbService) {
 		RestError(c, err)
 		return
 	}
+
+	utils.OK(c)
 }
 
 func loginUser(c *gin.Context, d db.DbService) {
@@ -77,7 +80,9 @@ func loginUser(c *gin.Context, d db.DbService) {
 		return
 	}
 
-	c.JSON(http.StatusOK, JSON{"token": tokenStr})
+	c.JSON(http.StatusOK, JSON{
+		"token": tokenStr,
+	})
 }
 
 func (a *AuthController) RegisterUserHandler (c *gin.Context) {

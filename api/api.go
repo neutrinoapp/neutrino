@@ -21,12 +21,12 @@ func initRoutes(e *gin.Engine) {
 		v1.POST("/login", authController.LoginUserHandler)
 		v1.POST("/register", authController.RegisterUserHandler)
 
-		appGroup := v1.Group("/app", authorizeMiddleware(), injectAppMiddleware())
+		appGroup := v1.Group("/app", authorizeMiddleware())
 		{
 			appGroup.POST("/", appController.CreateApplicationHandler)
 			appGroup.GET("/", appController.GetApplicationsHandler)
 
-			appIdGroup := appGroup.Group("/:appId")
+			appIdGroup := appGroup.Group("/:appId", injectAppMiddleware())
 			{
 				appIdGroup.GET("/", appController.GetApplicationHandler)
 				appIdGroup.DELETE("/", appController.DeleteApplicationHandler)
@@ -65,15 +65,13 @@ func IsInitialized() bool {
 }
 
 func RespondId(id interface{}, c *gin.Context) {
-	var i interface{}
+	i := JSON{}
 
 	switch t := id.(type) {
 	case JSON:
-		i = JSON{
-			"_id": t["_id"],
-		}
+		i["_id"] =  t["_id"]
 	default:
-		i = id
+		i["_id"] =  t
 	}
 
 	c.JSON(http.StatusOK, i)
