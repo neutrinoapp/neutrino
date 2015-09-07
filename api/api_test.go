@@ -1,13 +1,14 @@
 package api
 
 import (
-	"github.com/ant0ine/go-json-rest/rest"
-	"github.com/ant0ine/go-json-rest/rest/test"
+	"github.com/gin-gonic/gin"
 	"testing"
 	"net/http"
 	"math/rand"
 	"time"
 	"strconv"
+	"net/http/httptest"
+	"strings"
 )
 
 var (
@@ -16,25 +17,48 @@ var (
 	token string
 )
 
-func sendAuthenticatedRequest(method, path string, body interface{}, t *testing.T) *test.Recorded {
+type ResRecorder struct {
+	rec *httptest.ResponseRecorder
+	t *testing.T
+}
+
+func (r *ResRecorder) CodeIs(s int) {
+	if r.rec.Code != s {
+		r.t.Error(r.rec.Code, "is different from", s)
+	}
+}
+
+func (r *ResRecorder) B() string {
+	return r.rec.Body.String()
+}
+
+func (r *ResRecorder) BHas(str string) {
+	if !strings.Contains(r.B(), str) {
+		r.t.Error(r.B(), "does not contain", str)
+	}
+}
+
+func sendAuthenticatedRequest(method, path string, body interface{}, t *testing.T) *ResRecorder {
 	login(t)
 	return sendRequest(method, path, body, t)
 }
 
-func sendRequest(method, path string, body interface{}, t *testing.T) *test.Recorded {
+func sendRequest(method, path string, body interface{}, t *testing.T) *ResRecorder {
 	if !IsInitialized() {
-		restApi := rest.NewApi()
-		Initialize(restApi)
-		apiHandler = restApi.MakeHandler()
+		e := gin.Default()
+		apiHandler = e
+		Initialize(e)
+		httptest.NewServer(e)
 	}
 
-	req := test.MakeSimpleRequest(method, "http://localhost" + path, body)
-
-	if token != "" {
-		req.Header.Add("Authorization", "Bearer " + token)
+	req, err := http.NewRequest(method, "http://localhost" + path, nil)
+	if err {
+		panic(err)
 	}
 
-	return test.RunRequest(t, apiHandler, req)
+	w := httptest.NewRecorder()
+	apiHandler.ServeHTTP(req, w)
+	return &ResRecorder{w, t}
 }
 
 func randomString() string {
