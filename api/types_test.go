@@ -18,8 +18,7 @@ func setupTypeTests(t *testing.T) (map[string]interface{}, *ApplicationModel, st
 	getRec := sendAuthenticatedRequest("GET", "/applications/" + app.Id, nil, t)
 	getRec.CodeIs(200)
 
-	var createdApp map[string]interface{}
-	getRec.DecodeJsonPayload(&createdApp)
+	createdApp := getRec.BObj()
 
 	return createdApp, app, typeName
 }
@@ -44,8 +43,7 @@ func TestDeleteType(t *testing.T) {
 	getReq.CodeIs(404)
 
 	appReq := sendAuthenticatedRequest("GET", "/applications/" + app.Id, nil, t)
-	var updatedApp map[string]interface{}
-	appReq.DecodeJsonPayload(&updatedApp)
+	updatedApp := appReq.BObj()
 
 	types := updatedApp["types"].([]interface{})
 
@@ -66,7 +64,7 @@ func TestGetAndInsertTypeData(t *testing.T) {
 	getRec.CodeIs(200)
 
 	var data []map[string]interface{}
-	getRec.DecodeJsonPayload(&data)
+	getRec.Decode(&data)
 
 	record := data[0]
 
@@ -83,13 +81,11 @@ func TestGetByIdTypeData(t *testing.T) {
 		"field2": "test",
 	}, t)
 
-	var res map[string]interface{}
-	rec.DecodeJsonPayload(&res)
+	res := rec.BObj()
 	id := res["_id"].(string)
 
 	rec1 := sendAuthenticatedRequest("GET", "/" + app.Id + "/types/" + typeName + "/" + id, nil, t)
-	var item map[string]interface{}
-	rec1.DecodeJsonPayload(&item)
+	item := rec1.BObj()
 
 	if item["field1"] != "test" || item["field2"] != "test" {
 		t.Error("Item not written correctly")
@@ -105,8 +101,7 @@ func TestUpdateTypeItemById(t *testing.T) {
 	}, t)
 	rec.CodeIs(200)
 
-	var res map[string]interface{}
-	rec.DecodeJsonPayload(&res)
+	res := rec.BObj()
 	id := res["_id"].(string)
 
 
@@ -116,8 +111,7 @@ func TestUpdateTypeItemById(t *testing.T) {
 	}, t)
 
 	rec1 := sendAuthenticatedRequest("GET", "/" + app.Id + "/types/" + typeName + "/" + id, nil, t)
-	var item map[string]interface{}
-	rec1.DecodeJsonPayload(&item)
+	item := rec1.BObj()
 
 	if item["field1"] != "testupdated" || item["field2"] != "testupdated" {
 		t.Fatal("Item not updated correctly")
@@ -133,8 +127,7 @@ func TestDeleteTypeItemById(t *testing.T) {
 	}, t)
 	rec.CodeIs(200)
 
-	var res map[string]interface{}
-	rec.DecodeJsonPayload(&res)
+	res := rec.BObj()
 	id := res["_id"].(string)
 
 	sendAuthenticatedRequest("DELETE", "/" + app.Id + "/types/" + typeName + "/" + id, nil, t)

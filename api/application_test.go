@@ -9,12 +9,10 @@ func createApp(t *testing.T) *ApplicationModel {
 		Name: randomString(),
 	}
 
-	rec := sendAuthenticatedRequest("POST", "/applications", app, t)
+	rec := sendAuthenticatedRequest("POST", "/app/", app, t)
 	rec.CodeIs(200)
 
-	var res map[string]interface{}
-	rec.DecodeJsonPayload(&res)
-
+	res := rec.BObj()
 	app.Id = res["_id"].(string)
 
 	return app
@@ -23,12 +21,11 @@ func createApp(t *testing.T) *ApplicationModel {
 func TestCreateAndGetApplication(t *testing.T) {
 	app := createApp(t)
 
-	getRec := sendAuthenticatedRequest("GET", "/applications", nil, t)
+	getRec := sendAuthenticatedRequest("GET", "/app/", nil, t)
 	getRec.CodeIs(200)
 
 	var result []*ApplicationModel
-	getRec.DecodeJsonPayload(&result)
-
+	getRec.Decode(&result)
 
 	if len(result) == 0 {
 		t.Error("Application not created")
@@ -42,14 +39,13 @@ func TestCreateAndGetApplication(t *testing.T) {
 func TestDeleteApplication(t *testing.T) {
 	app := createApp(t);
 
-	delRec := sendAuthenticatedRequest("DELETE", "/applications/" + app.Id, nil, t)
+	delRec := sendAuthenticatedRequest("DELETE", "/app/" + app.Id, nil, t)
 	delRec.CodeIs(200)
 
-	getRec := sendAuthenticatedRequest("GET", "/applications/" + app.Id, nil, t)
+	getRec := sendAuthenticatedRequest("GET", "/app/" + app.Id, nil, t)
 	getRec.CodeIs(404)
 
-	var result map[string]interface{}
-	getRec.DecodeJsonPayload(&result)
+	result := getRec.BObj()
 
 	err := result["error"]
 
@@ -62,16 +58,15 @@ func TestUpdateApplication(t *testing.T) {
 	app := createApp(t);
 
 	randomName := randomString() + "updated!"
-	putRec := sendAuthenticatedRequest("PUT", "/applications/" + app.Id, map[string]interface{}{
+	putRec := sendAuthenticatedRequest("PUT", "/app/" + app.Id, map[string]interface{}{
 		"name": randomName,
 	}, t)
 	putRec.CodeIs(200)
 
-	getRec := sendAuthenticatedRequest("GET", "/applications/" + app.Id, nil, t)
+	getRec := sendAuthenticatedRequest("GET", "/app/" + app.Id, nil, t)
 	getRec.CodeIs(200)
 
-	var result map[string]interface{}
-	getRec.DecodeJsonPayload(&result)
+	result := getRec.BObj()
 
 	res := result["name"]
 

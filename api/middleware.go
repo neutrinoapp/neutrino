@@ -65,7 +65,7 @@ func defaultContentTypeMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		contentTypeHeader := c.Request.Header.Get("Content-Type")
 		if contentTypeHeader == "" {
-			c.Header("Content-Type", "application-json")
+			c.Request.Header.Set("Content-Type", "application/json")
 		}
 
 		c.Next()

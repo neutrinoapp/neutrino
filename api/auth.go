@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"github.com/go-neutrino/neutrino-core/db"
-"github.com/go-neutrino/neutrino-core/utils"
+	"github.com/go-neutrino/neutrino-core/utils"
 )
 
 type UserModel struct {

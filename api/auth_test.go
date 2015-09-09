@@ -10,7 +10,7 @@ import (
 func TestRegisterUser(t *testing.T) {
 	body := register(t)
 
-	res, err := neutrino.NewUsersDbService().FindId(body["email"], nil)
+	res, err := db.NewUsersDbService().FindId(body["email"], nil)
 
 	if res == nil || err != nil {
 		t.Fatal("User not created correctly", res, err);
@@ -23,7 +23,7 @@ func TestLoginUser(t *testing.T) {
 	rec := sendRequest("POST", "/auth", body, t)
 	rec.CodeIs(http.StatusOK)
 
-	bodyStr := rec.Recorder.Body.String()
+	bodyStr := rec.B()
 
 	contains := strings.Contains(bodyStr, "token")
 
@@ -42,7 +42,7 @@ func TestAppRegisterUser(t *testing.T) {
 	r := sendAuthenticatedRequest("PUT", "/" + app.Id + "/auth", b, t)
 	r.CodeIs(200)
 
-	res, err := neutrino.NewAppUsersDbService(app.Id).FindId(b["email"], nil)
+	res, err := db.NewAppUsersDbService(app.Id).FindId(b["email"], nil)
 
 	if res == nil || err != nil {
 		t.Fatal("User not created correctly", res, err);
@@ -65,8 +65,7 @@ func TestAppLoginUser(t *testing.T) {
 	}, t)
 	rec.CodeIs(200)
 
-	var res map[string]interface{}
-	rec.DecodeJsonPayload(&res)
+	res := rec.BObj()
 
 	token := res["token"].(string)
 

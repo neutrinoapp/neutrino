@@ -9,6 +9,9 @@ import (
 	"strconv"
 	"net/http/httptest"
 	"strings"
+	"io/ioutil"
+	"encoding/json"
+	"fmt"
 )
 
 var (
@@ -18,24 +21,36 @@ var (
 )
 
 type ResRecorder struct {
-	rec *httptest.ResponseRecorder
+	*httptest.ResponseRecorder
 	t *testing.T
 }
 
 func (r *ResRecorder) CodeIs(s int) {
-	if r.rec.Code != s {
-		r.t.Error(r.rec.Code, "is different from", s)
+	if r.Code != s {
+		r.t.Error(r.Code, "is different from", s)
 	}
 }
 
 func (r *ResRecorder) B() string {
-	return r.rec.Body.String()
+	return r.Body.String()
 }
 
 func (r *ResRecorder) BHas(str string) {
 	if !strings.Contains(r.B(), str) {
 		r.t.Error(r.B(), "does not contain", str)
 	}
+}
+
+func (r *ResRecorder) BObj() JSON {
+	b, _ := ioutil.ReadAll(r.Body)
+	var res JSON
+	json.Unmarshal(b, &res)
+	return res
+}
+
+func (r *ResRecorder) Decode(o interface{}) {
+	b, _ := ioutil.ReadAll(r.Body)
+	json.Unmarshal(b, o)
 }
 
 func sendAuthenticatedRequest(method, path string, body interface{}, t *testing.T) *ResRecorder {
@@ -51,13 +66,23 @@ func sendRequest(method, path string, body interface{}, t *testing.T) *ResRecord
 		httptest.NewServer(e)
 	}
 
-	req, err := http.NewRequest(method, "http://localhost" + path, nil)
-	if err {
+	var b string
+	if body != nil {
+		bodyStr, err := json.Marshal(body)
+		if err != nil {
+			panic(err)
+		}
+
+		b = fmt.Sprintf("%s", bodyStr)
+	}
+
+	req, err := http.NewRequest(method, "/v1" + path, strings.NewReader(b))
+	if err != nil {
 		panic(err)
 	}
 
 	w := httptest.NewRecorder()
-	apiHandler.ServeHTTP(req, w)
+	apiHandler.ServeHTTP(w, req)
 	return &ResRecorder{w, t}
 }
 
@@ -68,12 +93,12 @@ func randomString() string {
 }
 
 func register(t *testing.T) map[string]interface{} {
-	b := map[string]interface{}{
+	b := JSON{
 		"email": randomString() + "@gmail.com",
 		"password": "pass",
 	}
 
-	rec := sendRequest("PUT", "/auth", b, t)
+	rec := sendRequest("POST", "/register", b, t)
 
 	rec.CodeIs(http.StatusOK)
 
@@ -83,13 +108,12 @@ func register(t *testing.T) map[string]interface{} {
 func login(t *testing.T) (*UserModel, string) {
 	if token == "" {
 		user = register(t)
-		rec := sendRequest("POST", "/auth", map[string]interface{}{
+		rec := sendRequest("POST", "/login", JSON{
 			"email": user["email"],
 			"password": user["password"],
 		}, t)
 
-		var response map[string]interface{}
-		rec.DecodeJsonPayload(&response)
+		response := rec.BObj()
 		token = response["token"].(string)
 	}
 
