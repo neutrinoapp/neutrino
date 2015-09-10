@@ -29,6 +29,7 @@ func authWithMaster(c *gin.Context, key string) error {
 
 func authorizeMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+
 		authHeader := c.Request.Header.Get("Authorization")
 
 		if authHeader == "" {
@@ -75,10 +76,6 @@ func defaultContentTypeMiddleware() gin.HandlerFunc {
 func injectAppMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		appId := c.Param("appId")
-
-		if appId == "" && c.Request.URL.Path == "/application" {
-			appId = c.Param("id")
-		}
 
 		if appId != "" {
 			//TODO: cache this

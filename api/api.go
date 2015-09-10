@@ -50,14 +50,14 @@ func initRoutes(e *gin.Engine) {
 	}
 }
 
-func Initialize(engine *gin.Engine) {
+func Initialize(e *gin.Engine) {
 	if IsInitialized() {
 		return
 	}
 
 	initialized = true
-	initMiddleware(engine)
-	initRoutes(engine)
+	initMiddleware(e)
+	initRoutes(e)
 }
 
 func IsInitialized() bool {

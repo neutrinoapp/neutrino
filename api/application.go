@@ -75,7 +75,7 @@ func (a *ApplicationController) GetApplicationHandler(c *gin.Context) {
 }
 
 func (a *ApplicationController) DeleteApplicationHandler(c *gin.Context) {
-	appId := c.Param("id")
+	appId := c.MustGet("app").(JSON)["_id"]
 
 	d := db.NewAppsDbService(c.MustGet("user").(string))
 	err := d.RemoveId(appId)
@@ -87,7 +87,7 @@ func (a *ApplicationController) DeleteApplicationHandler(c *gin.Context) {
 }
 
 func (a *ApplicationController) UpdateApplicationHandler(c *gin.Context) {
-	appId := c.Param("id")
+	appId := c.MustGet("app").(JSON)["_id"]
 	d := db.NewAppsDbService(c.MustGet("user").(string))
 	doc := utils.WhitelistFields([]string{"name"}, utils.GetBody(c))
 

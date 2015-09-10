@@ -64,6 +64,31 @@ func sendRequest(method, path string, body interface{}, t *testing.T) *ResRecord
 		apiHandler = e
 		Initialize(e)
 		httptest.NewServer(e)
+
+		e.Use(func() gin.HandlerFunc {
+			return func(c *gin.Context) {
+				fmt.Println("###")
+				fmt.Println("URL: -> " + c.Request.URL.String())
+				fmt.Println("Method: -> " + c.Request.Method)
+
+				fmt.Println("Headers: ->")
+				for k := range c.Request.Header {
+					fmt.Println(c.Request.Header[k])
+				}
+				fmt.Println("<-")
+
+				if user, exists := c.Get("user"); exists {
+					fmt.Println("User: -> ", user)
+				}
+
+				b, _ := ioutil.ReadAll(c.Request.Body)
+				fmt.Println("Body: -> ", b)
+
+				fmt.Println("### -->>")
+
+				c.Next()
+			}
+		}())
 	}
 
 	var b string
@@ -77,6 +102,8 @@ func sendRequest(method, path string, body interface{}, t *testing.T) *ResRecord
 	}
 
 	req, err := http.NewRequest(method, "/v1" + path, strings.NewReader(b))
+	req.Header.Set("Authorization", "Bearer " + token)
+
 	if err != nil {
 		panic(err)
 	}

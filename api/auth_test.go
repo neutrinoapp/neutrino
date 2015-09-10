@@ -20,7 +20,7 @@ func TestRegisterUser(t *testing.T) {
 func TestLoginUser(t *testing.T) {
 	body := register(t)
 
-	rec := sendRequest("POST", "/auth", body, t)
+	rec := sendRequest("POST", "/login", body, t)
 	rec.CodeIs(http.StatusOK)
 
 	bodyStr := rec.B()
@@ -39,7 +39,7 @@ func TestAppRegisterUser(t *testing.T) {
 		"password": "pass",
 	}
 
-	r := sendAuthenticatedRequest("PUT", "/" + app.Id + "/auth", b, t)
+	r := sendAuthenticatedRequest("POST", "/" + app.Id + "/register", b, t)
 	r.CodeIs(200)
 
 	res, err := db.NewAppUsersDbService(app.Id).FindId(b["email"], nil)
@@ -54,12 +54,12 @@ func TestAppLoginUser(t *testing.T) {
 	email := randomString() + "@gmail.com"
 	password := "pass"
 
-	sendAuthenticatedRequest("PUT", "/" + app.Id + "/auth", map[string]interface{}{
+	sendAuthenticatedRequest("POST", "/" + app.Id + "/register", map[string]interface{}{
 		"email": email,
 		"password": password,
 	}, t)
 
-	rec := sendAuthenticatedRequest("POST", "/" + app.Id + "/auth", map[string]interface{}{
+	rec := sendAuthenticatedRequest("POST", "/" + app.Id + "/login", map[string]interface{}{
 		"email": email,
 		"password": "pass",
 	}, t)
