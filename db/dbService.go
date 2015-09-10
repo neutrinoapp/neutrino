@@ -27,7 +27,7 @@ type dbService struct {
 }
 
 func NewDbService(dbName, colName string, index mgo.Index) DbService {
-	connectionString := GetConfig().GetConnectionString()
+	connectionString := config["mongoHost"].(string)
 	d := dbService{connectionString, dbName, colName, index}
 	return &d
 }

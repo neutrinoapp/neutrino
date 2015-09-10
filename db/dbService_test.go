@@ -13,7 +13,9 @@ var (
 )
 
 func init() {
-	Initialize(defaultConnectionString)
+	Initialize(map[string]interface{}{
+		"mongoHost": defaultConnectionString,
+	})
 }
 
 func getDefaultDbService() DbService {

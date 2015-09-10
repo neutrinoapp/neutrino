@@ -6,6 +6,7 @@ import (
 )
 
 var initialized bool
+var config map[string]interface{}
 
 func initMiddleware(e *gin.Engine) {
 	e.Use(defaultContentTypeMiddleware())
@@ -50,12 +51,14 @@ func initRoutes(e *gin.Engine) {
 	}
 }
 
-func Initialize(e *gin.Engine) {
+func Initialize(e *gin.Engine, c map[string]interface{}) {
 	if IsInitialized() {
 		return
 	}
 
 	initialized = true
+	config = c
+
 	initMiddleware(e)
 	initRoutes(e)
 }
