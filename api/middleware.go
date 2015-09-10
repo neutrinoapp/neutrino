@@ -82,7 +82,7 @@ func injectAppMiddleware() gin.HandlerFunc {
 			d := db.NewAppsDbService(c.MustGet("user").(string))
 			app, err := d.FindId(appId, nil)
 			if err != nil {
-				RestError(c, err)
+				RestErrorAppNotFound(c)
 				return
 			}
 

@@ -8,14 +8,14 @@ func setupTypeTests(t *testing.T) (map[string]interface{}, *ApplicationModel, st
 	typeName := randomString()
 	app := createApp(t)
 
-	createTypeRec := sendAuthenticatedRequest("POST", "/" + app.Id + "/types",
+	createTypeRec := sendAuthenticatedRequest("POST", "/app/" + app.Id + "/data",
 		map[string]interface{}{
 			"name": typeName,
 		}, t)
 
 	createTypeRec.CodeIs(200)
 
-	getRec := sendAuthenticatedRequest("GET", "/applications/" + app.Id, nil, t)
+	getRec := sendAuthenticatedRequest("GET", "/app/" + app.Id, nil, t)
 	getRec.CodeIs(200)
 
 	createdApp := getRec.BObj()
@@ -36,13 +36,13 @@ func TestCreateType(t *testing.T) {
 func TestDeleteType(t *testing.T) {
 	_, app, typeName := setupTypeTests(t)
 
-	deleteReq := sendAuthenticatedRequest("DELETE", "/" + app.Id + "/types/" + typeName, nil, t)
+	deleteReq := sendAuthenticatedRequest("DELETE", "/app/" + app.Id + "/data/" + typeName, nil, t)
 	deleteReq.CodeIs(200)
 
-	getReq := sendAuthenticatedRequest("GET", "/" + app.Id + "/types/" + typeName, nil, t)
+	getReq := sendAuthenticatedRequest("GET", "/app/" + app.Id + "/data/" + typeName, nil, t)
 	getReq.CodeIs(404)
 
-	appReq := sendAuthenticatedRequest("GET", "/applications/" + app.Id, nil, t)
+	appReq := sendAuthenticatedRequest("GET", "/app/" + app.Id, nil, t)
 	updatedApp := appReq.BObj()
 
 	types := updatedApp["types"].([]interface{})
@@ -55,12 +55,12 @@ func TestDeleteType(t *testing.T) {
 func TestGetAndInsertTypeData(t *testing.T) {
 	_, app, typeName := setupTypeTests(t)
 
-	sendAuthenticatedRequest("POST", "/" + app.Id + "/types/" + typeName, map[string]interface{}{
+	sendAuthenticatedRequest("POST", "/app/" + app.Id + "/data/" + typeName, map[string]interface{}{
 		"field1": "test",
 		"field2": "test",
 	}, t)
 
-	getRec := sendAuthenticatedRequest("GET", "/" + app.Id + "/types/" + typeName, nil, t)
+	getRec := sendAuthenticatedRequest("GET", "/app/" + app.Id + "/data/" + typeName, nil, t)
 	getRec.CodeIs(200)
 
 	var data []map[string]interface{}
@@ -76,7 +76,7 @@ func TestGetAndInsertTypeData(t *testing.T) {
 func TestGetByIdTypeData(t *testing.T) {
 	_, app, typeName := setupTypeTests(t)
 
-	rec := sendAuthenticatedRequest("POST", "/" + app.Id + "/types/" + typeName, map[string]interface{}{
+	rec := sendAuthenticatedRequest("POST", "/app/" + app.Id + "/data/" + typeName, map[string]interface{}{
 		"field1": "test",
 		"field2": "test",
 	}, t)
@@ -84,7 +84,7 @@ func TestGetByIdTypeData(t *testing.T) {
 	res := rec.BObj()
 	id := res["_id"].(string)
 
-	rec1 := sendAuthenticatedRequest("GET", "/" + app.Id + "/types/" + typeName + "/" + id, nil, t)
+	rec1 := sendAuthenticatedRequest("GET", "/app/" + app.Id + "/data/" + typeName + "/" + id, nil, t)
 	item := rec1.BObj()
 
 	if item["field1"] != "test" || item["field2"] != "test" {
@@ -95,7 +95,7 @@ func TestGetByIdTypeData(t *testing.T) {
 func TestUpdateTypeItemById(t *testing.T) {
 	_, app, typeName := setupTypeTests(t)
 
-	rec := sendAuthenticatedRequest("POST", "/" + app.Id + "/types/" + typeName, map[string]interface{}{
+	rec := sendAuthenticatedRequest("POST", "/app/" + app.Id + "/data/" + typeName, map[string]interface{}{
 		"field1": "test",
 		"field2": "test",
 	}, t)
@@ -105,12 +105,12 @@ func TestUpdateTypeItemById(t *testing.T) {
 	id := res["_id"].(string)
 
 
-	sendAuthenticatedRequest("PUT", "/" + app.Id + "/types/" + typeName + "/" + id, map[string]interface{}{
+	sendAuthenticatedRequest("PUT", "/app/" + app.Id + "/data/" + typeName + "/" + id, map[string]interface{}{
 		"field1": "testupdated",
 		"field2": "testupdated",
 	}, t)
 
-	rec1 := sendAuthenticatedRequest("GET", "/" + app.Id + "/types/" + typeName + "/" + id, nil, t)
+	rec1 := sendAuthenticatedRequest("GET", "/app/" + app.Id + "/data/" + typeName + "/" + id, nil, t)
 	item := rec1.BObj()
 
 	if item["field1"] != "testupdated" || item["field2"] != "testupdated" {
@@ -121,7 +121,7 @@ func TestUpdateTypeItemById(t *testing.T) {
 func TestDeleteTypeItemById(t *testing.T) {
 	_, app, typeName := setupTypeTests(t)
 
-	rec := sendAuthenticatedRequest("POST", "/" + app.Id + "/types/" + typeName, map[string]interface{}{
+	rec := sendAuthenticatedRequest("POST", "/app/" + app.Id + "/data/" + typeName, map[string]interface{}{
 		"field1": "test",
 		"field2": "test",
 	}, t)
@@ -130,8 +130,8 @@ func TestDeleteTypeItemById(t *testing.T) {
 	res := rec.BObj()
 	id := res["_id"].(string)
 
-	sendAuthenticatedRequest("DELETE", "/" + app.Id + "/types/" + typeName + "/" + id, nil, t)
+	sendAuthenticatedRequest("DELETE", "/app/" + app.Id + "/data/" + typeName + "/" + id, nil, t)
 
-	rec1 := sendAuthenticatedRequest("GET", "/" + app.Id + "/types/" + typeName + "/" + id, nil, t)
+	rec1 := sendAuthenticatedRequest("GET", "/app/" + app.Id + "/data/" + typeName + "/" + id, nil, t)
 	rec1.CodeIs(404)
 }

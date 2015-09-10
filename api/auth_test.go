@@ -34,12 +34,12 @@ func TestLoginUser(t *testing.T) {
 
 func TestAppRegisterUser(t *testing.T) {
 	app := createApp(t)
-	b := map[string]interface{}{
+	b := JSON{
 		"email": randomString() + "@gmail.com",
 		"password": "pass",
 	}
 
-	r := sendAuthenticatedRequest("POST", "/" + app.Id + "/register", b, t)
+	r := sendAuthenticatedRequest("POST", "/app/" + app.Id + "/register", b, t)
 	r.CodeIs(200)
 
 	res, err := db.NewAppUsersDbService(app.Id).FindId(b["email"], nil)
@@ -54,12 +54,12 @@ func TestAppLoginUser(t *testing.T) {
 	email := randomString() + "@gmail.com"
 	password := "pass"
 
-	sendAuthenticatedRequest("POST", "/" + app.Id + "/register", map[string]interface{}{
+	sendAuthenticatedRequest("POST", "/app/" + app.Id + "/register", JSON{
 		"email": email,
 		"password": password,
 	}, t)
 
-	rec := sendAuthenticatedRequest("POST", "/" + app.Id + "/login", map[string]interface{}{
+	rec := sendAuthenticatedRequest("POST", "/app/" + app.Id + "/login", JSON{
 		"email": email,
 		"password": "pass",
 	}, t)

@@ -82,7 +82,7 @@ func sendRequest(method, path string, body interface{}, t *testing.T) *ResRecord
 				}
 
 				b, _ := ioutil.ReadAll(c.Request.Body)
-				fmt.Println("Body: -> ", b)
+				fmt.Println("Body: -> ", string(b))
 
 				fmt.Println("### -->>")
 

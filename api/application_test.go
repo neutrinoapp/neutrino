@@ -9,7 +9,7 @@ func createApp(t *testing.T) *ApplicationModel {
 		Name: randomString(),
 	}
 
-	rec := sendAuthenticatedRequest("POST", "/app/", app, t)
+	rec := sendAuthenticatedRequest("POST", "/app", app, t)
 	rec.CodeIs(200)
 
 	res := rec.BObj()
@@ -21,7 +21,7 @@ func createApp(t *testing.T) *ApplicationModel {
 func TestCreateAndGetApplication(t *testing.T) {
 	app := createApp(t)
 
-	getRec := sendAuthenticatedRequest("GET", "/app/", nil, t)
+	getRec := sendAuthenticatedRequest("GET", "/app", nil, t)
 	getRec.CodeIs(200)
 
 	var result []*ApplicationModel
@@ -42,12 +42,11 @@ func TestDeleteApplication(t *testing.T) {
 	sendAuthenticatedRequest("DELETE", "/app/" + app.Id, nil, t)
 
 	getRec := sendAuthenticatedRequest("GET", "/app/" + app.Id, nil, t)
-
 	result := getRec.BObj()
 
 	err := result["error"]
 
-	if err != "not found" {
+	if err != "app not found" {
 		t.Fatal("App not deleted")
 	}
 }

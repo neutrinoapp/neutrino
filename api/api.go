@@ -23,21 +23,21 @@ func initRoutes(e *gin.Engine) {
 
 		appGroup := v1.Group("/app", authorizeMiddleware())
 		{
-			appGroup.POST("/", appController.CreateApplicationHandler)
-			appGroup.GET("/", appController.GetApplicationsHandler)
+			appGroup.POST("", appController.CreateApplicationHandler)
+			appGroup.GET("", appController.GetApplicationsHandler)
 
 			appIdGroup := appGroup.Group("/:appId", injectAppMiddleware())
 			{
-				appIdGroup.GET("/", appController.GetApplicationHandler)
-				appIdGroup.DELETE("/", appController.DeleteApplicationHandler)
-				appIdGroup.PUT("/", appController.UpdateApplicationHandler)
+				appIdGroup.GET("", appController.GetApplicationHandler)
+				appIdGroup.DELETE("", appController.DeleteApplicationHandler)
+				appIdGroup.PUT("", appController.UpdateApplicationHandler)
 
 				appIdGroup.POST("/register", authController.AppRegisterUserHandler)
 				appIdGroup.POST("/login", authController.AppLoginUserHandler)
 
 				dataGroup := appIdGroup.Group("/data")
 				{
-					dataGroup.POST("/", typesController.CreateTypeHandler)
+					dataGroup.POST("", typesController.CreateTypeHandler)
 					dataGroup.DELETE("/:typeName", typesController.DeleteType)
 					dataGroup.POST("/:typeName", typesController.InsertInTypeHandler)
 					dataGroup.GET("/:typeName", typesController.GetTypeDataHandler)

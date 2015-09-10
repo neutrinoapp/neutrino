@@ -70,8 +70,9 @@ func (a *ApplicationController) GetApplicationsHandler(c *gin.Context) {
 }
 
 func (a *ApplicationController) GetApplicationHandler(c *gin.Context) {
-	app := c.MustGet("app")
-	c.JSON(http.StatusOK, app)
+	if app, exists := c.Get("app"); exists {
+		c.JSON(http.StatusOK, app)
+	}
 }
 
 func (a *ApplicationController) DeleteApplicationHandler(c *gin.Context) {

@@ -14,6 +14,10 @@ func RestErrorNotFound(c *gin.Context) {
 	RestError(c, "not found")
 }
 
+func RestErrorAppNotFound(c *gin.Context) {
+	RestError(c, "app not found")
+}
+
 func RestError(c *gin.Context, err interface{}) {
 	status := http.StatusInternalServerError
 
@@ -25,7 +29,7 @@ func RestError(c *gin.Context, err interface{}) {
 		msg = t
 	}
 
-	if msg == "not found" {
+	if msg == "not found" || msg == "app not found" {
 		status = http.StatusNotFound
 	} else if msg == "invalid request body" {
 		status = http.StatusBadRequest
