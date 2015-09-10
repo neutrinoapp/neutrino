@@ -18,7 +18,7 @@ func setupTypeTests(t *testing.T) (map[string]interface{}, *ApplicationModel, st
 	getRec := sendAuthenticatedRequest("GET", "/app/" + app.Id, nil, t)
 	getRec.CodeIs(200)
 
-	createdApp := getRec.BObj()
+	createdApp := getRec.BodyJSON()
 
 	return createdApp, app, typeName
 }
@@ -43,7 +43,7 @@ func TestDeleteType(t *testing.T) {
 	getReq.CodeIs(404)
 
 	appReq := sendAuthenticatedRequest("GET", "/app/" + app.Id, nil, t)
-	updatedApp := appReq.BObj()
+	updatedApp := appReq.BodyJSON()
 
 	types := updatedApp["types"].([]interface{})
 
@@ -81,11 +81,11 @@ func TestGetByIdTypeData(t *testing.T) {
 		"field2": "test",
 	}, t)
 
-	res := rec.BObj()
+	res := rec.BodyJSON()
 	id := res["_id"].(string)
 
 	rec1 := sendAuthenticatedRequest("GET", "/app/" + app.Id + "/data/" + typeName + "/" + id, nil, t)
-	item := rec1.BObj()
+	item := rec1.BodyJSON()
 
 	if item["field1"] != "test" || item["field2"] != "test" {
 		t.Error("Item not written correctly")
@@ -101,7 +101,7 @@ func TestUpdateTypeItemById(t *testing.T) {
 	}, t)
 	rec.CodeIs(200)
 
-	res := rec.BObj()
+	res := rec.BodyJSON()
 	id := res["_id"].(string)
 
 
@@ -111,7 +111,7 @@ func TestUpdateTypeItemById(t *testing.T) {
 	}, t)
 
 	rec1 := sendAuthenticatedRequest("GET", "/app/" + app.Id + "/data/" + typeName + "/" + id, nil, t)
-	item := rec1.BObj()
+	item := rec1.BodyJSON()
 
 	if item["field1"] != "testupdated" || item["field2"] != "testupdated" {
 		t.Fatal("Item not updated correctly")
@@ -127,7 +127,7 @@ func TestDeleteTypeItemById(t *testing.T) {
 	}, t)
 	rec.CodeIs(200)
 
-	res := rec.BObj()
+	res := rec.BodyJSON()
 	id := res["_id"].(string)
 
 	sendAuthenticatedRequest("DELETE", "/app/" + app.Id + "/data/" + typeName + "/" + id, nil, t)

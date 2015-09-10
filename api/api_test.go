@@ -31,17 +31,17 @@ func (r *ResRecorder) CodeIs(s int) {
 	}
 }
 
-func (r *ResRecorder) B() string {
+func (r *ResRecorder) BodyString() string {
 	return r.Body.String()
 }
 
-func (r *ResRecorder) BHas(str string) {
-	if !strings.Contains(r.B(), str) {
-		r.t.Error(r.B(), "does not contain", str)
+func (r *ResRecorder) BodyHas(str string) {
+	if !strings.Contains(r.BodyString(), str) {
+		r.t.Error(r.BodyString(), "does not contain", str)
 	}
 }
 
-func (r *ResRecorder) BObj() JSON {
+func (r *ResRecorder) BodyJSON() JSON {
 	b, _ := ioutil.ReadAll(r.Body)
 	var res JSON
 	json.Unmarshal(b, &res)
@@ -140,7 +140,7 @@ func login(t *testing.T) (*UserModel, string) {
 			"password": user["password"],
 		}, t)
 
-		response := rec.BObj()
+		response := rec.BodyJSON()
 		token = response["token"].(string)
 	}
 

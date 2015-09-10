@@ -12,7 +12,7 @@ func createApp(t *testing.T) *ApplicationModel {
 	rec := sendAuthenticatedRequest("POST", "/app", app, t)
 	rec.CodeIs(200)
 
-	res := rec.BObj()
+	res := rec.BodyJSON()
 	app.Id = res["_id"].(string)
 
 	return app
@@ -42,7 +42,7 @@ func TestDeleteApplication(t *testing.T) {
 	sendAuthenticatedRequest("DELETE", "/app/" + app.Id, nil, t)
 
 	getRec := sendAuthenticatedRequest("GET", "/app/" + app.Id, nil, t)
-	result := getRec.BObj()
+	result := getRec.BodyJSON()
 
 	err := result["error"]
 
@@ -61,7 +61,7 @@ func TestUpdateApplication(t *testing.T) {
 
 	getRec := sendAuthenticatedRequest("GET", "/app/" + app.Id, nil, t)
 
-	result := getRec.BObj()
+	result := getRec.BodyJSON()
 
 	res := result["name"]
 

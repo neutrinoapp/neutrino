@@ -23,7 +23,7 @@ func TestLoginUser(t *testing.T) {
 	rec := sendRequest("POST", "/login", body, t)
 	rec.CodeIs(http.StatusOK)
 
-	bodyStr := rec.B()
+	bodyStr := rec.BodyString()
 
 	contains := strings.Contains(bodyStr, "token")
 
@@ -65,7 +65,7 @@ func TestAppLoginUser(t *testing.T) {
 	}, t)
 	rec.CodeIs(200)
 
-	res := rec.BObj()
+	res := rec.BodyJSON()
 
 	token := res["token"].(string)
 
