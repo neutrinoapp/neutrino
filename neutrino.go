@@ -10,7 +10,7 @@ import (
 func main() {
 	engine := gin.Default()
 
-	c, err := envconfig.LoadSimple("neutrino")
+	c, err := envconfig.Load("neutrino")
 
 	if err != nil {
 		panic("Error loading config: " + err.Error())
@@ -19,5 +19,5 @@ func main() {
 	db.Initialize(c)
 	api.Initialize(engine, c)
 
-	engine.Run(c["port"].(string))
+	engine.Run(c.GetOrDefault("port", ":5000").(string))
 }
