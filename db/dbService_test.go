@@ -4,6 +4,7 @@ import (
 	"testing"
 	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/mgo.v2"
+	"github.com/go-neutrino/go-env-config"
 )
 
 var (
@@ -13,9 +14,11 @@ var (
 )
 
 func init() {
-	Initialize(map[string]interface{}{
+	c := envconfig.NewConfig()
+	c.M = map[string]interface{}{
 		"mongoHost": defaultConnectionString,
-	})
+	}
+	Initialize(c)
 }
 
 func getDefaultDbService() DbService {

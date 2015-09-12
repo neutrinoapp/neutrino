@@ -3,10 +3,11 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"github.com/go-neutrino/go-env-config"
 )
 
 var initialized bool
-var config map[string]interface{}
+var config envconfig.Config
 
 func initMiddleware(e *gin.Engine) {
 	e.Use(defaultContentTypeMiddleware())
@@ -51,7 +52,7 @@ func initRoutes(e *gin.Engine) {
 	}
 }
 
-func Initialize(e *gin.Engine, c map[string]interface{}) {
+func Initialize(e *gin.Engine, c envconfig.Config) {
 	if IsInitialized() {
 		return
 	}

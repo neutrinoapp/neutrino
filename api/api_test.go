@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-neutrino/neutrino-core/db"
+	"github.com/go-neutrino/go-env-config"
 )
 
 var (
@@ -63,7 +64,8 @@ func sendRequest(method, path string, body interface{}, t *testing.T) *ResRecord
 	if !IsInitialized() {
 		e := gin.Default()
 		apiHandler = e
-		testConfig := map[string]interface{}{
+		testConfig := envconfig.NewConfig()
+		testConfig.M = map[string]interface{}{
 			"mongoHost": "localhost:27017",
 		}
 		Initialize(e, testConfig)
