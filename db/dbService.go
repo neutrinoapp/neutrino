@@ -27,7 +27,7 @@ type dbService struct {
 }
 
 func NewDbService(dbName, colName string, index mgo.Index) DbService {
-	connectionString := config.GetOrDefault("mongoHost", "localhost:28017").(string)
+	connectionString := config.GetOrDefault("mongoHost", "localhost:27017").(string)
 	d := dbService{connectionString, dbName, colName, index}
 	return &d
 }

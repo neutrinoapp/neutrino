@@ -33,30 +33,6 @@ func ErrorTestField(t *testing.T, field string, expected, actual interface{}) {
 	t.Error("expected", field, "to", "equal", expected, "got", actual);
 }
 
-//type fakeMessageService struct {
-//	broadcastCalledTimes, broadcastJsonCalledTimes int
-//	lastMessage string
-//	lastJson map[string]interface{}
-//}
-//
-//func (m *fakeMessageService) InitSocketHandler() http.Handler {
-//	return nil
-//}
-//
-//func (m *fakeMessageService) GetSessions() []sockjs.Session {
-//	return nil
-//}
-//
-//func (m *fakeMessageService) Broadcast(message string) {
-//	m.broadcastCalledTimes++
-//	m.lastMessage = message
-//}
-//
-//func (m *fakeMessageService) BroadcastJSON(message map[string]interface{}) {
-//	m.broadcastJsonCalledTimes++
-//	m.lastJson = message
-//}
-
 func TestDbServiceGetSettings(t *testing.T) {
 	d := getDefaultDbService()
 	s := d.GetSettings();
