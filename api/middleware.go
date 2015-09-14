@@ -5,6 +5,7 @@ import (
 	"strings"
 	"gopkg.in/dgrijalva/jwt-go.v2"
 	"github.com/go-neutrino/neutrino-core/db"
+	"fmt"
 )
 
 func authWithToken(c *gin.Context, userToken string) error {
@@ -14,7 +15,18 @@ func authWithToken(c *gin.Context, userToken string) error {
 			return nil, nil
 		}
 
-		return []byte(""), nil
+		//TODO: cache this
+		tokenSecretRecord, err := db.NewSystemDbService().FindId("accountSecret", nil)
+
+		if err != nil {
+			fmt.Println(err.Error())
+			//we probably do not have such collection. Use a default secret and warn.
+			tokenSecretRecord = ""
+		}
+
+		tokenSecret := tokenSecretRecord["value"].(string)
+
+		return []byte(tokenSecret), nil
 	})
 
 	c.Set("token", token)

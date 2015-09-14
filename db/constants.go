@@ -16,3 +16,7 @@ func (c *constants) UsersCollection() string {
 func (c *constants) ApplicationsCollection() string {
 	return "applications"
 }
+
+func (c *constants) SystemCollection() string {
+	return "system"
+}

@@ -56,6 +56,10 @@ func NewAppUsersDbService(appId string) DbService {
 	return NewDbService(Constants.DatabaseName(), appId	 + "." + "users", mgo.Index{})
 }
 
+func NewSystemDbService() DbService {
+	return NewDbService(Constants.DatabaseName(), Constants.SystemCollection(), mgo.Index{})
+}
+
 func (d *dbService) GetSettings() map[string]string {
 	m := make(map[string]string)
 	m["ConnectionString"] = d.connectionString
