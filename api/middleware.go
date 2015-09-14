@@ -21,10 +21,13 @@ func authWithToken(c *gin.Context, userToken string) error {
 		if err != nil {
 			fmt.Println(err.Error())
 			//we probably do not have such collection. Use a default secret and warn.
-			tokenSecretRecord = ""
+			tokenSecretRecord = JSON{
+				"value": "",
+			}
 		}
 
 		tokenSecret := tokenSecretRecord["value"].(string)
+
 
 		return []byte(tokenSecret), nil
 	})
