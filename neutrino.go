@@ -4,20 +4,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-neutrino/neutrino-core/db"
 	"github.com/go-neutrino/neutrino-core/api"
-	"github.com/go-neutrino/go-env-config"
+	"github.com/go-neutrino/neutrino-config"
 )
 
 func main() {
 	engine := gin.Default()
 
-	c, err := envconfig.Load("neutrino")
-
-	if err != nil {
-		panic("Error loading config: " + err.Error())
-	}
+	c := nconfig.Load()
 
 	db.Initialize(c)
 	api.Initialize(engine, c)
 
-	engine.Run(c.GetOrDefault("port", ":5000").(string))
+
+	engine.Run(c.GetString(nconfig.KEY_CORE_PORT))
 }

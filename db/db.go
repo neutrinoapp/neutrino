@@ -1,9 +1,11 @@
 package db
 
-import "github.com/go-neutrino/go-env-config"
+import (
+	"github.com/spf13/viper"
+)
 
-var config envconfig.Config
-func Initialize(c envconfig.Config) {
+var config *viper.Viper
+func Initialize(c *viper.Viper) {
 	if config != nil {
 		panic("Initialize must be called once")
 	}
