@@ -1,20 +1,20 @@
 package main
 
 import (
-	"github.com/nats-io/nats"
-	"net/http"
-	"github.com/go-neutrino/neutrino-config"
-	"io/ioutil"
-	"encoding/json"
 	"bytes"
-	"log"
+	"encoding/json"
+	"github.com/go-neutrino/neutrino-config"
+	"github.com/nats-io/nats"
 	"github.com/spf13/viper"
+	"io/ioutil"
+	"log"
+	"net/http"
 	"sync"
 )
 
 var (
 	services []string
-	c *viper.Viper
+	c        *viper.Viper
 )
 
 func refreshServices() {
@@ -54,13 +54,13 @@ func refreshServices() {
 }
 
 func jobsHandler(m *nats.Msg) {
-	go func	() {
+	go func() {
 		b := bytes.NewBuffer(m.Data)
 
 		sCopy := services[:]
 
 		for _, s := range sCopy {
-			http.Post(s + "/message", "application/json", b)
+			http.Post(s+"/message", "application/json", b)
 
 			log.Println("Send message to " + s + ", " + string(m.Data))
 		}

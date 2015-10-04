@@ -1,19 +1,19 @@
 package server
 
 import (
-	"net/http"
+	"fmt"
+	"github.com/go-neutrino/neutrino-config"
 	"github.com/gorilla/websocket"
 	"github.com/nats-io/nats"
-	"fmt"
 	"github.com/spf13/viper"
-	"github.com/go-neutrino/neutrino-config"
-	"time"
 	"io/ioutil"
+	"net/http"
+	"time"
 )
 
 var (
 	upgrader = websocket.Upgrader{
-		ReadBufferSize: 1024,
+		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 		CheckOrigin: func(r *http.Request) bool {
 			//allow connections from any origin
@@ -26,7 +26,7 @@ var (
 func Initialize(c *viper.Viper) {
 	config = c
 
-	http.HandleFunc("/data", func (w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/data", func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 
 		if err != nil {
@@ -41,7 +41,7 @@ func Initialize(c *viper.Viper) {
 		GetConnectionStore().Put(token, realtimeConn)
 	})
 
-	http.HandleFunc("/message", func (w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/message", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Got message!")
 
 		b, err := ioutil.ReadAll(r.Body)
@@ -65,11 +65,11 @@ func Initialize(c *viper.Viper) {
 		return
 	}
 
-	conn.Subscribe("foo", func(s string) {
+	conn.Subscribe("realtime-jobs", func(s string) {
 		fmt.Printf("Received a message: %s\n", s)
 	})
 
-	go func	() {
+	go func() {
 		for {
 			time.Sleep(5 * time.Second)
 			fmt.Println("Sending message!")

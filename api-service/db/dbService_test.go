@@ -1,16 +1,16 @@
 package db
 
 import (
-	"testing"
-	"gopkg.in/mgo.v2/bson"
-	"gopkg.in/mgo.v2"
 	"github.com/go-neutrino/go-env-config"
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
+	"testing"
 )
 
 var (
 	defaultConnectionString = "localhost:27017"
-	defaultDatabase = "test"
-	defaultCollection = "test"
+	defaultDatabase         = "test"
+	defaultCollection       = "test"
 )
 
 func init() {
@@ -30,12 +30,12 @@ func getDbService(collection string) DbService {
 }
 
 func ErrorTestField(t *testing.T, field string, expected, actual interface{}) {
-	t.Error("expected", field, "to", "equal", expected, "got", actual);
+	t.Error("expected", field, "to", "equal", expected, "got", actual)
 }
 
 func TestDbServiceGetSettings(t *testing.T) {
 	d := getDefaultDbService()
-	s := d.GetSettings();
+	s := d.GetSettings()
 
 	if s["ConnectionString"] != defaultConnectionString {
 		ErrorTestField(t, "ConnectionString", defaultConnectionString, s["ConnectionString"])
@@ -55,7 +55,7 @@ func TestDbServiceGetSession(t *testing.T) {
 	s := d.GetSession()
 
 	if s == nil {
-		t.Error("Database session is nil");
+		t.Error("Database session is nil")
 	}
 }
 
@@ -95,6 +95,6 @@ func TestDbServiceInsertAndFindId(t *testing.T) {
 	number := res["number"]
 
 	if number != 5 {
-		 ErrorTestField(t, "number", 5, number)
+		ErrorTestField(t, "number", 5, number)
 	}
 }

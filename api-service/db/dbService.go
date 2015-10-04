@@ -1,10 +1,10 @@
 package db
 
 import (
+	"github.com/go-neutrino/neutrino-config"
 	"gopkg.in/mgo.v2"
 	"log"
-	"github.com/go-neutrino/neutrino-core/utils"
-	"github.com/go-neutrino/neutrino-config"
+	"github.com/go-neutrino/neutrino-core/api-service/utils"
 )
 
 var connectionPool map[string]*mgo.Session
@@ -24,7 +24,7 @@ type DbService interface {
 
 type dbService struct {
 	connectionString, dbName, colName string
-	index mgo.Index
+	index                             mgo.Index
 }
 
 func NewDbService(dbName, colName string, index mgo.Index) DbService {
@@ -38,23 +38,23 @@ func NewUsersDbService() DbService {
 }
 
 func NewTypeDbService(appId, typeName string) DbService {
-	return NewDbService(Constants.DatabaseName(), appId + "." + typeName, mgo.Index{})
+	return NewDbService(Constants.DatabaseName(), appId+"."+typeName, mgo.Index{})
 }
 
 func NewAppsDbService(user string) DbService {
 	index := mgo.Index{
-		Key: []string{"$text:name"},
-		Unique: true,
-		DropDups: true,
+		Key:        []string{"$text:name"},
+		Unique:     true,
+		DropDups:   true,
 		Background: true,
-		Sparse: false,
+		Sparse:     false,
 	}
 
-	return NewDbService(Constants.DatabaseName(), user + "." + Constants.ApplicationsCollection(), index)
+	return NewDbService(Constants.DatabaseName(), user+"."+Constants.ApplicationsCollection(), index)
 }
 
 func NewAppUsersDbService(appId string) DbService {
-	return NewDbService(Constants.DatabaseName(), appId	 + "." + "users", mgo.Index{})
+	return NewDbService(Constants.DatabaseName(), appId+"."+"users", mgo.Index{})
 }
 
 func NewSystemDbService() DbService {
@@ -136,7 +136,7 @@ func (d *dbService) FindId(id, fields interface{}) (map[string]interface{}, erro
 	defer session.Close()
 	err := collection.FindId(id).Select(fields).One(&result)
 
-	return result, err;
+	return result, err
 }
 
 func (d *dbService) Find(query, fields interface{}) ([]map[string]interface{}, error) {
@@ -146,7 +146,7 @@ func (d *dbService) Find(query, fields interface{}) ([]map[string]interface{}, e
 	defer session.Close()
 	err := collection.Find(query).Select(fields).All(&result)
 
-	return result, err;
+	return result, err
 }
 
 func (d *dbService) RemoveId(id interface{}) error {

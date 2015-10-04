@@ -1,9 +1,9 @@
 package api
 
 import (
-	"net/http"
 	"errors"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 func RestErrorInvalidBody(c *gin.Context) {

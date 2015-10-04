@@ -5,6 +5,7 @@ import (
 )
 
 var config *viper.Viper
+
 func Initialize(c *viper.Viper) {
 	if config != nil {
 		panic("Initialize must be called once")

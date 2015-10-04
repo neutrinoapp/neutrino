@@ -1,8 +1,8 @@
 package server
 
 import (
-	"github.com/gorilla/websocket"
 	"fmt"
+	"github.com/gorilla/websocket"
 )
 
 type RealtimeConnection interface {
@@ -14,9 +14,9 @@ type RealtimeConnection interface {
 }
 
 type realtimeConnection struct {
-	conn *websocket.Conn
+	conn      *websocket.Conn
 	processor MessageProcessor
-	group string
+	group     string
 }
 
 func (r *realtimeConnection) GetConnection() *websocket.Conn {
@@ -53,8 +53,8 @@ func (r *realtimeConnection) GetProcessor() MessageProcessor {
 
 func NewConnection(c *websocket.Conn, g string) RealtimeConnection {
 	r := &realtimeConnection{
-		conn: c,
-		group: g,
+		conn:      c,
+		group:     g,
 		processor: NewMessageProcessor(),
 	}
 
@@ -64,7 +64,7 @@ func NewConnection(c *websocket.Conn, g string) RealtimeConnection {
 		if err != nil {
 			defer r.Close()
 
-			fmt.Println(err.Error());
+			fmt.Println(err.Error())
 			GetConnectionStore().Remove(g, r)
 		}
 	}()

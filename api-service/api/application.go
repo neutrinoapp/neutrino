@@ -1,15 +1,15 @@
 package api
 
 import (
-	"time"
-	"net/http"
-	"github.com/go-neutrino/neutrino-core/db"
-	"github.com/go-neutrino/neutrino-core/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/go-neutrino/neutrino-core/api-service/db"
+	"github.com/go-neutrino/neutrino-core/api-service/utils"
+	"net/http"
+	"time"
 )
 
 type ApplicationModel struct {
-	Id string `json: _id`
+	Id   string `json: _id`
 	Name string `json: "name"`
 }
 
@@ -33,9 +33,9 @@ func (a *ApplicationController) CreateApplicationHandler(c *gin.Context) {
 
 	username := c.MustGet("user").(string)
 	doc := JSON{
-		"name": body.Name,
-		"owner": username,
-		"types": []string{"users"},
+		"name":      body.Name,
+		"owner":     username,
+		"types":     []string{"users"},
 		"createdAt": time.Now(),
 		"masterKey": utils.GetCleanUUID(),
 	}

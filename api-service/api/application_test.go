@@ -37,11 +37,11 @@ func TestCreateAndGetApplication(t *testing.T) {
 }
 
 func TestDeleteApplication(t *testing.T) {
-	app := createApp(t);
+	app := createApp(t)
 
-	sendAuthenticatedRequest("DELETE", "/app/" + app.Id, nil, t)
+	sendAuthenticatedRequest("DELETE", "/app/"+app.Id, nil, t)
 
-	getRec := sendAuthenticatedRequest("GET", "/app/" + app.Id, nil, t)
+	getRec := sendAuthenticatedRequest("GET", "/app/"+app.Id, nil, t)
 	result := getRec.BodyJSON()
 
 	err := result["error"]
@@ -52,14 +52,14 @@ func TestDeleteApplication(t *testing.T) {
 }
 
 func TestUpdateApplication(t *testing.T) {
-	app := createApp(t);
+	app := createApp(t)
 
 	randomName := randomString() + "updated!"
-	sendAuthenticatedRequest("PUT", "/app/" + app.Id, map[string]interface{}{
+	sendAuthenticatedRequest("PUT", "/app/"+app.Id, map[string]interface{}{
 		"name": randomName,
 	}, t)
 
-	getRec := sendAuthenticatedRequest("GET", "/app/" + app.Id, nil, t)
+	getRec := sendAuthenticatedRequest("GET", "/app/"+app.Id, nil, t)
 
 	result := getRec.BodyJSON()
 

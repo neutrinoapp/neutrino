@@ -2,8 +2,8 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"net/http"
 	"github.com/spf13/viper"
+	"net/http"
 )
 
 var initialized bool
@@ -73,9 +73,9 @@ func RespondId(id interface{}, c *gin.Context) {
 
 	switch t := id.(type) {
 	case JSON:
-		i["_id"] =  t["_id"]
+		i["_id"] = t["_id"]
 	default:
-		i["_id"] =  t
+		i["_id"] = t
 	}
 
 	c.JSON(http.StatusOK, i)

@@ -1,9 +1,9 @@
 package server
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
-	"errors"
 )
 
 var (

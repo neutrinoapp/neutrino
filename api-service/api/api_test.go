@@ -1,25 +1,23 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
-	"testing"
-	"net/http"
-	"math/rand"
-	"time"
-	"strconv"
-	"net/http/httptest"
-	"strings"
-	"io/ioutil"
 	"encoding/json"
 	"fmt"
-	"github.com/go-neutrino/neutrino-core/db"
-	"github.com/go-neutrino/go-env-config"
+	"github.com/gin-gonic/gin"
+	"io/ioutil"
+	"math/rand"
+	"net/http"
+	"net/http/httptest"
+	"strconv"
+	"strings"
+	"testing"
+	"time"
 )
 
 var (
 	apiHandler http.Handler
-	user map[string]interface{}
-	token string
+	user       map[string]interface{}
+	token      string
 )
 
 type ResRecorder struct {
@@ -108,8 +106,8 @@ func sendRequest(method, path string, body interface{}, t *testing.T) *ResRecord
 		b = fmt.Sprintf("%s", bodyStr)
 	}
 
-	req, err := http.NewRequest(method, "/v1" + path, strings.NewReader(b))
-	req.Header.Set("Authorization", "Bearer " + token)
+	req, err := http.NewRequest(method, "/v1"+path, strings.NewReader(b))
+	req.Header.Set("Authorization", "Bearer "+token)
 
 	if err != nil {
 		panic(err)
@@ -128,7 +126,7 @@ func randomString() string {
 
 func register(t *testing.T) map[string]interface{} {
 	b := JSON{
-		"email": randomString() + "@gmail.com",
+		"email":    randomString() + "@gmail.com",
 		"password": "pass",
 	}
 
@@ -143,7 +141,7 @@ func login(t *testing.T) (*UserModel, string) {
 	if token == "" {
 		user = register(t)
 		rec := sendRequest("POST", "/login", JSON{
-			"email": user["email"],
+			"email":    user["email"],
 			"password": user["password"],
 		}, t)
 
@@ -152,7 +150,7 @@ func login(t *testing.T) (*UserModel, string) {
 	}
 
 	return &UserModel{
-		Email: user["email"].(string),
+		Email:    user["email"].(string),
 		Password: user["password"].(string),
 	}, token
 }

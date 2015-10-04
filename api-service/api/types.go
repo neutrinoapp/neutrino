@@ -1,10 +1,10 @@
 package api
 
 import (
-	"github.com/go-neutrino/neutrino-core/db"
 	"github.com/gin-gonic/gin"
-	"github.com/go-neutrino/neutrino-core/utils"
 	"net/http"
+	"github.com/go-neutrino/neutrino-core/api-service/utils"
+	"github.com/go-neutrino/neutrino-core/api-service/db"
 )
 
 type TypesController struct {
@@ -26,7 +26,7 @@ func (t *TypesController) CreateTypeHandler(c *gin.Context) {
 	)
 }
 
-func (t * TypesController) DeleteType(c *gin.Context) {
+func (t *TypesController) DeleteType(c *gin.Context) {
 	appId := c.Param("appId")
 	typeName := c.Param("typeName")
 
@@ -110,7 +110,7 @@ func (t *TypesController) GetTypeItemById(c *gin.Context) {
 
 	item, err := d.FindId(itemId, nil)
 
-	if (err != nil) {
+	if err != nil {
 		RestError(c, err)
 		return
 	}

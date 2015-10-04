@@ -1,10 +1,10 @@
 package api
 
 import (
-	"testing"
+	"github.com/go-neutrino/neutrino-core/db"
 	"net/http"
 	"strings"
-	"github.com/go-neutrino/neutrino-core/db"
+	"testing"
 )
 
 func TestRegisterUser(t *testing.T) {
@@ -13,7 +13,7 @@ func TestRegisterUser(t *testing.T) {
 	res, err := db.NewUsersDbService().FindId(body["email"], nil)
 
 	if res == nil || err != nil {
-		t.Fatal("User not created correctly", res, err);
+		t.Fatal("User not created correctly", res, err)
 	}
 }
 
@@ -35,17 +35,17 @@ func TestLoginUser(t *testing.T) {
 func TestAppRegisterUser(t *testing.T) {
 	app := createApp(t)
 	b := JSON{
-		"email": randomString() + "@gmail.com",
+		"email":    randomString() + "@gmail.com",
 		"password": "pass",
 	}
 
-	r := sendAuthenticatedRequest("POST", "/app/" + app.Id + "/register", b, t)
+	r := sendAuthenticatedRequest("POST", "/app/"+app.Id+"/register", b, t)
 	r.CodeIs(200)
 
 	res, err := db.NewAppUsersDbService(app.Id).FindId(b["email"], nil)
 
 	if res == nil || err != nil {
-		t.Fatal("User not created correctly", res, err);
+		t.Fatal("User not created correctly", res, err)
 	}
 }
 
@@ -54,13 +54,13 @@ func TestAppLoginUser(t *testing.T) {
 	email := randomString() + "@gmail.com"
 	password := "pass"
 
-	sendAuthenticatedRequest("POST", "/app/" + app.Id + "/register", JSON{
-		"email": email,
+	sendAuthenticatedRequest("POST", "/app/"+app.Id+"/register", JSON{
+		"email":    email,
 		"password": password,
 	}, t)
 
-	rec := sendAuthenticatedRequest("POST", "/app/" + app.Id + "/login", JSON{
-		"email": email,
+	rec := sendAuthenticatedRequest("POST", "/app/"+app.Id+"/login", JSON{
+		"email":    email,
 		"password": "pass",
 	}, t)
 	rec.CodeIs(200)

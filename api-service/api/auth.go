@@ -1,18 +1,18 @@
 package api
 
 import (
+	"github.com/gin-gonic/gin"
+	"github.com/go-neutrino/neutrino-core/api-service/db"
+	"github.com/go-neutrino/neutrino-core/api-service/utils"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/dgrijalva/jwt-go.v2"
-	"time"
-	"github.com/gin-gonic/gin"
 	"net/http"
-	"github.com/go-neutrino/neutrino-core/db"
-	"github.com/go-neutrino/neutrino-core/utils"
+	"time"
 )
 
 type UserModel struct {
-	Id string `json: "_id"`
-	Email string `json: "email"`
+	Id       string `json: "_id"`
+	Email    string `json: "email"`
 	Password string `json: "password"`
 }
 
@@ -34,8 +34,8 @@ func registerUser(c *gin.Context, d db.DbService) {
 	}
 
 	doc := JSON{
-		"_id": u["email"].(string),
-		"password": hashedPassword,
+		"_id":       u["email"].(string),
+		"password":  hashedPassword,
 		"createdAt": time.Now(),
 	}
 
@@ -85,11 +85,11 @@ func loginUser(c *gin.Context, d db.DbService) {
 	})
 }
 
-func (a *AuthController) RegisterUserHandler (c *gin.Context) {
+func (a *AuthController) RegisterUserHandler(c *gin.Context) {
 	registerUser(c, db.NewUsersDbService())
 }
 
-func (a *AuthController) AppRegisterUserHandler (c *gin.Context) {
+func (a *AuthController) AppRegisterUserHandler(c *gin.Context) {
 	registerUser(c, db.NewAppUsersDbService(c.Param("appId")))
 }
 

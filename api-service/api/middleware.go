@@ -1,16 +1,16 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
-	"strings"
-	"gopkg.in/dgrijalva/jwt-go.v2"
-	"github.com/go-neutrino/neutrino-core/db"
 	"fmt"
+	"github.com/gin-gonic/gin"
+	"gopkg.in/dgrijalva/jwt-go.v2"
+	"strings"
+	"github.com/go-neutrino/neutrino-core/api-service/db"
 )
 
 func authWithToken(c *gin.Context, userToken string) error {
 	token, err := jwt.Parse(userToken, func(token *jwt.Token) (interface{}, error) {
-		if(jwt.GetSigningMethod("HS256") != token.Method){
+		if jwt.GetSigningMethod("HS256") != token.Method {
 			//TODO: "Invalid signing token algorithm."
 			return nil, nil
 		}
@@ -27,7 +27,6 @@ func authWithToken(c *gin.Context, userToken string) error {
 		}
 
 		tokenSecret := tokenSecretRecord["value"].(string)
-
 
 		return []byte(tokenSecret), nil
 	})

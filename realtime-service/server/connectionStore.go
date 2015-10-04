@@ -5,6 +5,7 @@ import (
 )
 
 var c ConnectionStore
+
 type ConnectionStore interface {
 	Get(string) []RealtimeConnection
 	Put(string, RealtimeConnection)
@@ -13,7 +14,7 @@ type ConnectionStore interface {
 
 type connectionStore struct {
 	connections map[string][]RealtimeConnection
-	l *sync.Mutex
+	l           *sync.Mutex
 }
 
 func (c *connectionStore) Get(g string) []RealtimeConnection {
@@ -50,9 +51,9 @@ func (c *connectionStore) Remove(g string, conn RealtimeConnection) {
 
 func GetConnectionStore() ConnectionStore {
 	if c == nil {
-		c  = &connectionStore{
+		c = &connectionStore{
 			connections: make(map[string][]RealtimeConnection),
-			l: new(sync.Mutex),
+			l:           new(sync.Mutex),
 		}
 	}
 
