@@ -1,10 +1,10 @@
 package db
 
 import (
-	"github.com/go-neutrino/go-env-config"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"testing"
+	"github.com/go-neutrino/neutrino-config"
 )
 
 var (
@@ -14,10 +14,7 @@ var (
 )
 
 func init() {
-	c := envconfig.NewConfig()
-	c.M = map[string]interface{}{
-		"mongoHost": defaultConnectionString,
-	}
+	c := nconfig.Load()
 	Initialize(c)
 }
 

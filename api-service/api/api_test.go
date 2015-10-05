@@ -12,6 +12,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"github.com/go-neutrino/neutrino-config"
+	"github.com/go-neutrino/neutrino-core/api-service/db"
 )
 
 var (
@@ -62,10 +64,7 @@ func sendRequest(method, path string, body interface{}, t *testing.T) *ResRecord
 	if !IsInitialized() {
 		e := gin.Default()
 		apiHandler = e
-		testConfig := envconfig.NewConfig()
-		testConfig.M = map[string]interface{}{
-			"mongoHost": "localhost:27017",
-		}
+		testConfig := nconfig.Load()
 		Initialize(e, testConfig)
 		db.Initialize(testConfig)
 		httptest.NewServer(e)
