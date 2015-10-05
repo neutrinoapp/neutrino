@@ -66,7 +66,6 @@ $ go test -v ./..
 # TODO
 #### Updated on the go:
 
-- [ ] Fix api service tests
 - [ ] Api service should send realtime-jobs to the queue for the broker and realtime service to process them
 - [ ] Cover api service's new functionality, realtime service and queue-broker with tests
 - [ ] Maybe abstract the websockets logic to a separate plugin
