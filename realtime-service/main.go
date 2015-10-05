@@ -1,10 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"github.com/go-neutrino/neutrino-config"
 	"github.com/go-neutrino/neutrino-core/realtime-service/server"
 	"net/http"
-	"fmt"
 )
 
 func main() {

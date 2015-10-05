@@ -2,9 +2,9 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"github.com/go-neutrino/neutrino-core/api-service/utils"
 	"github.com/go-neutrino/neutrino-core/api-service/db"
+	"github.com/go-neutrino/neutrino-core/api-service/utils"
+	"net/http"
 )
 
 type TypesController struct {

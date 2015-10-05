@@ -1,98 +1,77 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"github.com/go-neutrino/neutrino-config"
+	"github.com/gorilla/websocket"
 	"github.com/nats-io/nats"
 	"github.com/spf13/viper"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"sync"
+	"strconv"
+	"time"
 )
 
 var (
-	services []string
 	c        *viper.Viper
+	upgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		CheckOrigin: func(r *http.Request) bool {
+			//allow connections from any origin
+			return true
+		},
+	}
+	connections []*websocket.Conn
 )
 
-func refreshServices() {
-	qHost := c.GetString(nconfig.KEY_QUEUE_STATS_HOST) + "/connz"
-
-	res, err := http.Get(qHost)
-
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	b, err := ioutil.ReadAll(res.Body)
-
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	var o map[string]interface{}
-
-	json.Unmarshal(b, &o)
-
-	connz := o["connections"].([]interface{})
-
-	services = make([]string, 0)
-	realtimePort := c.GetString(nconfig.KEY_REALTIME_PORT)
-
-	for _, e := range connz {
-		con := e.(map[string]interface{})
-
-		ip := con["ip"].(string)
-		host := ip + realtimePort
-
-		services = append(services, host)
-	}
-}
-
 func jobsHandler(m *nats.Msg) {
-	go func() {
-		b := bytes.NewBuffer(m.Data)
+	log.Println("Got message " + string(m.Data))
 
-		sCopy := services[:]
-
-		for _, s := range sCopy {
-			http.Post(s+"/message", "application/json", b)
-
-			log.Println("Send message to " + s + ", " + string(m.Data))
-		}
-	}()
+	for i, c := range connections {
+		log.Println("Sending message to connection: " + strconv.Itoa(i+1))
+		c.WriteMessage(websocket.TextMessage, m.Data)
+	}
 }
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	var wg sync.WaitGroup
-
-	wg.Add(1)
-
 	c = nconfig.Load()
-
-	qHost := c.GetString(nconfig.KEY_QUEUE_HOST)
-
-	n, e := nats.Connect(qHost)
+	qAddr := c.GetString(nconfig.KEY_QUEUE_ADDR)
+	n, e := nats.Connect(qAddr)
 
 	if e != nil {
 		panic(e)
 	}
 
 	conn, err := nats.NewEncodedConn(n, nats.JSON_ENCODER)
-
 	if err != nil {
 		panic(err)
 	}
 
-	refreshServices()
-
 	conn.Subscribe("realtime-jobs", jobsHandler)
+	log.Println("Connected to NATS on " + qAddr)
 
-	wg.Wait()
+	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
+		conn, err := upgrader.Upgrade(w, r, nil)
+
+		if err != nil {
+			panic(err)
+			return
+		}
+
+		connections = append(connections, conn)
+	})
+
+	go func() {
+		for {
+			time.Sleep(5 * time.Second)
+			log.Println("Sending message!")
+			conn.Publish("realtime-jobs", "Hello World")
+		}
+	}()
+
+	port := c.GetString(nconfig.KEY_BROKER_PORT)
+	log.Println("Starting WS service on port " + port)
+	http.ListenAndServe(port, nil)
 }

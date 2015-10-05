@@ -1,14 +1,11 @@
 package server
 
 import (
-	"fmt"
 	"github.com/go-neutrino/neutrino-config"
 	"github.com/gorilla/websocket"
-	"github.com/nats-io/nats"
 	"github.com/spf13/viper"
-	"io/ioutil"
+	"log"
 	"net/http"
-	"time"
 )
 
 var (
@@ -41,39 +38,22 @@ func Initialize(c *viper.Viper) {
 		GetConnectionStore().Put(token, realtimeConn)
 	})
 
-	http.HandleFunc("/message", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Got message!")
-
-		b, err := ioutil.ReadAll(r.Body)
-
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		fmt.Println(string(b))
-	})
-
-	nc, err := nats.Connect(config.GetString(nconfig.KEY_QUEUE_HOST))
+	wsDialer := websocket.Dialer{}
+	conn, _, err := wsDialer.Dial(c.GetString(nconfig.KEY_BROKER_HOST)+c.GetString(nconfig.KEY_BROKER_PORT)+"/register", nil)
 	if err != nil {
 		panic(err)
 	}
-
-	conn, err := nats.NewEncodedConn(nc, nats.JSON_ENCODER)
-	if err != nil {
-		panic(err)
-		return
-	}
-
-	conn.Subscribe("realtime-jobs", func(s string) {
-		fmt.Printf("Received a message: %s\n", s)
-	})
 
 	go func() {
+		defer conn.Close()
 		for {
-			time.Sleep(5 * time.Second)
-			fmt.Println("Sending message!")
-			conn.Publish("realtime-jobs", "Hello World")
+			_, message, err := conn.ReadMessage()
+			if err != nil {
+				log.Println("read: ", err)
+				break
+			}
+
+			log.Printf("recv: %s", message)
 		}
 	}()
 }

@@ -24,7 +24,7 @@ Interactive documentation can be found [here](http://docs.realbas3.apiary.io/#re
 --------------
 
 ```bash
-$ go get github.com/go-neutrino/neutrino-core
+$ go get github.com/go-neutrino/neutrino
 ```
 
 In the root of the project - `$GOPATH/src/github.com/go-neutrino/neutrino` you can execute the following:
@@ -59,7 +59,14 @@ $ go test -v ./..
   - [x] Update types data
   - [x] Delete types data
   - [x] In-app user management
-  - [x] Integration tests
-- [ ] WebSockets API - Realtime API
+- [] WebSockets API - Realtime API
   - [ ] Types support
   - [ ] Javascript SDK
+
+# TODO
+#### Updated on the go:
+
+- [ ] Fix api service tests
+- [ ] Api service should send realtime-jobs to the queue for the broker and realtime service to process them
+- [ ] Cover api service's new functionality, realtime service and queue-broker with tests
+- [ ] Maybe abstract the websockets logic to a separate plugin
