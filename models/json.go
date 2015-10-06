@@ -2,8 +2,8 @@ package models
 
 import (
 	"bytes"
-	"fmt"
 	"encoding/json"
+	"fmt"
 )
 
 type JSON map[string]interface{}

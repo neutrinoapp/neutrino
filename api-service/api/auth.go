@@ -4,11 +4,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-neutrino/neutrino-core/api-service/db"
 	"github.com/go-neutrino/neutrino-core/api-service/utils"
+	"github.com/go-neutrino/neutrino-core/models"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/dgrijalva/jwt-go.v2"
 	"net/http"
 	"time"
-	"github.com/go-neutrino/neutrino-core/models"
 )
 
 type UserModel struct {

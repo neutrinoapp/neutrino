@@ -2,8 +2,8 @@ package log
 
 import (
 	"log"
-	"runtime"
 	"path/filepath"
+	"runtime"
 	"strconv"
 )
 
@@ -11,7 +11,7 @@ func init() {
 	log.SetFlags(log.LstdFlags)
 }
 
-func args() []interface{}{
+func args() []interface{} {
 	_, caller, line, _ := runtime.Caller(2)
 	callerFile := filepath.Base(caller)
 	fileAndLine := callerFile + ":" + strconv.Itoa(line)

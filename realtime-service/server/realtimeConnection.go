@@ -1,8 +1,8 @@
 package server
 
 import (
-	"github.com/gorilla/websocket"
 	"github.com/go-neutrino/neutrino-core/log"
+	"github.com/gorilla/websocket"
 )
 
 type RealtimeConnection interface {

@@ -3,10 +3,10 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-neutrino/neutrino-core/api-service/db"
-	"github.com/go-neutrino/neutrino-core/api-service/utils"
-	"net/http"
 	"github.com/go-neutrino/neutrino-core/api-service/notification"
+	"github.com/go-neutrino/neutrino-core/api-service/utils"
 	"github.com/go-neutrino/neutrino-core/models"
+	"net/http"
 )
 
 type TypesController struct {

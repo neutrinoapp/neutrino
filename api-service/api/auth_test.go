@@ -1,11 +1,11 @@
 package api
 
 import (
+	"github.com/go-neutrino/neutrino-core/api-service/db"
+	"github.com/go-neutrino/neutrino-core/models"
 	"net/http"
 	"strings"
 	"testing"
-	"github.com/go-neutrino/neutrino-core/api-service/db"
-	"github.com/go-neutrino/neutrino-core/models"
 )
 
 func TestRegisterUser(t *testing.T) {

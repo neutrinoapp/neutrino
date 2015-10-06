@@ -3,10 +3,10 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-neutrino/neutrino-core/api-service/db"
+	"github.com/go-neutrino/neutrino-core/log"
+	"github.com/go-neutrino/neutrino-core/models"
 	"gopkg.in/dgrijalva/jwt-go.v2"
 	"strings"
-	"github.com/go-neutrino/neutrino-core/models"
-	"github.com/go-neutrino/neutrino-core/log"
 )
 
 func authWithToken(c *gin.Context, userToken string) error {

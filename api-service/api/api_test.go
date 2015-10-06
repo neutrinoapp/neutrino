@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/go-neutrino/neutrino-config"
+	"github.com/go-neutrino/neutrino-core/api-service/db"
+	"github.com/go-neutrino/neutrino-core/models"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -12,9 +15,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"github.com/go-neutrino/neutrino-config"
-	"github.com/go-neutrino/neutrino-core/api-service/db"
-	"github.com/go-neutrino/neutrino-core/models"
 )
 
 var (

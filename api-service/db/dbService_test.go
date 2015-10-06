@@ -1,10 +1,10 @@
 package db
 
 import (
+	"github.com/go-neutrino/neutrino-config"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"testing"
-	"github.com/go-neutrino/neutrino-config"
 )
 
 var (

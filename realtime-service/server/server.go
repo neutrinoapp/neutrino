@@ -2,9 +2,9 @@ package server
 
 import (
 	"github.com/go-neutrino/neutrino-config"
+	"github.com/go-neutrino/neutrino-core/log"
 	"github.com/gorilla/websocket"
 	"github.com/spf13/viper"
-	"github.com/go-neutrino/neutrino-core/log"
 	"net/http"
 )
 

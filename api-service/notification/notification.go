@@ -2,15 +2,15 @@ package notification
 
 import (
 	"github.com/go-neutrino/neutrino-config"
+	"github.com/go-neutrino/neutrino-core/log"
+	"github.com/go-neutrino/neutrino-core/models"
 	"github.com/nats-io/nats"
 	"github.com/spf13/viper"
-	"github.com/go-neutrino/neutrino-core/models"
-	"github.com/go-neutrino/neutrino-core/log"
 )
 
 var (
 	qConn *nats.EncodedConn
-	c *viper.Viper
+	c     *viper.Viper
 )
 
 type op string
@@ -21,7 +21,7 @@ const (
 	OP_CREATE op = "create"
 	OP_DELETE op = "delete"
 
-	ORIGIN_API origin = "api"
+	ORIGIN_API    origin = "api"
 	ORIGIN_CLIENT origin = "client"
 )
 
@@ -50,8 +50,8 @@ func Notify(data models.JSON) {
 
 func Build(o op, og origin, pld interface{}, opts models.JSON) models.JSON {
 	return models.JSON{
-		"op": o,
-		"origin": og,
+		"op":      o,
+		"origin":  og,
 		"options": opts,
 		"payload": pld,
 	}

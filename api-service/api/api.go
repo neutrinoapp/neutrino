@@ -2,9 +2,9 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/go-neutrino/neutrino-core/models"
 	"github.com/spf13/viper"
 	"net/http"
-	"github.com/go-neutrino/neutrino-core/models"
 )
 
 var initialized bool
