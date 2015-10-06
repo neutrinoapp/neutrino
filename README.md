@@ -30,7 +30,9 @@ $ go get github.com/go-neutrino/neutrino
 In the root of the project - `$GOPATH/src/github.com/go-neutrino/neutrino` you can execute the following:
 
 ```bash
-$ go run neutrino.go
+$ go run api-service/main.go
+$ go run realtime-service/main.go
+$ go run queue-broker-service/main.go
 ```
 
 ```bash
