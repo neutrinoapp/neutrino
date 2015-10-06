@@ -63,7 +63,7 @@ $ go test -v ./..
   - [x] Update types data
   - [x] Delete types data
   - [x] In-app user management
-- [] WebSockets API - Realtime API
+- [ ] WebSockets API - Realtime API
   - [ ] Types support
   - [ ] Javascript SDK
 
@@ -73,3 +73,4 @@ $ go test -v ./..
 - [ ] Api service should send realtime-jobs to the queue for the broker and realtime service to process them
 - [ ] Cover api service's new functionality, realtime service and queue-broker with tests
 - [ ] Maybe abstract the websockets logic to a separate plugin
+- [ ] Add docker image for NATS in the travis-ci build
