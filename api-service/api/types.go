@@ -5,6 +5,8 @@ import (
 	"github.com/go-neutrino/neutrino-core/api-service/db"
 	"github.com/go-neutrino/neutrino-core/api-service/utils"
 	"net/http"
+	"github.com/go-neutrino/neutrino-core/api-service/notification"
+	"github.com/go-neutrino/neutrino-core/models"
 )
 
 type TypesController struct {
@@ -14,12 +16,12 @@ func (t *TypesController) CreateTypeHandler(c *gin.Context) {
 	body := utils.GetBody(c)
 	typeName := body["name"]
 
-	app := c.MustGet("app").(JSON)
+	app := c.MustGet("app").(models.JSON)
 
 	d := db.NewAppsDbService(c.MustGet("user").(string))
 	d.UpdateId(app["_id"],
-		JSON{
-			"$push": JSON{
+		models.JSON{
+			"$push": models.JSON{
 				"types": typeName,
 			},
 		},
@@ -30,12 +32,12 @@ func (t *TypesController) DeleteType(c *gin.Context) {
 	appId := c.Param("appId")
 	typeName := c.Param("typeName")
 
-	app := c.MustGet("app").(JSON)
+	app := c.MustGet("app").(models.JSON)
 
 	d := db.NewAppsDbService(c.MustGet("user").(string))
 	d.UpdateId(app["_id"],
-		JSON{
-			"$pull": JSON{
+		models.JSON{
+			"$pull": models.JSON{
 				"types": typeName,
 			},
 		},
@@ -66,6 +68,13 @@ func (t *TypesController) InsertInTypeHandler(c *gin.Context) {
 		return
 	}
 
+	notification.Notify(notification.Build(
+		notification.OP_CREATE,
+		notification.ORIGIN_API,
+		body,
+		nil,
+	))
+
 	RespondId(body["_id"], c)
 }
 
@@ -73,7 +82,7 @@ func (t *TypesController) GetTypeDataHandler(c *gin.Context) {
 	appId := c.Param("appId")
 	typeName := c.Param("typeName")
 
-	app := c.MustGet("app").(JSON)
+	app := c.MustGet("app").(models.JSON)
 	types := app["types"].([]interface{})
 	found := false
 

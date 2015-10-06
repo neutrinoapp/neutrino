@@ -2,8 +2,8 @@ package server
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
+	"github.com/go-neutrino/neutrino-core/log"
 )
 
 var (
@@ -23,7 +23,7 @@ func (p *messageProcessor) Process(mType int, m []byte) error {
 	}
 
 	//TODO:
-	fmt.Println(string(m))
+	log.Info(string(m))
 
 	return nil
 }

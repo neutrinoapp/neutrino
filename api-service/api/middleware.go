@@ -1,11 +1,12 @@
 package api
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-neutrino/neutrino-core/api-service/db"
 	"gopkg.in/dgrijalva/jwt-go.v2"
 	"strings"
+	"github.com/go-neutrino/neutrino-core/models"
+	"github.com/go-neutrino/neutrino-core/log"
 )
 
 func authWithToken(c *gin.Context, userToken string) error {
@@ -19,9 +20,9 @@ func authWithToken(c *gin.Context, userToken string) error {
 		tokenSecretRecord, err := db.NewSystemDbService().FindId("accountSecret", nil)
 
 		if err != nil {
-			fmt.Println(err.Error())
+			log.Error("No account secret found", err)
 			//we probably do not have such collection. Use a default secret and warn.
-			tokenSecretRecord = JSON{
+			tokenSecretRecord = models.JSON{
 				"value": "",
 			}
 		}
@@ -100,7 +101,7 @@ func injectAppMiddleware() gin.HandlerFunc {
 				return
 			}
 
-			c.Set("app", JSON{}.FromMap(app))
+			c.Set("app", models.JSON{}.FromMap(app))
 
 		} else {
 			RestError(c, "Invalid app id.")

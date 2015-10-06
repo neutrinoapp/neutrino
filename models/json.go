@@ -1,8 +1,9 @@
-package api
+package models
 
 import (
 	"bytes"
 	"fmt"
+	"encoding/json"
 )
 
 type JSON map[string]interface{}
@@ -21,6 +22,10 @@ func (j JSON) String() string {
 	})
 
 	return b.String()
+}
+
+func (j JSON) JsonString() ([]byte, error) {
+	return json.Marshal(j)
 }
 
 func (j JSON) FromMap(m map[string]interface{}) JSON {

@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"github.com/go-neutrino/neutrino-config"
-	"github.com/go-neutrino/neutrino-core/realtime-service/server"
 	"net/http"
+	"github.com/go-neutrino/neutrino-core/log"
+	"github.com/go-neutrino/neutrino-core/realtime-service/server"
 )
 
 func main() {
@@ -13,6 +13,6 @@ func main() {
 	server.Initialize(c)
 
 	port := c.GetString(nconfig.KEY_REALTIME_PORT)
-	fmt.Println("Listening on port: " + port)
-	fmt.Println(http.ListenAndServe(port, nil))
+	log.Info("Listening on port: " + port)
+	log.Info(http.ListenAndServe(port, nil))
 }

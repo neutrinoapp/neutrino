@@ -6,6 +6,7 @@ import (
 	"github.com/go-neutrino/neutrino-core/api-service/utils"
 	"net/http"
 	"time"
+	"github.com/go-neutrino/neutrino-core/models"
 )
 
 type ApplicationModel struct {
@@ -32,7 +33,7 @@ func (a *ApplicationController) CreateApplicationHandler(c *gin.Context) {
 	d := db.NewAppsDbService(c.MustGet("user").(string))
 
 	username := c.MustGet("user").(string)
-	doc := JSON{
+	doc := models.JSON{
 		"name":      body.Name,
 		"owner":     username,
 		"types":     []string{"users"},
@@ -53,10 +54,10 @@ func (a *ApplicationController) GetApplicationsHandler(c *gin.Context) {
 	d := db.NewAppsDbService(user)
 
 	res, err := d.Find(
-		JSON{
+		models.JSON{
 			"owner": user,
 		},
-		JSON{
+		models.JSON{
 			"name": 1,
 		},
 	)
@@ -76,7 +77,7 @@ func (a *ApplicationController) GetApplicationHandler(c *gin.Context) {
 }
 
 func (a *ApplicationController) DeleteApplicationHandler(c *gin.Context) {
-	appId := c.MustGet("app").(JSON)["_id"]
+	appId := c.MustGet("app").(models.JSON)["_id"]
 
 	d := db.NewAppsDbService(c.MustGet("user").(string))
 	err := d.RemoveId(appId)
@@ -88,13 +89,13 @@ func (a *ApplicationController) DeleteApplicationHandler(c *gin.Context) {
 }
 
 func (a *ApplicationController) UpdateApplicationHandler(c *gin.Context) {
-	appId := c.MustGet("app").(JSON)["_id"]
+	appId := c.MustGet("app").(models.JSON)["_id"]
 	d := db.NewAppsDbService(c.MustGet("user").(string))
 	doc := utils.WhitelistFields([]string{"name"}, utils.GetBody(c))
 
-	err := d.Update(JSON{
+	err := d.Update(models.JSON{
 		"_id": appId,
-	}, JSON{
+	}, models.JSON{
 		"$set": doc,
 	})
 

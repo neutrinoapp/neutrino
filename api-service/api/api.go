@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"net/http"
+	"github.com/go-neutrino/neutrino-core/models"
 )
 
 var initialized bool
@@ -69,10 +70,10 @@ func IsInitialized() bool {
 }
 
 func RespondId(id interface{}, c *gin.Context) {
-	i := JSON{}
+	i := models.JSON{}
 
 	switch t := id.(type) {
-	case JSON:
+	case models.JSON:
 		i["_id"] = t["_id"]
 	default:
 		i["_id"] = t

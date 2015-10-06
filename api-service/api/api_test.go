@@ -14,6 +14,7 @@ import (
 	"time"
 	"github.com/go-neutrino/neutrino-config"
 	"github.com/go-neutrino/neutrino-core/api-service/db"
+	"github.com/go-neutrino/neutrino-core/models"
 )
 
 var (
@@ -43,9 +44,9 @@ func (r *ResRecorder) BodyHas(str string) {
 	}
 }
 
-func (r *ResRecorder) BodyJSON() JSON {
+func (r *ResRecorder) BodyJSON() models.models.JSON {
 	b, _ := ioutil.ReadAll(r.Body)
-	var res JSON
+	var res models.JSON
 	json.Unmarshal(b, &res)
 	return res
 }
@@ -124,7 +125,7 @@ func randomString() string {
 }
 
 func register(t *testing.T) map[string]interface{} {
-	b := JSON{
+	b := models.JSON{
 		"email":    randomString() + "@gmail.com",
 		"password": "pass",
 	}
@@ -139,7 +140,7 @@ func register(t *testing.T) map[string]interface{} {
 func login(t *testing.T) (*UserModel, string) {
 	if token == "" {
 		user = register(t)
-		rec := sendRequest("POST", "/login", JSON{
+		rec := sendRequest("POST", "/login", models.JSON{
 			"email":    user["email"],
 			"password": user["password"],
 		}, t)

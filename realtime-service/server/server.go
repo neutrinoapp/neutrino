@@ -4,7 +4,7 @@ import (
 	"github.com/go-neutrino/neutrino-config"
 	"github.com/gorilla/websocket"
 	"github.com/spf13/viper"
-	"log"
+	"github.com/go-neutrino/neutrino-core/log"
 	"net/http"
 )
 
@@ -49,11 +49,11 @@ func Initialize(c *viper.Viper) {
 		for {
 			_, message, err := conn.ReadMessage()
 			if err != nil {
-				log.Println("read: ", err)
+				log.Info("read: ", err)
 				break
 			}
 
-			log.Printf("recv: %s", message)
+			log.Info("recv: %s", message)
 		}
 	}()
 }

@@ -1,8 +1,8 @@
 package server
 
 import (
-	"fmt"
 	"github.com/gorilla/websocket"
+	"github.com/go-neutrino/neutrino-core/log"
 )
 
 type RealtimeConnection interface {
@@ -64,7 +64,7 @@ func NewConnection(c *websocket.Conn, g string) RealtimeConnection {
 		if err != nil {
 			defer r.Close()
 
-			fmt.Println(err.Error())
+			log.Error(err)
 			GetConnectionStore().Remove(g, r)
 		}
 	}()

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"github.com/go-neutrino/neutrino-core/models"
 )
 
 func RestErrorInvalidBody(c *gin.Context) {
@@ -41,7 +42,7 @@ func RestError(c *gin.Context, err interface{}) {
 
 	c.Error(errors.New(msg))
 
-	c.JSON(status, JSON{
+	c.JSON(status, models.JSON{
 		"error": msg,
 	})
 }

@@ -8,6 +8,7 @@ import (
 	"gopkg.in/dgrijalva/jwt-go.v2"
 	"net/http"
 	"time"
+	"github.com/go-neutrino/neutrino-core/models"
 )
 
 type UserModel struct {
@@ -20,7 +21,7 @@ type AuthController struct {
 }
 
 func registerUser(c *gin.Context, d db.DbService) {
-	var u JSON
+	var u models.JSON
 
 	if err := c.Bind(&u); err != nil {
 		RestErrorInvalidBody(c)
@@ -33,7 +34,7 @@ func registerUser(c *gin.Context, d db.DbService) {
 		return
 	}
 
-	doc := JSON{
+	doc := models.JSON{
 		"_id":       u["email"].(string),
 		"password":  hashedPassword,
 		"createdAt": time.Now(),
@@ -48,7 +49,7 @@ func registerUser(c *gin.Context, d db.DbService) {
 }
 
 func loginUser(c *gin.Context, d db.DbService) {
-	var u JSON
+	var u models.JSON
 
 	if err := c.Bind(&u); err != nil {
 		RestError(c, err)
@@ -80,7 +81,7 @@ func loginUser(c *gin.Context, d db.DbService) {
 		return
 	}
 
-	c.JSON(http.StatusOK, JSON{
+	c.JSON(http.StatusOK, models.JSON{
 		"token": tokenStr,
 	})
 }

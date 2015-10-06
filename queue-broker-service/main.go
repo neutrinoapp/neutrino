@@ -2,13 +2,12 @@ package main
 
 import (
 	"github.com/go-neutrino/neutrino-config"
+	"github.com/go-neutrino/neutrino-core/log"
 	"github.com/gorilla/websocket"
 	"github.com/nats-io/nats"
 	"github.com/spf13/viper"
-	"log"
 	"net/http"
 	"strconv"
-	"time"
 )
 
 var (
@@ -25,17 +24,15 @@ var (
 )
 
 func jobsHandler(m *nats.Msg) {
-	log.Println("Got message " + string(m.Data))
+	log.Info("Got message " + string(m.Data))
 
 	for i, c := range connections {
-		log.Println("Sending message to connection: " + strconv.Itoa(i+1))
+		log.Info("Sending message to connection: " + strconv.Itoa(i+1))
 		c.WriteMessage(websocket.TextMessage, m.Data)
 	}
 }
 
 func main() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-
 	c = nconfig.Load()
 	qAddr := c.GetString(nconfig.KEY_QUEUE_ADDR)
 	n, e := nats.Connect(qAddr)
@@ -50,7 +47,7 @@ func main() {
 	}
 
 	conn.Subscribe("realtime-jobs", jobsHandler)
-	log.Println("Connected to NATS on " + qAddr)
+	log.Info("Connected to NATS on " + qAddr)
 
 	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
@@ -63,15 +60,7 @@ func main() {
 		connections = append(connections, conn)
 	})
 
-	go func() {
-		for {
-			time.Sleep(5 * time.Second)
-			log.Println("Sending message!")
-			conn.Publish("realtime-jobs", "Hello World")
-		}
-	}()
-
 	port := c.GetString(nconfig.KEY_BROKER_PORT)
-	log.Println("Starting WS service on port " + port)
+	log.Info("Starting WS service on port " + port)
 	http.ListenAndServe(port, nil)
 }
