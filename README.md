@@ -23,6 +23,8 @@ Interactive documentation can be found [here](http://docs.realbas3.apiary.io/#re
 # Development
 --------------
 
+### You need NATS and MongoDB running
+
 ```bash
 $ go get github.com/go-neutrino/neutrino
 ```
