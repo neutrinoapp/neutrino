@@ -44,7 +44,7 @@ func (r *ResRecorder) BodyHas(str string) {
 	}
 }
 
-func (r *ResRecorder) BodyJSON() models.models.JSON {
+func (r *ResRecorder) BodyJSON() models.JSON {
 	b, _ := ioutil.ReadAll(r.Body)
 	var res models.JSON
 	json.Unmarshal(b, &res)

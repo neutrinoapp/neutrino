@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 	"github.com/go-neutrino/neutrino-core/api-service/db"
+	"github.com/go-neutrino/neutrino-core/models"
 )
 
 func TestRegisterUser(t *testing.T) {
@@ -34,7 +35,7 @@ func TestLoginUser(t *testing.T) {
 
 func TestAppRegisterUser(t *testing.T) {
 	app := createApp(t)
-	b := JSON{
+	b := models.JSON{
 		"email":    randomString() + "@gmail.com",
 		"password": "pass",
 	}
@@ -54,12 +55,12 @@ func TestAppLoginUser(t *testing.T) {
 	email := randomString() + "@gmail.com"
 	password := "pass"
 
-	sendAuthenticatedRequest("POST", "/app/"+app.Id+"/register", JSON{
+	sendAuthenticatedRequest("POST", "/app/"+app.Id+"/register", models.JSON{
 		"email":    email,
 		"password": password,
 	}, t)
 
-	rec := sendAuthenticatedRequest("POST", "/app/"+app.Id+"/login", JSON{
+	rec := sendAuthenticatedRequest("POST", "/app/"+app.Id+"/login", models.JSON{
 		"email":    email,
 		"password": "pass",
 	}, t)
