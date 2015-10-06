@@ -1,6 +1,6 @@
 #WIP
 
-### Neutrino is under heavy development, there are still some rough edges.
+### Neutrino is under heavy development, there is a lot more work to be done.
 
 # NEUTRINO
 
