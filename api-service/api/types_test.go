@@ -8,29 +8,12 @@ func setupTypeTests(t *testing.T) (map[string]interface{}, *ApplicationModel, st
 	typeName := randomString()
 	app := createApp(t)
 
-	createTypeRec := sendAuthenticatedRequest("POST", "/app/"+app.Id+"/data",
-		map[string]interface{}{
-			"name": typeName,
-		}, t)
-
-	createTypeRec.CodeIs(200)
-
 	getRec := sendAuthenticatedRequest("GET", "/app/"+app.Id, nil, t)
 	getRec.CodeIs(200)
 
 	createdApp := getRec.BodyJSON()
 
 	return createdApp, app, typeName
-}
-
-func TestCreateType(t *testing.T) {
-	createdApp, _, typeName := setupTypeTests(t)
-
-	types := createdApp["types"].([]interface{})
-
-	if types[1].(string) != typeName {
-		t.Error("Type not created correctly")
-	}
 }
 
 func TestDeleteType(t *testing.T) {

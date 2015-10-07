@@ -12,20 +12,21 @@ import (
 type TypesController struct {
 }
 
-func (t *TypesController) CreateTypeHandler(c *gin.Context) {
-	body := utils.GetBody(c)
-	typeName := body["name"]
-
+func (t *TypesController) ensureType(typeName string, c *gin.Context) {
 	app := c.MustGet("app").(models.JSON)
+	user := c.MustGet("user").(string)
 
-	d := db.NewAppsDbService(c.MustGet("user").(string))
-	d.UpdateId(app["_id"],
-		models.JSON{
-			"$push": models.JSON{
-				"types": typeName,
+	go func() {
+		//we do not need to wait for this op
+		d := db.NewAppsDbService(user)
+		d.UpdateId(app["_id"],
+			models.JSON{
+				"$push": models.JSON{
+					"types": typeName,
+				},
 			},
-		},
-	)
+		)
+	}()
 }
 
 func (t *TypesController) DeleteType(c *gin.Context) {
@@ -60,6 +61,8 @@ func (t *TypesController) InsertInTypeHandler(c *gin.Context) {
 	typeName := c.Param("typeName")
 	body := utils.GetBody(c)
 
+	t.ensureType(typeName, c)
+
 	d := db.NewTypeDbService(appId, typeName)
 	err := d.Insert(body)
 
@@ -81,6 +84,8 @@ func (t *TypesController) InsertInTypeHandler(c *gin.Context) {
 func (t *TypesController) GetTypeDataHandler(c *gin.Context) {
 	appId := c.Param("appId")
 	typeName := c.Param("typeName")
+
+	t.ensureType(typeName, c)
 
 	app := c.MustGet("app").(models.JSON)
 	types := app["types"].([]interface{})
@@ -115,6 +120,8 @@ func (t *TypesController) GetTypeItemById(c *gin.Context) {
 	typeName := c.Param("typeName")
 	itemId := c.Param("itemId")
 
+	t.ensureType(typeName, c)
+
 	d := db.NewTypeDbService(appId, typeName)
 
 	item, err := d.FindId(itemId, nil)
@@ -132,6 +139,8 @@ func (t *TypesController) UpdateTypeItemById(c *gin.Context) {
 	typeName := c.Param("typeName")
 	itemId := c.Param("itemId")
 
+	t.ensureType(typeName, c)
+
 	d := db.NewTypeDbService(appId, typeName)
 	body := utils.GetBody(c)
 
@@ -141,12 +150,25 @@ func (t *TypesController) UpdateTypeItemById(c *gin.Context) {
 		RestError(c, err)
 		return
 	}
+
+	payload := models.JSON{}
+	payload.FromMap(body)
+	payload["_id"] = itemId
+
+	notification.Notify(notification.Build(
+		notification.OP_UPDATE,
+		notification.ORIGIN_API,
+		payload,
+		nil,
+	))
 }
 
 func (t *TypesController) DeleteTypeItemById(c *gin.Context) {
 	appId := c.Param("appId")
 	typeName := c.Param("typeName")
 	itemId := c.Param("itemId")
+
+	t.ensureType(typeName, c)
 
 	d := db.NewTypeDbService(appId, typeName)
 
@@ -156,4 +178,13 @@ func (t *TypesController) DeleteTypeItemById(c *gin.Context) {
 		RestError(c, err)
 		return
 	}
+
+	notification.Notify(notification.Build(
+		notification.OP_DELETE,
+		notification.ORIGIN_API,
+		models.JSON{
+			"_id": itemId,
+		},
+		nil,
+	))
 }

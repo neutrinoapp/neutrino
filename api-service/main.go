@@ -15,5 +15,5 @@ func main() {
 	db.Initialize(c)
 	api.Initialize(engine, c)
 
-	engine.Run(c.GetString(nconfig.KEY_CORE_PORT))
+	engine.Run(c.GetString(nconfig.KEY_API_PORT))
 }

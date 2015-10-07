@@ -20,7 +20,7 @@ func authWithToken(c *gin.Context, userToken string) error {
 		tokenSecretRecord, err := db.NewSystemDbService().FindId("accountSecret", nil)
 
 		if err != nil {
-			log.Error("No account secret found", err)
+			log.Error("Account secret error: ", err)
 			//we probably do not have such collection. Use a default secret and warn.
 			tokenSecretRecord = models.JSON{
 				"value": "",

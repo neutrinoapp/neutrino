@@ -15,6 +15,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"runtime"
 )
 
 var (
@@ -30,7 +31,8 @@ type ResRecorder struct {
 
 func (r *ResRecorder) CodeIs(s int) {
 	if r.Code != s {
-		r.t.Error(r.Code, "is different from", s)
+		_, file, line, _ := runtime.Caller(2)
+		r.t.Error(r.Code, "is different from", s, file+":"+strconv.Itoa(line))
 	}
 }
 
