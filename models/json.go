@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"io/ioutil"
 )
 
 type JSON map[string]interface{}
@@ -34,4 +36,18 @@ func (j JSON) FromMap(m map[string]interface{}) JSON {
 	}
 
 	return j
+}
+
+func (j JSON) FromResponse(res *http.Response) error {
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(body, j)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

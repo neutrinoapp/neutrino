@@ -23,7 +23,7 @@ Interactive documentation can be found [here](http://docs.realbas3.apiary.io/#re
 # Development
 --------------
 
-### You need NATS and MongoDB running
+### You need NATS and MongoDB running, refer to **dev-setup.sh**
 
 ```bash
 $ go get github.com/go-neutrino/neutrino
@@ -70,7 +70,9 @@ $ go test -v ./..
 # TODO
 #### Updated on the go:
 
-- [ ] Api service should send realtime-jobs to the queue for the broker and realtime service to process them
 - [ ] Cover api service's new functionality, realtime service and queue-broker with tests
 - [ ] Maybe abstract the websockets logic to a separate plugin
 - [ ] Add docker image for NATS in the travis-ci build
+- [ ] Sort out permissons
+- [ ] Go client (for tests)
+- [ ] Js client

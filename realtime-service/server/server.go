@@ -6,6 +6,8 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/spf13/viper"
 	"net/http"
+	"time"
+	"fmt"
 )
 
 var (
@@ -19,6 +21,27 @@ var (
 	}
 	config *viper.Viper
 )
+
+func connectToBroker() *websocket.Conn {
+	wsDialer := websocket.Dialer{}
+	var conn *websocket.Conn
+	brokerHost := config.GetString(nconfig.KEY_BROKER_HOST)
+	brokerPort := config.GetString(nconfig.KEY_BROKER_PORT)
+	//retry the connection to the broker until established
+	for {
+		c, _, err := wsDialer.Dial(brokerHost+brokerPort+"/register", nil)
+		if err != nil {
+			log.Error(err)
+			time.Sleep(time.Second * 5)
+		} else {
+			log.Info("Connected to broker.")
+			conn = c
+			break;
+		}
+	}
+
+	return conn
+}
 
 func Initialize(c *viper.Viper) {
 	config = c
@@ -38,22 +61,19 @@ func Initialize(c *viper.Viper) {
 		GetConnectionStore().Put(token, realtimeConn)
 	})
 
-	wsDialer := websocket.Dialer{}
-	conn, _, err := wsDialer.Dial(c.GetString(nconfig.KEY_BROKER_HOST)+c.GetString(nconfig.KEY_BROKER_PORT)+"/register", nil)
-	if err != nil {
-		panic(err)
-	}
-
 	go func() {
-		defer conn.Close()
+		conn := connectToBroker()
 		for {
 			_, message, err := conn.ReadMessage()
 			if err != nil {
-				log.Info("read: ", err)
-				break
+				conn.Close()
+				log.Error("Broker connection error: ", err, "reconnecting....")
+				conn = connectToBroker()
+				//just in case if something bad happens
+				defer conn.Close()
 			}
 
-			log.Info("recv: %s", message)
+			log.Info(fmt.Sprintf("recv: %s", message))
 		}
 	}()
 }
