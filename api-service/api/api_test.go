@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/go-neutrino/neutrino-config"
 	"github.com/go-neutrino/neutrino-core/api-service/db"
 	"github.com/go-neutrino/neutrino-core/models"
 	"io/ioutil"
@@ -67,9 +66,8 @@ func sendRequest(method, path string, body interface{}, t *testing.T) *ResRecord
 	if !IsInitialized() {
 		e := gin.Default()
 		apiHandler = e
-		testConfig := nconfig.Load()
-		Initialize(e, testConfig)
-		db.Initialize(testConfig)
+		Initialize(e)
+		db.Initialize()
 		httptest.NewServer(e)
 
 		e.Use(func() gin.HandlerFunc {

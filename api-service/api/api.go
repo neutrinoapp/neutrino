@@ -3,12 +3,10 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-neutrino/neutrino-core/models"
-	"github.com/spf13/viper"
 	"net/http"
 )
 
 var initialized bool
-var config *viper.Viper
 
 func initMiddleware(e *gin.Engine) {
 	e.Use(defaultContentTypeMiddleware())
@@ -52,13 +50,12 @@ func initRoutes(e *gin.Engine) {
 	}
 }
 
-func Initialize(e *gin.Engine, c *viper.Viper) {
+func Initialize(e *gin.Engine) {
 	if IsInitialized() {
 		return
 	}
 
 	initialized = true
-	config = c
 
 	initMiddleware(e)
 	initRoutes(e)

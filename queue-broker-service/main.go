@@ -1,17 +1,15 @@
 package main
 
 import (
-	"github.com/go-neutrino/neutrino-config"
 	"github.com/go-neutrino/neutrino-core/log"
 	"github.com/gorilla/websocket"
 	"github.com/nats-io/nats"
-	"github.com/spf13/viper"
 	"net/http"
 	"strconv"
+	"github.com/go-neutrino/neutrino-core/config"
 )
 
 var (
-	c        *viper.Viper
 	upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -33,8 +31,7 @@ func jobsHandler(m *nats.Msg) {
 }
 
 func main() {
-	c = nconfig.Load()
-	qAddr := c.GetString(nconfig.KEY_QUEUE_ADDR)
+	qAddr := config.Get(config.KEY_QUEUE_ADDR)
 	n, e := nats.Connect(qAddr)
 
 	if e != nil {
@@ -60,7 +57,7 @@ func main() {
 		connections = append(connections, conn)
 	})
 
-	port := c.GetString(nconfig.KEY_BROKER_PORT)
+	port := config.Get(config.KEY_BROKER_PORT)
 	log.Info("Starting WS service on port " + port)
 	http.ListenAndServe(port, nil)
 }

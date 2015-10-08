@@ -1,7 +1,6 @@
 package integrationtests
 
 import (
-	"github.com/go-neutrino/neutrino-config"
 	"net/http"
 	"encoding/json"
 	"strings"
@@ -9,11 +8,11 @@ import (
 	"time"
 	"strconv"
 	"github.com/go-neutrino/neutrino-core/models"
+	"github.com/go-neutrino/neutrino-core/config"
 )
 
 var (
-	config = nconfig.Load()
-	ApiBaseUrl = "http://localhost" + config.GetString(nconfig.KEY_API_PORT) + "/v1/"
+	ApiBaseUrl = "http://localhost" + config.Get(config.KEY_API_PORT) + "/v1/"
 	AppId = ""
 	Token = ""
 	Email = ""

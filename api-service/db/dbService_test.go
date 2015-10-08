@@ -1,7 +1,6 @@
 package db
 
 import (
-	"github.com/go-neutrino/neutrino-config"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"testing"
@@ -14,8 +13,7 @@ var (
 )
 
 func init() {
-	c := nconfig.Load()
-	Initialize(c)
+	Initialize()
 }
 
 func getDefaultDbService() DbService {

@@ -1,16 +1,14 @@
 package notification
 
 import (
-	"github.com/go-neutrino/neutrino-config"
 	"github.com/go-neutrino/neutrino-core/log"
 	"github.com/go-neutrino/neutrino-core/models"
 	"github.com/nats-io/nats"
-	"github.com/spf13/viper"
+	"github.com/go-neutrino/neutrino-core/config"
 )
 
 var (
 	qConn *nats.EncodedConn
-	c     *viper.Viper
 )
 
 type op string
@@ -26,8 +24,7 @@ const (
 )
 
 func init() {
-	c = nconfig.Load()
-	qAddr := c.GetString(nconfig.KEY_QUEUE_ADDR)
+	qAddr := config.Get(config.KEY_QUEUE_ADDR)
 	n, e := nats.Connect(qAddr)
 
 	if e != nil {
@@ -43,7 +40,7 @@ func init() {
 }
 
 func Notify(data models.JSON) {
-	subj := c.GetString(nconfig.CONST_REALTIME_JOBS_SUBJ)
+	subj := config.Get(config.CONST_REALTIME_JOBS_SUBJ)
 	log.Info("Publishing to queue subject: " + subj + " data: " + data.String())
 	qConn.Publish(subj, data)
 }

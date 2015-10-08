@@ -3,10 +3,11 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-neutrino/neutrino-core/api-service/db"
-	"github.com/go-neutrino/neutrino-core/api-service/utils"
 	"github.com/go-neutrino/neutrino-core/models"
 	"net/http"
 	"time"
+	"github.com/go-neutrino/neutrino-core/utils"
+	"github.com/go-neutrino/neutrino-core/utils/webUtils"
 )
 
 type ApplicationModel struct {
@@ -91,7 +92,7 @@ func (a *ApplicationController) DeleteApplicationHandler(c *gin.Context) {
 func (a *ApplicationController) UpdateApplicationHandler(c *gin.Context) {
 	appId := c.MustGet("app").(models.JSON)["_id"]
 	d := db.NewAppsDbService(c.MustGet("user").(string))
-	doc := utils.WhitelistFields([]string{"name"}, utils.GetBody(c))
+	doc := utils.WhitelistFields([]string{"name"}, webUtils.GetBody(c))
 
 	err := d.Update(models.JSON{
 		"_id": appId,

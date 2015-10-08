@@ -4,9 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-neutrino/neutrino-core/api-service/db"
 	"github.com/go-neutrino/neutrino-core/api-service/notification"
-	"github.com/go-neutrino/neutrino-core/api-service/utils"
 	"github.com/go-neutrino/neutrino-core/models"
 	"net/http"
+	"github.com/go-neutrino/neutrino-core/utils/webUtils"
 )
 
 type TypesController struct {
@@ -59,7 +59,7 @@ func (t *TypesController) DeleteType(c *gin.Context) {
 func (t *TypesController) InsertInTypeHandler(c *gin.Context) {
 	appId := c.Param("appId")
 	typeName := c.Param("typeName")
-	body := utils.GetBody(c)
+	body := webUtils.GetBody(c)
 
 	t.ensureType(typeName, c)
 
@@ -142,7 +142,7 @@ func (t *TypesController) UpdateTypeItemById(c *gin.Context) {
 	t.ensureType(typeName, c)
 
 	d := db.NewTypeDbService(appId, typeName)
-	body := utils.GetBody(c)
+	body := webUtils.GetBody(c)
 
 	err := d.UpdateId(itemId, body)
 

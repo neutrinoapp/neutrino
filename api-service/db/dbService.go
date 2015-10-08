@@ -1,10 +1,10 @@
 package db
 
 import (
-	"github.com/go-neutrino/neutrino-config"
-	"github.com/go-neutrino/neutrino-core/api-service/utils"
 	"gopkg.in/mgo.v2"
 	"log"
+	"github.com/go-neutrino/neutrino-core/config"
+	"github.com/go-neutrino/neutrino-core/utils"
 )
 
 var connectionPool map[string]*mgo.Session
@@ -28,7 +28,7 @@ type dbService struct {
 }
 
 func NewDbService(dbName, colName string, index mgo.Index) DbService {
-	connectionString := config.GetString(nconfig.KEY_MONGO_ADDR)
+	connectionString := config.Get(config.KEY_MONGO_ADDR)
 	d := dbService{connectionString, dbName, colName, index}
 	return &d
 }

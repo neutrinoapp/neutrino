@@ -1,13 +1,12 @@
 package server
 
 import (
-	"github.com/go-neutrino/neutrino-config"
 	"github.com/go-neutrino/neutrino-core/log"
 	"github.com/gorilla/websocket"
-	"github.com/spf13/viper"
 	"net/http"
 	"time"
 	"fmt"
+	"github.com/go-neutrino/neutrino-core/config"
 )
 
 var (
@@ -19,14 +18,13 @@ var (
 			return true
 		},
 	}
-	config *viper.Viper
 )
 
 func connectToBroker() *websocket.Conn {
 	wsDialer := websocket.Dialer{}
 	var conn *websocket.Conn
-	brokerHost := config.GetString(nconfig.KEY_BROKER_HOST)
-	brokerPort := config.GetString(nconfig.KEY_BROKER_PORT)
+	brokerHost := config.Get(config.KEY_BROKER_HOST)
+	brokerPort := config.Get(config.KEY_BROKER_PORT)
 	//retry the connection to the broker until established
 	for {
 		c, _, err := wsDialer.Dial(brokerHost+brokerPort+"/register", nil)
@@ -43,9 +41,7 @@ func connectToBroker() *websocket.Conn {
 	return conn
 }
 
-func Initialize(c *viper.Viper) {
-	config = c
-
+func Initialize() {
 	http.HandleFunc("/data", func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 
