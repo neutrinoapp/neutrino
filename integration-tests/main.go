@@ -42,7 +42,7 @@ func SendRequest(baseUrl, url, method string, body interface{}) models.JSON {
 			panic (err)
 		}
 
-		bodyStr = b
+		bodyStr = string(b)
 	}
 
 	req, err := http.NewRequest(method, baseUrl + url, strings.NewReader(bodyStr))
@@ -54,7 +54,8 @@ func SendRequest(baseUrl, url, method string, body interface{}) models.JSON {
 		req.Header.Set("Authorization", "Bearer "+Token)
 	}
 
-	res, err := http.Client.Do(req)
+	client := http.Client{}
+	res, err := client.Do(req)
 	defer res.Body.Close()
 	if err != nil {
 		panic(err)
@@ -74,7 +75,7 @@ func CreateApp(name string) string {
 		"name": name,
 	})
 
-	return res["_id"]
+	return res["_id"].(string)
 }
 
 func Register(email, password string) {
@@ -90,5 +91,5 @@ func Login(email, password string) string {
 		"password": password,
 	})
 
-	return res["token"]
+	return res["token"].(string)
 }
