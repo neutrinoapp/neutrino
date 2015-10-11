@@ -7,7 +7,7 @@ services:
 
 before_install:
   - docker pull apcera/gnatsd:latest
-  - docker run --name nats -p 4222:4222 -p 8333:8333 -d apcera/gnatsd:latest -m 8333
+  - docker run --name nats -p 127.0.0.1:4222:4222 -p 127.0.0.1:8333:8333 -d apcera/gnatsd:latest -m 8333
   - docker ps -a
 
 script: go test ./api-service/... ./queue-broker-service/... ./realtime-service/...
