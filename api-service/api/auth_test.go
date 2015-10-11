@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/go-neutrino/neutrino-core/api-service/db"
-	"github.com/go-neutrino/neutrino-core/models"
+	"github.com/go-neutrino/neutrino/api-service/db"
+	"github.com/go-neutrino/neutrino/models"
 	"net/http"
 	"strings"
 	"testing"

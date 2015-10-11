@@ -1,10 +1,10 @@
 package notification
 
 import (
-	"github.com/go-neutrino/neutrino-core/log"
-	"github.com/go-neutrino/neutrino-core/models"
+	"github.com/go-neutrino/neutrino/log"
+	"github.com/go-neutrino/neutrino/models"
 	"github.com/nats-io/nats"
-	"github.com/go-neutrino/neutrino-core/config"
+	"github.com/go-neutrino/neutrino/config"
 )
 
 var (

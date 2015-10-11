@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/go-neutrino/neutrino-core/log"
+	"github.com/go-neutrino/neutrino/log"
 	"github.com/gorilla/websocket"
 )
 

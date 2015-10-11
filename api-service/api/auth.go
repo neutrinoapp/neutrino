@@ -2,13 +2,13 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/go-neutrino/neutrino-core/api-service/db"
-	"github.com/go-neutrino/neutrino-core/models"
+	"github.com/go-neutrino/neutrino/api-service/db"
+	"github.com/go-neutrino/neutrino/models"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/dgrijalva/jwt-go.v2"
 	"net/http"
 	"time"
-	"github.com/go-neutrino/neutrino-core/utils/webUtils"
+	"github.com/go-neutrino/neutrino/utils/webUtils"
 )
 
 type UserModel struct {

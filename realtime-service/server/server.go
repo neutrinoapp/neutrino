@@ -1,12 +1,12 @@
 package server
 
 import (
-	"github.com/go-neutrino/neutrino-core/log"
+	"github.com/go-neutrino/neutrino/log"
 	"github.com/gorilla/websocket"
 	"net/http"
 	"time"
 	"fmt"
-	"github.com/go-neutrino/neutrino-core/config"
+	"github.com/go-neutrino/neutrino/config"
 )
 
 var (

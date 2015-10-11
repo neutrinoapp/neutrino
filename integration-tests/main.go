@@ -7,8 +7,8 @@ import (
 	"math/rand"
 	"time"
 	"strconv"
-	"github.com/go-neutrino/neutrino-core/models"
-	"github.com/go-neutrino/neutrino-core/config"
+	"github.com/go-neutrino/neutrino/models"
+	"github.com/go-neutrino/neutrino/config"
 )
 
 var (

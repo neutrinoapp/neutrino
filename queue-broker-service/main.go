@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/go-neutrino/neutrino-core/log"
+	"github.com/go-neutrino/neutrino/log"
 	"github.com/gorilla/websocket"
 	"github.com/nats-io/nats"
 	"net/http"
 	"strconv"
-	"github.com/go-neutrino/neutrino-core/config"
+	"github.com/go-neutrino/neutrino/config"
 )
 
 var (

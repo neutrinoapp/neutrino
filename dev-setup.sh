@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 docker -v
 
 docker pull apcera/gnatsd

@@ -3,7 +3,7 @@ package api
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	"github.com/go-neutrino/neutrino-core/models"
+	"github.com/go-neutrino/neutrino/models"
 	"net/http"
 )
 

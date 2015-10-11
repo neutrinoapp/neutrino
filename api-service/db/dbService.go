@@ -3,8 +3,8 @@ package db
 import (
 	"gopkg.in/mgo.v2"
 	"log"
-	"github.com/go-neutrino/neutrino-core/config"
-	"github.com/go-neutrino/neutrino-core/utils"
+	"github.com/go-neutrino/neutrino/config"
+	"github.com/go-neutrino/neutrino/utils"
 )
 
 var connectionPool map[string]*mgo.Session
