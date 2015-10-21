@@ -21,12 +21,18 @@ func (t *TypesController) ensureType(typeName string, c *gin.Context) {
 		d := db.NewAppsDbService(user)
 		d.UpdateId(app["_id"],
 			models.JSON{
-				"$push": models.JSON{
+				"$addToSet": models.JSON{
 					"types": typeName,
 				},
 			},
 		)
 	}()
+}
+
+func (t *TypesController) GetTypesHandler(c *gin.Context) {
+	app := c.MustGet("app").(models.JSON)
+
+	c.JSON(http.StatusOK, app["types"])
 }
 
 func (t *TypesController) DeleteType(c *gin.Context) {

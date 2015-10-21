@@ -70,9 +70,7 @@ $ go test -v ./..
 # TODO
 #### Updated on the go:
 
-- [ ] Cover api service's new functionality, realtime service and queue-broker with tests
-- [ ] Maybe abstract the websockets logic to a separate plugin
-- [ ] Add docker image for NATS in the travis-ci build
-- [ ] Sort out permissons
 - [ ] Go client (for tests)
+- [ ] Cover api service's new functionality, realtime service and queue-broker with tests
+- [ ] Sort out permissions
 - [ ] Js client

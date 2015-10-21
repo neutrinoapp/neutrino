@@ -22,8 +22,13 @@ func (p *messageProcessor) Process(mType int, m []byte) error {
 		return errors.New("Unsupported message type: " + strconv.Itoa(mType))
 	}
 
-	//TODO:
-	log.Info(string(m))
+	message := string(m)
+	//TODO: send message only to the right clients, sort of filtering on the go
+	for _, conn := range GetConnectionStore().Get("") {
+		conn.Broadcast(message)
+	}
+
+	log.Info(message)
 
 	return nil
 }

@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"github.com/go-neutrino/neutrino/models"
 	"github.com/go-neutrino/neutrino/config"
+	"github.com/go-neutrino/neutrino/log"
 )
 
 var (
@@ -64,14 +65,14 @@ func SendRequest(baseUrl, url, method string, body interface{}) models.JSON {
 	json := models.JSON{}
 	err = json.FromResponse(res)
 	if err != nil {
-		panic(err)
+		log.Error(err)
 	}
 
 	return json
 }
 
 func CreateApp(name string) string {
-	res := SendRequest(ApiBaseUrl, "app", "post", models.JSON{
+	res := SendRequest(ApiBaseUrl, "app", "POST", models.JSON{
 		"name": name,
 	})
 
@@ -79,17 +80,21 @@ func CreateApp(name string) string {
 }
 
 func Register(email, password string) {
-	SendRequest(ApiBaseUrl, "register", "post", models.JSON{
+	SendRequest(ApiBaseUrl, "register", "POST", models.JSON{
 		"email": email,
 		"password": password,
 	})
 }
 
 func Login(email, password string) string {
-	res := SendRequest(ApiBaseUrl, "login", "post", models.JSON{
+	res := SendRequest(ApiBaseUrl, "login", "POST", models.JSON{
 		"email": email,
 		"password": password,
 	})
 
 	return res["token"].(string)
+}
+
+func CreateItem(t string, m models.JSON) models.JSON {
+	return SendRequest(ApiBaseUrl, "app/" + AppId + "/data/" + t, "POST", m)
 }

@@ -7,17 +7,11 @@ import (
 	"net/http"
 	"strconv"
 	"github.com/go-neutrino/neutrino/config"
+	"github.com/go-neutrino/neutrino/client"
 )
 
 var (
-	upgrader = websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
-		CheckOrigin: func(r *http.Request) bool {
-			//allow connections from any origin
-			return true
-		},
-	}
+	upgrader = client.NewWebsocketUpgrader()
 	connections []*websocket.Conn
 )
 

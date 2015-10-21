@@ -38,6 +38,7 @@ func initRoutes(e *gin.Engine) {
 
 				dataGroup := appIdGroup.Group("/data")
 				{
+					dataGroup.GET("", typesController.GetTypesHandler)
 					dataGroup.DELETE("/:typeName", typesController.DeleteType)
 					dataGroup.POST("/:typeName", typesController.InsertInTypeHandler)
 					dataGroup.GET("/:typeName", typesController.GetTypeDataHandler)

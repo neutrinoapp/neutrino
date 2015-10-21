@@ -2,43 +2,20 @@ package server
 
 import (
 	"github.com/go-neutrino/neutrino/log"
-	"github.com/gorilla/websocket"
 	"net/http"
-	"time"
-	"fmt"
 	"github.com/go-neutrino/neutrino/config"
+	"github.com/go-neutrino/neutrino/client"
 )
 
 var (
-	upgrader = websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
-		CheckOrigin: func(r *http.Request) bool {
-			//allow connections from any origin
-			return true
-		},
-	}
+	upgrader = client.NewWebsocketUpgrader()
+	brokerClient *client.WebsocketClient
 )
 
-func connectToBroker() *websocket.Conn {
-	wsDialer := websocket.Dialer{}
-	var conn *websocket.Conn
+func init() {
 	brokerHost := config.Get(config.KEY_BROKER_HOST)
 	brokerPort := config.Get(config.KEY_BROKER_PORT)
-	//retry the connection to the broker until established
-	for {
-		c, _, err := wsDialer.Dial(brokerHost+brokerPort+"/register", nil)
-		if err != nil {
-			log.Error(err)
-			time.Sleep(time.Second * 5)
-		} else {
-			log.Info("Connected to broker.")
-			conn = c
-			break;
-		}
-	}
-
-	return conn
+	brokerClient = client.NewWebsocketClient(brokerHost+brokerPort+"/register")
 }
 
 func Initialize() {
@@ -58,18 +35,11 @@ func Initialize() {
 	})
 
 	go func() {
-		conn := connectToBroker()
 		for {
-			_, message, err := conn.ReadMessage()
-			if err != nil {
-				conn.Close()
-				log.Error("Broker connection error: ", err, "reconnecting....")
-				conn = connectToBroker()
-				//just in case if something bad happens
-				defer conn.Close()
+			select {
+			case msg := <- brokerClient.Message:
+				log.Info("Got message:", msg)
 			}
-
-			log.Info(fmt.Sprintf("recv: %s", message))
 		}
 	}()
 }

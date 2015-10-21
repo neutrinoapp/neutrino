@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"io/ioutil"
+	"errors"
 )
 
 type JSON map[string]interface{}
@@ -38,15 +39,19 @@ func (j JSON) FromMap(m map[string]interface{}) JSON {
 	return j
 }
 
-func (j JSON) FromResponse(res *http.Response) error {
+func (j *JSON) FromResponse(res *http.Response) error {
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}
 
+	if (string(body) == "") {
+		return nil
+	}
+
 	err = json.Unmarshal(body, j)
 	if err != nil {
-		return err
+		return errors.New(err.Error() + "; Body: " + string(body))
 	}
 
 	return nil
