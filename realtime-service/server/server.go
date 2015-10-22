@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/go-neutrino/neutrino/log"
+//	"github.com/go-neutrino/neutrino/log"
 	"net/http"
 	"github.com/go-neutrino/neutrino/config"
 	"github.com/go-neutrino/neutrino/client"
@@ -38,7 +38,10 @@ func Initialize() {
 		for {
 			select {
 			case msg := <- brokerClient.Message:
-				log.Info("Got message:", msg)
+				//TODO:
+				for _, conn := range GetConnectionStore().Get("") {
+					conn.Broadcast(msg)
+				}
 			}
 		}
 	}()

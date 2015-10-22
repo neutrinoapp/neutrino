@@ -1,4 +1,5 @@
 package client
+
 import (
 	"github.com/go-neutrino/neutrino/log"
 	"time"

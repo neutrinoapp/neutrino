@@ -1,26 +1,46 @@
 package integrationtests
 
 import (
-	"testing"
-	"github.com/go-neutrino/neutrino/realtime-service/client"
-	"time"
+	"github.com/go-neutrino/neutrino/log"
 	"github.com/go-neutrino/neutrino/models"
+	"github.com/go-neutrino/neutrino/realtime-service/client"
 	"sync"
+	"testing"
+	"time"
 )
 
-var c = neutrinoclient.NewClient("15f7fee2b1dc41a1b9b3398321358277")
+func noop (ev neutrinoclient.NeutrinoEvent, m models.JSON) {
+	//dummy func
+}
 
-func readMessage(t *testing.T, expectedEv string, times int) sync.WaitGroup {
-	var wg sync.WaitGroup
+func readMessages(t *testing.T, expectedEv []string, times int,
+		cb func(neutrinoclient.NeutrinoEvent, models.JSON)) *sync.WaitGroup {
+
+	wg := &sync.WaitGroup{}
 	wg.Add(times)
 
-	go func () {
+	go func() {
 		for i := 0; i < times; i++ {
 			select {
-			case ev := <- c.Data("test").Event:
-				t.Log(ev.Code, ev.Data)
+			case ev := <-Data.Event:
+				log.Info("Test event:", ev.Code, ev.Data)
 
-				if (ev.Code != expectedEv) {
+				var m models.JSON
+				err := m.FromString([]byte(ev.Data))
+				if err != nil {
+					t.Error(err)
+				}
+
+				cb(ev, m)
+
+				foundEv := false
+				for _, e := range expectedEv {
+					if e == ev.Code {
+						foundEv = true
+					}
+				}
+
+				if !foundEv {
 					t.Error("Unexptected event.", ev.Data)
 				}
 			}
@@ -29,16 +49,39 @@ func readMessage(t *testing.T, expectedEv string, times int) sync.WaitGroup {
 		}
 	}()
 
+	time.Sleep(time.Second * 1)
+
 	return wg
 }
 
 func TestInsertIntoType(t *testing.T) {
-	wg := readMessage(t, neutrinoclient.EVENT_CREATE, 1)
-
-	time.Sleep(time.Second * 1)
+	wg := readMessages(t, []string{neutrinoclient.EVENT_CREATE}, 1, noop)
 
 	CreateItem("test", models.JSON{
 		"name": "test",
+	})
+
+	wg.Wait()
+}
+
+func TestUpdateItem(t *testing.T) {
+	cb := func (ev neutrinoclient.NeutrinoEvent, m models.JSON) {
+		if (ev.Code == neutrinoclient.EVENT_UPDATE) {
+			n := m["payload"].(map[string]interface{})["name"]
+			if (n != "updated-test") {
+				t.Error("Incorrect updated name:", n, "Expected: updated-test")
+			}
+		}
+	}
+
+	wg := readMessages(t, []string{neutrinoclient.EVENT_CREATE, neutrinoclient.EVENT_UPDATE}, 2, cb)
+
+	id := CreateItem("test", models.JSON{
+		"name": "test",
+	})["_id"].(string)
+
+	UpdateItem("test", id, models.JSON{
+		"name": "updated-test",
 	})
 
 	wg.Wait()

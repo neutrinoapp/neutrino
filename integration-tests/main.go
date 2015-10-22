@@ -10,6 +10,7 @@ import (
 	"github.com/go-neutrino/neutrino/models"
 	"github.com/go-neutrino/neutrino/config"
 	"github.com/go-neutrino/neutrino/log"
+	"github.com/go-neutrino/neutrino/realtime-service/client"
 )
 
 var (
@@ -18,6 +19,8 @@ var (
 	Token = ""
 	Email = ""
 	Password = ""
+	Client *neutrinoclient.NeutrinoClient
+	Data *neutrinoclient.NeutrinoData
 )
 
 func randomString() string {
@@ -33,6 +36,9 @@ func init() {
 	Register(Email, Password)
 	Token = Login(Email, Password)
 	AppId = CreateApp(randomString())
+
+	Client = neutrinoclient.NewClient(AppId)
+	Data = Client.Data("test")
 }
 
 func SendRequest(baseUrl, url, method string, body interface{}) models.JSON {
@@ -97,4 +103,8 @@ func Login(email, password string) string {
 
 func CreateItem(t string, m models.JSON) models.JSON {
 	return SendRequest(ApiBaseUrl, "app/" + AppId + "/data/" + t, "POST", m)
+}
+
+func UpdateItem(t, id string, m models.JSON) models.JSON {
+	return SendRequest(ApiBaseUrl, "app/" + AppId + "/data/" + t + "/" + id, "PUT", m)
 }

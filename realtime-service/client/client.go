@@ -1,8 +1,10 @@
 package neutrinoclient
 
 import (
-"github.com/go-neutrino/neutrino/client"
-"github.com/go-neutrino/neutrino/log"
+	"github.com/go-neutrino/neutrino/client"
+	"github.com/go-neutrino/neutrino/log"
+	"github.com/go-neutrino/neutrino/models"
+	"sync"
 )
 
 type (
@@ -10,6 +12,7 @@ type (
 		Addr string
 		AppId string
 		WebsocketClient *client.WebsocketClient
+		listeners []*NeutrinoData
 	}
 )
 
@@ -25,11 +28,24 @@ func NewClient(appId string) *NeutrinoClient {
 
 	go func () {
 		processMessage := func (msg string) {
-			log.Info(msg)
+			log.Info("Neutrino client sending message to data callback:", msg)
+			var m models.JSON
+			err := m.FromString([]byte(msg))
+			if err != nil {
+				log.Error(err)
+				return
+			}
+
+			typeName := m["type"]
+			for _, listener := range c.listeners {
+				if listener.Name == typeName {
+					listener.onDataMessage(m)
+				}
+			}
 		}
 
 		for {
-			select {
+		select {
 			case msg := <- c.WebsocketClient.Message:
 				if (msg != "") {
 					processMessage(msg)
@@ -43,4 +59,11 @@ func NewClient(appId string) *NeutrinoClient {
 
 func (c *NeutrinoClient) getAppUrl() string {
 	return c.Addr + "/app/" + c.AppId
+}
+
+func (c *NeutrinoClient) registerDataListener(d *NeutrinoData) {
+	m := &sync.Mutex{}
+	m.Lock()
+	c.listeners = append(c.listeners, d)
+	m.Unlock()
 }

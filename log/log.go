@@ -27,5 +27,6 @@ func Info(v ...interface{}) {
 }
 
 func Error(v ...interface{}) {
+	//TODO: proper error logging
 	log.Println(append(args(), v)...)
 }

@@ -1,9 +1,7 @@
 package models
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"io/ioutil"
 	"errors"
@@ -17,18 +15,13 @@ func (j JSON) ForEach(f func(key string, value interface{})) {
 	}
 }
 
-func (j JSON) String() string {
-	var b bytes.Buffer
-
-	j.ForEach(func(k string, v interface{}) {
-		b.WriteString(k + ":" + fmt.Sprintf("%v", v) + "\r\n")
-	})
-
-	return b.String()
+func (j *JSON) String() (string, error) {
+	b, err := json.Marshal(j)
+	return string(b), err
 }
 
-func (j JSON) JsonString() ([]byte, error) {
-	return json.Marshal(j)
+func (j *JSON) FromString(str []byte) error {
+	return json.Unmarshal(str, j)
 }
 
 func (j JSON) FromMap(m map[string]interface{}) JSON {

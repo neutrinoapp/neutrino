@@ -3,7 +3,7 @@ package client
 import (
 	"github.com/gorilla/websocket"
 	"net/http"
-"github.com/go-neutrino/neutrino/log"
+	"github.com/go-neutrino/neutrino/log"
 	"time"
 )
 
@@ -78,11 +78,13 @@ func (w *WebsocketClient) autoProcess() {
 	go func () {
 		for {
 			if conn != nil {
-				_, message, err := conn.ReadMessage()
+				_, m, err := conn.ReadMessage()
+				message := string(m)
 				if err != nil {
 					w.error <- err
 				} else {
-					w.Message <- string(message)
+					log.Info("Client got message from service:", message)
+					w.Message <- message
 				}
 			}
 		}

@@ -82,6 +82,7 @@ func (t *TypesController) InsertInTypeHandler(c *gin.Context) {
 		notification.ORIGIN_API,
 		body,
 		nil,
+		typeName,
 	))
 
 	RespondId(body["_id"], c)
@@ -166,6 +167,7 @@ func (t *TypesController) UpdateTypeItemById(c *gin.Context) {
 		notification.ORIGIN_API,
 		payload,
 		nil,
+		typeName,
 	))
 }
 
@@ -192,5 +194,6 @@ func (t *TypesController) DeleteTypeItemById(c *gin.Context) {
 			"_id": itemId,
 		},
 		nil,
+		typeName,
 	))
 }

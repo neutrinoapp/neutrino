@@ -45,11 +45,12 @@ func Notify(data models.JSON) {
 	qConn.Publish(subj, data)
 }
 
-func Build(o op, og origin, pld interface{}, opts models.JSON) models.JSON {
+func Build(o op, og origin, pld interface{}, opts models.JSON, t string) models.JSON {
 	return models.JSON{
 		"op":      o,
 		"origin":  og,
 		"options": opts,
+		"type": t,
 		"payload": pld,
 	}
 }
