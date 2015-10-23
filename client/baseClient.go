@@ -22,6 +22,7 @@ func NewClient(connect func()(interface{}, error), addr string) *Client {
 		isConnected: false,
 		Addr: addr,
 		Message: make(chan string),
+		Error: make(chan error),
 		error: make(chan error),
 	}
 }

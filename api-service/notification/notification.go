@@ -3,12 +3,12 @@ package notification
 import (
 	"github.com/go-neutrino/neutrino/log"
 	"github.com/go-neutrino/neutrino/models"
-	"github.com/nats-io/nats"
 	"github.com/go-neutrino/neutrino/config"
+	"github.com/go-neutrino/neutrino/client"
 )
 
 var (
-	qConn *nats.EncodedConn
+	natsClient *client.NatsClient
 )
 
 type op string
@@ -24,19 +24,20 @@ const (
 )
 
 func init() {
-	qAddr := config.Get(config.KEY_QUEUE_ADDR)
-	n, e := nats.Connect(qAddr)
-
-	if e != nil {
-		panic(e)
-	}
-
-	conn, err := nats.NewEncodedConn(n, nats.JSON_ENCODER)
-	if err != nil {
-		panic(err)
-	}
-
-	qConn = conn
+	natsClient = client.NewNatsClient(config.Get(config.KEY_QUEUE_ADDR))
+//	qAddr := config.Get()
+//	n, e := nats.Connect(qAddr)
+//
+//	if e != nil {
+//		panic(e)
+//	}
+//
+//	conn, err := nats.NewEncodedConn(n, nats.JSON_ENCODER)
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	qConn = conn
 }
 
 func Notify(data models.JSON) {
@@ -48,7 +49,7 @@ func Notify(data models.JSON) {
 	}
 
 	log.Info("Publishing to queue subject: " + subj + " data: " + str)
-	qConn.Publish(subj, data)
+	natsClient.GetConnection().Publish(subj, data)
 }
 
 func Build(o op, og origin, pld interface{}, opts models.JSON, t string) models.JSON {

@@ -14,22 +14,19 @@ type WebsocketClient struct {
 func NewWebsocketClient(addr string) *WebsocketClient {
 	wsDialer := websocket.Dialer{}
 	connect := func () (interface{}, error) {
-			var conn *websocket.Conn
-			var err error
+		log.Info("Connecting to websocket server:", addr)
+		var conn *websocket.Conn
+		var err error
 
-			conn, _, err = wsDialer.Dial(addr, nil)
+		conn, _, err = wsDialer.Dial(addr, nil)
 
-			return conn, err
-		}
+		return conn, err
+	}
 
 	c := NewClient(connect, addr)
 
-	wsClient := &WebsocketClient{
-		c,
-	}
-
-	wsClient.autoProcess()
-
+	wsClient := &WebsocketClient{c}
+	wsClient.handleConnection()
 	return wsClient
 }
 
@@ -49,7 +46,7 @@ func (w *WebsocketClient) Disconnected() {
 	}
 }
 
-func (w *WebsocketClient) autoProcess() {
+func (w *WebsocketClient) handleConnection() {
 	var conn *websocket.Conn
 
 	establishConnection := func () *websocket.Conn {
@@ -95,7 +92,7 @@ func (w *WebsocketClient) autoProcess() {
 	}()
 
 	time.Sleep(time.Second * 2)
-	onError(nil, true)
+	go onError(nil, true)
 }
 
 func NewWebsocketUpgrader() websocket.Upgrader {
