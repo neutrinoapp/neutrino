@@ -2,6 +2,7 @@ package api
 
 import (
 	"testing"
+	"time"
 )
 
 func setupTypeTests(t *testing.T) (map[string]interface{}, *ApplicationModel, string) {
@@ -42,6 +43,8 @@ func TestGetAndInsertTypeData(t *testing.T) {
 		"field1": "test",
 		"field2": "test",
 	}, t)
+
+	time.Sleep(time.Second * 1)
 
 	getRec := sendAuthenticatedRequest("GET", "/app/"+app.Id+"/data/"+typeName, nil, t)
 	getRec.CodeIs(200)
