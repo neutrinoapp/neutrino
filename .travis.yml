@@ -2,8 +2,3 @@ language: go
 
 services:
   - mongodb
-
-before_install:
-  - sleep 10
-
-script: ./test.sh
