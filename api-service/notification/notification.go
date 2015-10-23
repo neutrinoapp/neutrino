@@ -9,6 +9,7 @@ import (
 
 var (
 	natsClient *client.NatsClient
+	queueSubject string
 )
 
 type op string
@@ -25,22 +26,22 @@ const (
 
 func init() {
 	natsClient = client.NewNatsClient(config.Get(config.KEY_QUEUE_ADDR))
+	queueSubject = config.Get(config.CONST_REALTIME_JOBS_SUBJ)
 }
 
 func Notify(data models.JSON) {
-	subj := config.Get(config.CONST_REALTIME_JOBS_SUBJ)
 	str, err := data.String()
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
-	log.Info("Publishing to queue subject: " + subj + " data: " + str)
 	conn := natsClient.GetConnection()
 	if conn != nil {
-		conn.Publish(subj, data)
+		log.Info("Publishing to queue subject: " + queueSubject + " data: " + str)
+		conn.Publish(queueSubject, data)
 	} else {
-		log.Info("Queue service not available, realtime updates will not be available.")
+		log.Info("Queue service not available, realtime updates will not arrive.")
 	}
 }
 

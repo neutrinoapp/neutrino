@@ -6,4 +6,4 @@ services:
 before_install:
   - sleep 10
 
-script: go test ./api-service/... ./queue-broker-service/... ./realtime-service/...
+script: ./test.sh

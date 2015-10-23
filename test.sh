@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+go test -v ./api-service/... ./queue-broker-service/... ./realtime-service/...
