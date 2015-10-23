@@ -70,7 +70,9 @@ $ go test -v ./..
 # TODO
 #### Updated on the go:
 
-- [ ] Go client (for tests)
 - [ ] Cover api service's new functionality, realtime service and queue-broker with tests
+- [ ] Updates from HTTP (Api service) to realtime service
+- [ ] Updates from Clients (go, js etc) to HTTP (api service) should be automatically ready with the previous one
+- [ ] Updates from Clients (go, js etc) to realtime service, to db(api service) and other clients 
 - [ ] Sort out permissions
 - [ ] Js client
