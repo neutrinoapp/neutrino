@@ -15,6 +15,7 @@ import (
 	"testing"
 	"time"
 	"runtime"
+	"os"
 )
 
 var (
@@ -153,4 +154,9 @@ func login(t *testing.T) (*UserModel, string) {
 		Email:    user["email"].(string),
 		Password: user["password"].(string),
 	}, token
+}
+
+func isTravis() bool {
+	//some tests fail on travis - investigate them further
+	return os.Getenv("TRAVIS") != ""
 }
