@@ -29,7 +29,7 @@ Interactive documentation can be found [here](http://docs.realbas3.apiary.io/#re
 $ go get github.com/go-neutrino/neutrino
 ```
 
-In the root of the project - `$GOPATH/src/github.com/go-neutrino/neutrino` you can execute the following:
+In the root of the project - `$GOPATH/src/github.com/go-neutrino/neutrino` you need to run all the services:
 
 ```bash
 $ go run api-service/main.go
@@ -37,8 +37,17 @@ $ go run realtime-service/main.go
 $ go run queue-broker-service/main.go
 ```
 
+To run the unit tests execute:
+
 ```bash
-$ go test -v ./..
+$ make test
+```
+
+To run the integration tests run:
+
+```bash
+#make sure that you have all the services running including nats and mongodb
+$ go test ./integration-tests/ 
 ```
 
 # Goals for the initial release
