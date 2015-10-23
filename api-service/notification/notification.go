@@ -41,7 +41,13 @@ func init() {
 
 func Notify(data models.JSON) {
 	subj := config.Get(config.CONST_REALTIME_JOBS_SUBJ)
-	log.Info("Publishing to queue subject: " + subj + " data: " + data.String())
+	str, err := data.String()
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	log.Info("Publishing to queue subject: " + subj + " data: " + str)
 	qConn.Publish(subj, data)
 }
 

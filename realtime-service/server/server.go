@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"github.com/go-neutrino/neutrino/config"
 	"github.com/go-neutrino/neutrino/client"
+	"github.com/go-neutrino/neutrino/log"
 )
 
 var (
@@ -38,6 +39,7 @@ func Initialize() {
 		for {
 			select {
 			case msg := <- brokerClient.Message:
+				log.Info("Realtime service got message from broker, broadcasting:", msg)
 				//TODO:
 				for _, conn := range GetConnectionStore().Get("") {
 					conn.Broadcast(msg)

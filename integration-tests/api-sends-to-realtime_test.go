@@ -86,3 +86,15 @@ func TestUpdateItem(t *testing.T) {
 
 	wg.Wait()
 }
+
+func TestDeleteItem(t *testing.T) {
+	wg := readMessages(t, []string{neutrinoclient.EVENT_CREATE, neutrinoclient.EVENT_DELETE}, 2, noop)
+
+	id := CreateItem("test", models.JSON{
+		"name": "test",
+	})["_id"].(string)
+
+	DeleteItem("test", id)
+
+	wg.Wait()
+}

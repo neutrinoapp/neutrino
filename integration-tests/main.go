@@ -108,3 +108,7 @@ func CreateItem(t string, m models.JSON) models.JSON {
 func UpdateItem(t, id string, m models.JSON) models.JSON {
 	return SendRequest(ApiBaseUrl, "app/" + AppId + "/data/" + t + "/" + id, "PUT", m)
 }
+
+func DeleteItem(t, id string) models.JSON {
+	return SendRequest(ApiBaseUrl, "app/" + AppId + "/data/" + t + "/" + id, "DELETE", nil)
+}

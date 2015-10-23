@@ -47,6 +47,7 @@ func NewClient(appId string) *NeutrinoClient {
 		for {
 		select {
 			case msg := <- c.WebsocketClient.Message:
+				log.Info("Neutrino client got message:", msg)
 				if (msg != "") {
 					processMessage(msg)
 				}

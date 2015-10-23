@@ -19,7 +19,7 @@ func jobsHandler(m *nats.Msg) {
 	log.Info("Got message " + string(m.Data))
 
 	for i, c := range connections {
-		log.Info("Sending message to connection: " + strconv.Itoa(i+1))
+		log.Info("Sending message to connection:", strconv.Itoa(i+1), string(m.Data))
 		c.WriteMessage(websocket.TextMessage, m.Data)
 	}
 }

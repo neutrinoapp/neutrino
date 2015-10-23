@@ -58,10 +58,15 @@ func (w *WebsocketClient) autoProcess() {
 		return w.GetConnection()
 	}
 
-	onError := func(err error) {
+	onError := func(err error, initial bool) {
 		conn = nil
-		w.Disconnected()
-		log.Error("Connection error:", w.Addr, err)
+
+		if !initial {
+			w.Disconnected()
+			log.Error("Connection error:", w.Addr, err, "dispatching error event")
+			w.Error <- err
+		}
+
 		conn = establishConnection()
 	}
 
@@ -70,7 +75,7 @@ func (w *WebsocketClient) autoProcess() {
 		for {
 			select {
 			case err := <- w.error:
-				onError(err)
+				onError(err, false)
 			}
 		}
 	}()
@@ -83,7 +88,6 @@ func (w *WebsocketClient) autoProcess() {
 				if err != nil {
 					w.error <- err
 				} else {
-					log.Info("Client got message from service:", message)
 					w.Message <- message
 				}
 			}
@@ -91,7 +95,7 @@ func (w *WebsocketClient) autoProcess() {
 	}()
 
 	time.Sleep(time.Second * 2)
-	onError(nil)
+	onError(nil, true)
 }
 
 func NewWebsocketUpgrader() websocket.Upgrader {

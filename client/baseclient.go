@@ -11,6 +11,7 @@ type Client struct {
 	connection interface{}
 	error chan error
 
+	Error chan error
 	Message chan string
 	Addr string
 }

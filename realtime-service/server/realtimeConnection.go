@@ -24,6 +24,7 @@ func (r *realtimeConnection) GetConnection() *websocket.Conn {
 }
 
 func (r *realtimeConnection) Broadcast(m string) error {
+	log.Info("Broadcasting message to clients:", m)
 	return r.conn.WriteMessage(MESSAGE_TYPE_STRING, []byte(m))
 }
 
