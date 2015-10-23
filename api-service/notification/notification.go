@@ -25,19 +25,6 @@ const (
 
 func init() {
 	natsClient = client.NewNatsClient(config.Get(config.KEY_QUEUE_ADDR))
-//	qAddr := config.Get()
-//	n, e := nats.Connect(qAddr)
-//
-//	if e != nil {
-//		panic(e)
-//	}
-//
-//	conn, err := nats.NewEncodedConn(n, nats.JSON_ENCODER)
-//	if err != nil {
-//		panic(err)
-//	}
-//
-//	qConn = conn
 }
 
 func Notify(data models.JSON) {
@@ -49,7 +36,12 @@ func Notify(data models.JSON) {
 	}
 
 	log.Info("Publishing to queue subject: " + subj + " data: " + str)
-	natsClient.GetConnection().Publish(subj, data)
+	conn := natsClient.GetConnection()
+	if conn != nil {
+		conn.Publish(subj, data)
+	} else {
+		log.Info("Queue service not available, realtime updates will not be available.")
+	}
 }
 
 func Build(o op, og origin, pld interface{}, opts models.JSON, t string) models.JSON {
