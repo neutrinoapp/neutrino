@@ -4,6 +4,7 @@ import (
 	"github.com/nats-io/nats"
 	"github.com/go-neutrino/neutrino/log"
 	"time"
+	"errors"
 )
 
 type NatsClient struct {
@@ -42,6 +43,7 @@ func (n *NatsClient) handleConnection() {
 				//TODO: this flush does not seem to work as a proper ping
 				err := conn.Flush()
 				if err != nil {
+					n.Error <- err
 					n.Connect()
 					continue
 				}
@@ -52,6 +54,16 @@ func (n *NatsClient) handleConnection() {
 	}()
 
 	go n.Connect()
+}
+
+func (n *NatsClient) Subscribe(c string, cb nats.Handler) error {
+	conn := n.GetConnection()
+	if conn == nil {
+		return errors.New("No available connection.")
+	}
+
+	_, err := conn.Subscribe(c, cb)
+	return err
 }
 
 func (n *NatsClient) GetConnection() *nats.EncodedConn {

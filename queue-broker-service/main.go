@@ -25,20 +25,9 @@ func jobsHandler(m *nats.Msg) {
 }
 
 func main() {
-	qAddr := config.Get(config.KEY_QUEUE_ADDR)
-	n, e := nats.Connect(qAddr)
-
-	if e != nil {
-		panic(e)
-	}
-
-	conn, err := nats.NewEncodedConn(n, nats.JSON_ENCODER)
-	if err != nil {
-		panic(err)
-	}
-
-	conn.Subscribe("realtime-jobs", jobsHandler)
-	log.Info("Connected to NATS on " + qAddr)
+	c := client.NewNatsClient(config.Get(config.KEY_QUEUE_ADDR))
+	//TODO: handle subscription after the connection to nats is lost and restored
+	c.Subscribe(config.Get(config.CONST_REALTIME_JOBS_SUBJ), jobsHandler)
 
 	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
