@@ -21,7 +21,7 @@ func (p *clientMessageProcessor) Process(mType int, m messaging.Message) error {
 
 	apiPort := config.Get(config.KEY_API_PORT)
 	//TODO: guess not
-	c := client.NewApiClient("http://localhost"+apiPort+"/v1/", m.Options["appId"].(string))
+	c := client.NewApiClient("http://localhost"+apiPort+"/v1/", m.App)
 	return opProcessor(m, c)
 }
 

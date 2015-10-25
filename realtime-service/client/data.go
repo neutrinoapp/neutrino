@@ -75,6 +75,7 @@ func (d *NeutrinoData) Create(m models.JSON) {
 		m,
 		nil,
 		d.DataName,
+		d.AppId,
 	).Send(d.WebsocketClient.GetConnection())
 }
 
@@ -86,6 +87,7 @@ func (d *NeutrinoData) Update(id string, m models.JSON) {
 		m,
 		nil,
 		d.DataName,
+		d.AppId,
 	).Send(d.WebsocketClient.GetConnection())
 }
 
@@ -96,6 +98,7 @@ func (d *NeutrinoData) Delete(id string) {
 		models.JSON{"_id": id},
 		nil,
 		d.DataName,
+		d.AppId,
 	).Send(d.WebsocketClient.GetConnection())
 }
 

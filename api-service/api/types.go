@@ -84,8 +84,9 @@ func (t *TypesController) InsertInTypeHandler(c *gin.Context) {
 		messaging.OP_CREATE,
 		messaging.ORIGIN_API,
 		body,
-		models.JSON{"appId": appId},
+		nil,
 		typeName,
+		appId,
 	))
 
 	RespondId(body["_id"], c)
@@ -171,8 +172,9 @@ func (t *TypesController) UpdateTypeItemById(c *gin.Context) {
 		messaging.OP_UPDATE,
 		messaging.ORIGIN_API,
 		payload,
-		models.JSON{"appId": appId},
+		nil,
 		typeName,
+		appId,
 	))
 }
 
@@ -198,7 +200,8 @@ func (t *TypesController) DeleteTypeItemById(c *gin.Context) {
 		messaging.OP_DELETE,
 		messaging.ORIGIN_API,
 		models.JSON{"_id": itemId},
-		models.JSON{"appId": appId},
+		nil,
 		typeName,
+		appId,
 	))
 }

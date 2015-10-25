@@ -46,22 +46,23 @@ func Initialize() {
 					log.Info("Realtime service got message from broker, broadcasting:", msg)
 					var m models.JSON
 					m.FromString([]byte(msg))
-					opts := m["options"]
 					noAppIdErr := errors.New("No appId provided with realtime notification.")
-					if opts == nil {
-						log.Error(noAppIdErr)
-						return
-					}
 
-					appId := opts.(map[string]interface{})["appId"]
+					appId := m["app"]
 					if appId == nil {
 						log.Error(noAppIdErr)
 						return
 					}
 
-					idStr := appId.(string)
-					log.Info("Broadcasting:", msg, "to", idStr)
-					for _, conn := range GetConnectionStore().Get(idStr) {
+					appIdStr := appId.(string)
+					if appIdStr == "" {
+						log.Error(noAppIdErr)
+						return
+					}
+
+					log.Info("Broadcasting:", msg, "to", appIdStr)
+					connsForApp := GetConnectionStore().Get(appIdStr)
+					for _, conn := range connsForApp {
 						conn.Broadcast(msg)
 					}
 				}

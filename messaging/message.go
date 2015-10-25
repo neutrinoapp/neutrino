@@ -27,6 +27,7 @@ type Message struct {
 	Options   models.JSON
 	Payload   models.JSON
 	Type      string
+	App       string
 }
 
 func (m Message) Send(c *websocket.Conn) error {
@@ -45,5 +46,6 @@ func (m Message) Serialize() models.JSON {
 		"options": m.Options,
 		"pld":     m.Payload,
 		"type":    m.Type,
+		"app":     m.App,
 	}
 }

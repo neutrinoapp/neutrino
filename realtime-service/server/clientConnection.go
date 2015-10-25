@@ -41,16 +41,7 @@ func (r *clientConnection) Listen() error {
 		messageJson.FromString(m)
 
 		message := messaging.GetMessageBuilder().BuildFromModel(messageJson)
-		var opts map[string]interface{}
-		if message.Options == nil {
-			opts = map[string]interface{}{
-				"appId": r.appId,
-			}
-
-			message.Options = opts
-		} else {
-			message.Options["appId"] = r.appId
-		}
+		message.App = r.appId
 
 		processErr := r.processor.Process(messageType, message)
 		if processErr != nil {
