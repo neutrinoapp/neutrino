@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-neutrino/neutrino/api-service/db"
 	"github.com/go-neutrino/neutrino/api-service/notification"
+	"github.com/go-neutrino/neutrino/messaging"
 	"github.com/go-neutrino/neutrino/models"
 	"github.com/go-neutrino/neutrino/utils/webUtils"
 	"net/http"
@@ -77,9 +78,11 @@ func (t *TypesController) InsertInTypeHandler(c *gin.Context) {
 		return
 	}
 
-	notification.Notify(notification.Build(
-		notification.OP_CREATE,
-		notification.ORIGIN_API,
+	messageBuilder := messaging.GetMessageBuilder()
+
+	notification.Notify(messageBuilder.Build(
+		messaging.OP_CREATE,
+		messaging.ORIGIN_API,
 		body,
 		nil,
 		typeName,
@@ -162,9 +165,11 @@ func (t *TypesController) UpdateTypeItemById(c *gin.Context) {
 	payload.FromMap(body)
 	payload["_id"] = itemId
 
-	notification.Notify(notification.Build(
-		notification.OP_UPDATE,
-		notification.ORIGIN_API,
+	messageBuilder := messaging.GetMessageBuilder()
+
+	notification.Notify(messageBuilder.Build(
+		messaging.OP_UPDATE,
+		messaging.ORIGIN_API,
 		payload,
 		nil,
 		typeName,
@@ -187,9 +192,11 @@ func (t *TypesController) DeleteTypeItemById(c *gin.Context) {
 		return
 	}
 
-	notification.Notify(notification.Build(
-		notification.OP_DELETE,
-		notification.ORIGIN_API,
+	messageBuilder := messaging.GetMessageBuilder()
+
+	notification.Notify(messageBuilder.Build(
+		messaging.OP_DELETE,
+		messaging.ORIGIN_API,
 		models.JSON{
 			"_id": itemId,
 		},

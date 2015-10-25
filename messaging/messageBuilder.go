@@ -2,24 +2,8 @@ package messaging
 
 import "github.com/go-neutrino/neutrino/models"
 
-type (
-	op     string
-	origin string
-)
-
-const (
-	OP_UPDATE   op = "update"
-	OP_CREATE   op = "create"
-	OP_DELETE   op = "delete"
-	OP_LOGIN    op = "login"
-	OP_REGISTER op = "register"
-
-	ORIGIN_API    origin = "api"
-	ORIGIN_CLIENT origin = "client"
-)
-
 type MessageBuilder interface {
-	Build(op, origin, interface{}, models.JSON, string) Message
+	Build(Op, Origin, models.JSON, models.JSON, string) Message
 	BuildFromModel(m models.JSON) Message
 }
 
@@ -36,7 +20,7 @@ func GetMessageBuilder() MessageBuilder {
 	return b
 }
 
-func (m *messageBuilder) Build(op op, og origin, pld interface{}, opts models.JSON, t string) Message {
+func (b *messageBuilder) Build(op Op, og Origin, pld models.JSON, opts models.JSON, t string) Message {
 	return Message{
 		Operation: op,
 		Origin:    og,
@@ -46,11 +30,11 @@ func (m *messageBuilder) Build(op op, og origin, pld interface{}, opts models.JS
 	}
 }
 
-func (m *messageBuilder) BuildFromModel(m models.JSON) Message {
-	return m.Build(
-		m["op"].(op),
-		m["origin"].(origin),
-		m["pld"],
+func (b *messageBuilder) BuildFromModel(m models.JSON) Message {
+	return b.Build(
+		m["op"].(Op),
+		m["origin"].(Origin),
+		m["pld"].(models.JSON),
 		m["options"].(models.JSON),
 		m["type"].(string),
 	)

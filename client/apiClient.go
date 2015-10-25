@@ -13,7 +13,11 @@ type ApiClient struct {
 }
 
 func NewApiClient(url, appId string) *ApiClient {
-	return &ApiClient{url, appId}
+	return &ApiClient{
+		BaseUrl: url,
+		Token:   "",
+		AppId:   appId,
+	}
 }
 
 func (c *ApiClient) SendRequest(url, method string, body interface{}) (models.JSON, error) {
@@ -62,7 +66,7 @@ func (c *ApiClient) CreateApp(name string) (string, error) {
 	})
 
 	if res == nil {
-		return nil, err
+		return "", err
 	}
 
 	return res["_id"].(string), nil
@@ -84,7 +88,7 @@ func (c *ApiClient) Login(email, password string) (string, error) {
 	})
 
 	if res == nil {
-		return nil, err
+		return "", err
 	}
 
 	c.Token = res["token"].(string)

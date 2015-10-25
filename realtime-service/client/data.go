@@ -64,7 +64,7 @@ func (c *NeutrinoClient) Data(name string) *NeutrinoData {
 }
 
 func (d *NeutrinoData) GetUrl() string {
-	return d.NeutrinoClient.Addr + "app"
+	return d.NeutrinoClient.RealtimeAddr + "app"
 }
 
 func (d *NeutrinoData) onDataMessage(m models.JSON) {

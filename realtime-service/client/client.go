@@ -2,6 +2,7 @@ package neutrinoclient
 
 import (
 	"github.com/go-neutrino/neutrino/client"
+	"github.com/go-neutrino/neutrino/config"
 	"github.com/go-neutrino/neutrino/log"
 	"github.com/go-neutrino/neutrino/messaging"
 	"github.com/go-neutrino/neutrino/models"
@@ -10,20 +11,26 @@ import (
 
 type (
 	NeutrinoClient struct {
-		Addr            string
+		RealtimeAddr    string
+		ApiAddr         string
 		AppId           string
+		Token           string
 		WebsocketClient *client.WebsocketClient
+		ApiClient       *client.ApiClient
 		listeners       []*NeutrinoData
 	}
 )
 
 func NewClient(appId string) *NeutrinoClient {
-	addr := "ws://localhost:6000/data?app=" + appId
+	wsAddr := "ws://localhost" + config.Get(config.KEY_REALTIME_PORT) + "/data?app=" + appId
+	apiAddr := "http://localhost" + config.Get(config.KEY_API_PORT) + "/v1/"
 
 	c := &NeutrinoClient{
 		AppId:           appId,
-		Addr:            addr,
-		WebsocketClient: client.NewWebsocketClient(addr),
+		RealtimeAddr:    wsAddr,
+		ApiAddr:         apiAddr,
+		WebsocketClient: client.NewWebsocketClient(wsAddr),
+		ApiClient:       client.NewApiClient(apiAddr, appId),
 	}
 
 	go func() {
@@ -58,38 +65,19 @@ func NewClient(appId string) *NeutrinoClient {
 	return c
 }
 
-func (c *NeutrinoClient) Login(u, p string) {
-	payload := models.JSON{
-		"email", u,
-		"password": p,
-	}
-
-	messaging.GetMessageBuilder().Build(
-		messaging.OP_LOGIN,
-		messaging.ORIGIN_CLIENT,
-		payload,
-		nil,
-		"users",
-	).Send(c.WebsocketClient.GetConnection())
+func (c *NeutrinoClient) Register(u, p string) (string, error) {
+	return c.ApiClient.Register(u, p)
 }
 
-func (c *NeutrinoClient) Register(u, p string) {
-	payload := models.JSON{
-		"email", u,
-		"password": p,
-	}
+func (c *NeutrinoClient) Login(u, p string) (string, error) {
+	token, err := c.ApiClient.Login(u, p)
+	c.Token = token
 
-	messaging.GetMessageBuilder().Build(
-		messaging.OP_REGISTER,
-		messaging.ORIGIN_CLIENT,
-		payload,
-		nil,
-		"users",
-	).Send(c.WebsocketClient.GetConnection())
+	return token, err
 }
 
 func (c *NeutrinoClient) getAppUrl() string {
-	return c.Addr + "/app/" + c.AppId
+	return c.RealtimeAddr + "/app/" + c.AppId
 }
 
 func (c *NeutrinoClient) registerDataListener(d *NeutrinoData) {
