@@ -79,9 +79,8 @@ $ go test ./integration-tests/
 # TODO
 #### Updated on the go:
 
+- [ ] Transport token from client to realtime service when communicating in realtime
 - [ ] Handle services authentication from/to api/realtime/clients
-- [ ] Updates from Clients (go, js etc) to HTTP (api service) should be automatically ready with the previous one
-- [ ] Updates from Clients (go, js etc) to realtime service, to db(api service) and other clients 
 - [ ] Sort out permissions
 - [ ] Js client
 

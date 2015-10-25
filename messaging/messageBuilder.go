@@ -32,11 +32,23 @@ func (b *messageBuilder) Build(op string, og string, pld models.JSON, opts model
 }
 
 func (b *messageBuilder) BuildFromModel(m models.JSON) Message {
+	optionsMap := m["options"]
+	options := models.JSON{}
+	if optionsMap != nil {
+		options.FromMap(optionsMap.(map[string]interface{}))
+	}
+
+	pldMap := m["pld"]
+	pld := models.JSON{}
+	if pldMap != nil {
+		pld.FromMap(pldMap.(map[string]interface{}))
+	}
+
 	return b.Build(
 		m["op"].(string),
 		m["origin"].(string),
-		m["pld"].(models.JSON),
-		m["options"].(models.JSON),
+		pld,
+		options,
 		m["type"].(string),
 		m["app"].(string),
 	)

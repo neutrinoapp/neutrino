@@ -102,7 +102,6 @@ func injectAppMiddleware() gin.HandlerFunc {
 			}
 
 			c.Set("app", models.JSON{}.FromMap(app))
-
 		} else {
 			RestError(c, "Invalid app id.")
 		}
