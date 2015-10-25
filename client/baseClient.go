@@ -6,24 +6,24 @@ import (
 )
 
 type Client struct {
-	connect func()(interface{}, error)
+	connect     func() (interface{}, error)
 	isConnected bool
-	connection interface{}
-	error chan error
+	connection  interface{}
+	error       chan error
 
-	Error chan error
+	Error   chan error
 	Message chan string
-	Addr string
+	Addr    string
 }
 
-func NewClient(connect func()(interface{}, error), addr string) *Client {
+func NewClient(connect func() (interface{}, error), addr string) *Client {
 	return &Client{
-		connect: connect,
+		connect:     connect,
 		isConnected: false,
-		Addr: addr,
-		Message: make(chan string),
-		Error: make(chan error),
-		error: make(chan error),
+		Addr:        addr,
+		Message:     make(chan string),
+		Error:       make(chan error),
+		error:       make(chan error),
 	}
 }
 
@@ -42,7 +42,7 @@ func (c *Client) Connect() {
 			c.isConnected = true
 			c.connection = conn
 			log.Info("Connected to", c.Addr)
-			break;
+			break
 		} else {
 			log.Error("Error connecting to", c.Addr, err)
 			time.Sleep(time.Second * 5)

@@ -9,12 +9,12 @@ import (
 	"time"
 )
 
-func noop (ev neutrinoclient.NeutrinoEvent, m models.JSON) {
+func noop(ev neutrinoclient.NeutrinoEvent, m models.JSON) {
 	//dummy func
 }
 
 func readMessages(t *testing.T, expectedEv []string, times int,
-		cb func(neutrinoclient.NeutrinoEvent, models.JSON)) *sync.WaitGroup {
+	cb func(neutrinoclient.NeutrinoEvent, models.JSON)) *sync.WaitGroup {
 
 	wg := &sync.WaitGroup{}
 	wg.Add(times)
@@ -22,7 +22,7 @@ func readMessages(t *testing.T, expectedEv []string, times int,
 	go func() {
 		for i := 0; i < times; i++ {
 			select {
-			case ev := <-Data.Event:
+			case ev := <-RealtimeData.Event:
 				log.Info("Test event:", ev.Code, ev.Data)
 
 				var m models.JSON
@@ -57,7 +57,7 @@ func readMessages(t *testing.T, expectedEv []string, times int,
 func TestInsertIntoType(t *testing.T) {
 	wg := readMessages(t, []string{neutrinoclient.EVENT_CREATE}, 1, noop)
 
-	CreateItem("test", models.JSON{
+	ApiClient.CreateItem("test", models.JSON{
 		"name": "test",
 	})
 
@@ -65,10 +65,10 @@ func TestInsertIntoType(t *testing.T) {
 }
 
 func TestUpdateItem(t *testing.T) {
-	cb := func (ev neutrinoclient.NeutrinoEvent, m models.JSON) {
-		if (ev.Code == neutrinoclient.EVENT_UPDATE) {
+	cb := func(ev neutrinoclient.NeutrinoEvent, m models.JSON) {
+		if ev.Code == neutrinoclient.EVENT_UPDATE {
 			n := m["payload"].(map[string]interface{})["name"]
-			if (n != "updated-test") {
+			if n != "updated-test" {
 				t.Error("Incorrect updated name:", n, "Expected: updated-test")
 			}
 		}
@@ -76,11 +76,11 @@ func TestUpdateItem(t *testing.T) {
 
 	wg := readMessages(t, []string{neutrinoclient.EVENT_CREATE, neutrinoclient.EVENT_UPDATE}, 2, cb)
 
-	id := CreateItem("test", models.JSON{
+	id := ApiClient.CreateItem("test", models.JSON{
 		"name": "test",
 	})["_id"].(string)
 
-	UpdateItem("test", id, models.JSON{
+	ApiClient.UpdateItem("test", id, models.JSON{
 		"name": "updated-test",
 	})
 
@@ -90,11 +90,11 @@ func TestUpdateItem(t *testing.T) {
 func TestDeleteItem(t *testing.T) {
 	wg := readMessages(t, []string{neutrinoclient.EVENT_CREATE, neutrinoclient.EVENT_DELETE}, 2, noop)
 
-	id := CreateItem("test", models.JSON{
+	id := ApiClient.CreateItem("test", models.JSON{
 		"name": "test",
 	})["_id"].(string)
 
-	DeleteItem("test", id)
+	ApiClient.DeleteItem("test", id)
 
 	wg.Wait()
 }

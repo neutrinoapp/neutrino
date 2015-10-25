@@ -5,8 +5,8 @@ import (
 	"github.com/go-neutrino/neutrino/api-service/db"
 	"github.com/go-neutrino/neutrino/api-service/notification"
 	"github.com/go-neutrino/neutrino/models"
-	"net/http"
 	"github.com/go-neutrino/neutrino/utils/webUtils"
+	"net/http"
 )
 
 type TypesController struct {

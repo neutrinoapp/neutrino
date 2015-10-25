@@ -8,7 +8,7 @@ const (
 	KEY_MONGO_ADDR = "mongo-host"
 	KEY_QUEUE_ADDR = "queue-host"
 
-	KEY_API_PORT = "core-port"
+	KEY_API_PORT      = "core-port"
 	KEY_REALTIME_PORT = "realtime-port"
 
 	KEY_BROKER_PORT = "broker-port"

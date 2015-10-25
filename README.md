@@ -73,15 +73,25 @@ $ go test ./integration-tests/
   - [x] Delete types data
   - [x] In-app user management
 - [ ] WebSockets API - Realtime API
-  - [ ] Types support
+  - [x] Types support
   - [ ] Javascript SDK
 
 # TODO
 #### Updated on the go:
 
-- [ ] Cover api service's new functionality, realtime service and queue-broker with tests
-- [ ] Updates from HTTP (Api service) to realtime service
+- [ ] Handle services authentication from/to api/realtime/clients
 - [ ] Updates from Clients (go, js etc) to HTTP (api service) should be automatically ready with the previous one
 - [ ] Updates from Clients (go, js etc) to realtime service, to db(api service) and other clients 
 - [ ] Sort out permissions
 - [ ] Js client
+
+Initial request -> No token needed, know only the app name(and the parent user of the app)
+    - /data?app=appId
+
+User logged in -> Get token from api service and reauthenticate with the realtime service
+    - HTTP GET -> /v1/api/token?username=username&password=password
+    - Conn.Token = token
+    
+On authentication-required request
+    - Validate token
+    - Execute

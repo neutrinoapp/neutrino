@@ -1,7 +1,6 @@
 package db
 
-import (
-)
+import ()
 
 func Initialize() {
 	//There must be something to initialize right?

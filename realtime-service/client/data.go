@@ -1,8 +1,8 @@
 package neutrinoclient
 
 import (
-	"github.com/go-neutrino/neutrino/models"
 	"github.com/go-neutrino/neutrino/log"
+	"github.com/go-neutrino/neutrino/models"
 )
 
 type NeutrinoEvent struct {
@@ -12,7 +12,7 @@ type NeutrinoEvent struct {
 
 type NeutrinoData struct {
 	*NeutrinoClient
-	Name string
+	Name  string
 	Event chan NeutrinoEvent
 }
 
@@ -42,7 +42,7 @@ func newDeleteEvent(data string) NeutrinoEvent {
 
 func (c *NeutrinoClient) Data(name string) *NeutrinoData {
 	//singleton data
-	if (dataMap[name] != nil) {
+	if dataMap[name] != nil {
 		return dataMap[name]
 	}
 
@@ -52,8 +52,8 @@ func (c *NeutrinoClient) Data(name string) *NeutrinoData {
 
 	d := &NeutrinoData{
 		NeutrinoClient: c,
-		Name: name,
-		Event: make(chan NeutrinoEvent),
+		Name:           name,
+		Event:          make(chan NeutrinoEvent),
 	}
 
 	c.registerDataListener(d)

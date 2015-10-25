@@ -1,10 +1,10 @@
 package client
 
 import (
-	"github.com/nats-io/nats"
-	"github.com/go-neutrino/neutrino/log"
-	"time"
 	"errors"
+	"github.com/go-neutrino/neutrino/log"
+	"github.com/nats-io/nats"
+	"time"
 )
 
 type NatsClient struct {
@@ -12,7 +12,7 @@ type NatsClient struct {
 }
 
 func NewNatsClient(addr string) *NatsClient {
-	connect := func () (interface{}, error) {
+	connect := func() (interface{}, error) {
 		log.Info("Connecting to nats:", addr)
 		n, err := nats.Connect(addr)
 
@@ -36,7 +36,7 @@ func NewNatsClient(addr string) *NatsClient {
 }
 
 func (n *NatsClient) handleConnection() {
-	go func () {
+	go func() {
 		for {
 			conn := n.GetConnection()
 			if conn != nil {

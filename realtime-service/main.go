@@ -1,10 +1,10 @@
 package main
 
 import (
+	"github.com/go-neutrino/neutrino/config"
 	"github.com/go-neutrino/neutrino/log"
 	"github.com/go-neutrino/neutrino/realtime-service/server"
 	"net/http"
-	"github.com/go-neutrino/neutrino/config"
 )
 
 func main() {

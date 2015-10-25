@@ -1,9 +1,9 @@
 package client
 
 import (
+	"github.com/go-neutrino/neutrino/log"
 	"github.com/gorilla/websocket"
 	"net/http"
-	"github.com/go-neutrino/neutrino/log"
 	"time"
 )
 
@@ -13,7 +13,7 @@ type WebsocketClient struct {
 
 func NewWebsocketClient(addr string) *WebsocketClient {
 	wsDialer := websocket.Dialer{}
-	connect := func () (interface{}, error) {
+	connect := func() (interface{}, error) {
 		log.Info("Connecting to websocket server:", addr)
 		var conn *websocket.Conn
 		var err error
@@ -31,7 +31,7 @@ func NewWebsocketClient(addr string) *WebsocketClient {
 }
 
 func (w *WebsocketClient) GetConnection() *websocket.Conn {
-	if (w.connection == nil) {
+	if w.connection == nil {
 		return nil
 	}
 
@@ -41,7 +41,7 @@ func (w *WebsocketClient) GetConnection() *websocket.Conn {
 func (w *WebsocketClient) Disconnected() {
 	w.Client.Disconnected()
 	conn := w.GetConnection()
-	if (conn != nil) {
+	if conn != nil {
 		conn.Close()
 	}
 }
@@ -49,7 +49,7 @@ func (w *WebsocketClient) Disconnected() {
 func (w *WebsocketClient) handleConnection() {
 	var conn *websocket.Conn
 
-	establishConnection := func () *websocket.Conn {
+	establishConnection := func() *websocket.Conn {
 		log.Info("Trying to connect to:", w.Addr)
 		w.Connect()
 		return w.GetConnection()
@@ -67,17 +67,16 @@ func (w *WebsocketClient) handleConnection() {
 		conn = establishConnection()
 	}
 
-
-	go func () {
+	go func() {
 		for {
 			select {
-			case err := <- w.error:
+			case err := <-w.error:
 				onError(err, false)
 			}
 		}
 	}()
 
-	go func () {
+	go func() {
 		for {
 			if conn != nil {
 				_, m, err := conn.ReadMessage()

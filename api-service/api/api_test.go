@@ -10,12 +10,12 @@ import (
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"runtime"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
-	"runtime"
-	"os"
 )
 
 var (

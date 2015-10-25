@@ -1,17 +1,17 @@
 package main
 
 import (
+	"github.com/go-neutrino/neutrino/client"
+	"github.com/go-neutrino/neutrino/config"
 	"github.com/go-neutrino/neutrino/log"
 	"github.com/gorilla/websocket"
 	"github.com/nats-io/nats"
 	"net/http"
 	"strconv"
-	"github.com/go-neutrino/neutrino/config"
-	"github.com/go-neutrino/neutrino/client"
 )
 
 var (
-	upgrader = client.NewWebsocketUpgrader()
+	upgrader    = client.NewWebsocketUpgrader()
 	connections []*websocket.Conn
 )
 

@@ -7,31 +7,31 @@ import (
 var c ConnectionStore
 
 type ConnectionStore interface {
-	Get(string) []RealtimeConnection
-	Put(string, RealtimeConnection)
-	Remove(string, RealtimeConnection)
+	Get(string) []ClientConnection
+	Put(string, ClientConnection)
+	Remove(string, ClientConnection)
 }
 
 type connectionStore struct {
-	connections map[string][]RealtimeConnection
+	connections map[string][]ClientConnection
 	l           *sync.Mutex
 }
 
-func (c *connectionStore) Get(g string) []RealtimeConnection {
+func (c *connectionStore) Get(g string) []ClientConnection {
 	c.l.Lock()
 	defer c.l.Unlock()
 
 	return c.connections[g]
 }
 
-func (c *connectionStore) Put(g string, conn RealtimeConnection) {
+func (c *connectionStore) Put(g string, conn ClientConnection) {
 	c.l.Lock()
 	defer c.l.Unlock()
 
 	c.connections[g] = append(c.connections[g], conn)
 }
 
-func (c *connectionStore) Remove(g string, conn RealtimeConnection) {
+func (c *connectionStore) Remove(g string, conn ClientConnection) {
 	c.l.Lock()
 	defer c.l.Unlock()
 
@@ -52,7 +52,7 @@ func (c *connectionStore) Remove(g string, conn RealtimeConnection) {
 func GetConnectionStore() ConnectionStore {
 	if c == nil {
 		c = &connectionStore{
-			connections: make(map[string][]RealtimeConnection),
+			connections: make(map[string][]ClientConnection),
 			l:           new(sync.Mutex),
 		}
 	}

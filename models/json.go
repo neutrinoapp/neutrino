@@ -2,9 +2,9 @@ package models
 
 import (
 	"encoding/json"
-	"net/http"
-	"io/ioutil"
 	"errors"
+	"io/ioutil"
+	"net/http"
 )
 
 type JSON map[string]interface{}
@@ -38,7 +38,7 @@ func (j *JSON) FromResponse(res *http.Response) error {
 		return err
 	}
 
-	if (string(body) == "") {
+	if string(body) == "" {
 		return nil
 	}
 
