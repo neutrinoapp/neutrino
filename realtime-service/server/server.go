@@ -1,9 +1,11 @@
 package server
 
 import (
+	"errors"
 	"github.com/go-neutrino/neutrino/client"
 	"github.com/go-neutrino/neutrino/config"
 	"github.com/go-neutrino/neutrino/log"
+	"github.com/go-neutrino/neutrino/models"
 	"net/http"
 )
 
@@ -31,6 +33,8 @@ func Initialize() {
 		appId := r.URL.Query().Get("app")
 		realtimeConn := NewConnection(conn, appId)
 
+		log.Info("New connection for app:", appId)
+
 		GetConnectionStore().Put(appId, realtimeConn)
 	})
 
@@ -38,10 +42,28 @@ func Initialize() {
 		for {
 			select {
 			case msg := <-brokerClient.Message:
-				log.Info("Realtime service got message from broker, broadcasting:", msg)
-				//TODO:
-				for _, conn := range GetConnectionStore().Get("") {
-					conn.Broadcast(msg)
+				{
+					log.Info("Realtime service got message from broker, broadcasting:", msg)
+					var m models.JSON
+					m.FromString([]byte(msg))
+					opts := m["options"]
+					noAppIdErr := errors.New("No appId provided with realtime notification.")
+					if opts == nil {
+						log.Error(noAppIdErr)
+						return
+					}
+
+					appId := opts.(map[string]interface{})["appId"]
+					if appId == nil {
+						log.Error(noAppIdErr)
+						return
+					}
+
+					idStr := appId.(string)
+					log.Info("Broadcasting:", msg, "to", idStr)
+					for _, conn := range GetConnectionStore().Get(idStr) {
+						conn.Broadcast(msg)
+					}
 				}
 			}
 		}

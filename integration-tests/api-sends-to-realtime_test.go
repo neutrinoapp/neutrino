@@ -67,7 +67,7 @@ func TestInsertIntoType(t *testing.T) {
 func TestUpdateItem(t *testing.T) {
 	cb := func(ev neutrinoclient.NeutrinoEvent, m models.JSON) {
 		if ev.Code == neutrinoclient.EVENT_UPDATE {
-			n := m["payload"].(map[string]interface{})["name"]
+			n := m["pld"].(map[string]interface{})["name"]
 			if n != "updated-test" {
 				t.Error("Incorrect updated name:", n, "Expected: updated-test")
 			}
@@ -76,9 +76,15 @@ func TestUpdateItem(t *testing.T) {
 
 	wg := readMessages(t, []string{neutrinoclient.EVENT_CREATE, neutrinoclient.EVENT_UPDATE}, 2, cb)
 
-	id := ApiClient.CreateItem("test", models.JSON{
+	res, err := ApiClient.CreateItem("test", models.JSON{
 		"name": "test",
-	})["_id"].(string)
+	})
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	id := res["_id"].(string)
 
 	ApiClient.UpdateItem("test", id, models.JSON{
 		"name": "updated-test",
@@ -90,9 +96,15 @@ func TestUpdateItem(t *testing.T) {
 func TestDeleteItem(t *testing.T) {
 	wg := readMessages(t, []string{neutrinoclient.EVENT_CREATE, neutrinoclient.EVENT_DELETE}, 2, noop)
 
-	id := ApiClient.CreateItem("test", models.JSON{
+	res, err := ApiClient.CreateItem("test", models.JSON{
 		"name": "test",
-	})["_id"].(string)
+	})
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	id := res["_id"].(string)
 
 	ApiClient.DeleteItem("test", id)
 

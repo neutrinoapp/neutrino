@@ -18,16 +18,17 @@ func init() {
 }
 
 func Notify(m messaging.Message) {
-	str, err := m.Serialize().String()
-	if err != nil {
-		log.Error(err)
-		return
-	}
-
 	conn := natsClient.GetConnection()
 	if conn != nil {
+		model := m.Serialize()
+		str, err := model.String()
+		if err != nil {
+			log.Error(err)
+			return
+		}
+
 		log.Info("Publishing to queue subject: " + queueSubject + " data: " + str)
-		conn.Publish(queueSubject, m)
+		conn.Publish(queueSubject, model)
 	} else {
 		log.Info("Queue service not available, realtime updates will not arrive.")
 	}

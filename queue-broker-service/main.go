@@ -8,6 +8,7 @@ import (
 	"github.com/nats-io/nats"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 var (
@@ -27,7 +28,14 @@ func jobsHandler(m *nats.Msg) {
 func main() {
 	c := client.NewNatsClient(config.Get(config.KEY_QUEUE_ADDR))
 	//TODO: handle subscription after the connection to nats is lost and restored
-	c.Subscribe(config.Get(config.CONST_REALTIME_JOBS_SUBJ), jobsHandler)
+	for {
+		if c.GetConnection() != nil {
+			c.Subscribe(config.Get(config.CONST_REALTIME_JOBS_SUBJ), jobsHandler)
+			break
+		} else {
+			time.Sleep(time.Second * 1)
+		}
+	}
 
 	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
@@ -37,6 +45,7 @@ func main() {
 			return
 		}
 
+		//TODO: handle removal of dead connections
 		connections = append(connections, conn)
 	})
 

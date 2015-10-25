@@ -20,7 +20,7 @@ func (j JSON) String() (string, error) {
 	return string(b), err
 }
 
-func (j JSON) FromString(str []byte) error {
+func (j *JSON) FromString(str []byte) error {
 	return json.Unmarshal(str, j)
 }
 
@@ -32,7 +32,7 @@ func (j JSON) FromMap(m map[string]interface{}) JSON {
 	return j
 }
 
-func (j JSON) FromResponse(res *http.Response) error {
+func (j *JSON) FromResponse(res *http.Response) error {
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return err
