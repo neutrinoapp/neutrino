@@ -5,25 +5,20 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type (
-	Op     string
-	Origin string
-)
-
 const (
-	OP_UPDATE Op = "update"
-	OP_CREATE Op = "create"
-	OP_DELETE Op = "delete"
+	OP_UPDATE string = "update"
+	OP_CREATE string = "create"
+	OP_DELETE string = "delete"
 
-	ORIGIN_API    Origin = "api"
-	ORIGIN_CLIENT Origin = "client"
+	ORIGIN_API    string = "api"
+	ORIGIN_CLIENT string = "client"
 )
 
 var MESSAGE_TYPE_STRING int = 1
 
 type Message struct {
-	Operation Op
-	Origin    Origin
+	Operation string
+	Origin    string
 	Options   models.JSON
 	Payload   models.JSON
 	Type      string

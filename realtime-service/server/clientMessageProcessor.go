@@ -9,7 +9,7 @@ import (
 )
 
 type clientMessageProcessor struct {
-	OpProcessors map[messaging.Op]func(messaging.Message, *client.ApiClient) error
+	OpProcessors map[string]func(messaging.Message, *client.ApiClient) error
 }
 
 func (p *clientMessageProcessor) Process(mType int, m messaging.Message) error {
@@ -41,7 +41,7 @@ func opDelete(m messaging.Message, c *client.ApiClient) error {
 }
 
 func NewClientMessageProcessor() messaging.MessageProcessor {
-	opProcessors := make(map[messaging.Op]func(messaging.Message, *client.ApiClient) error)
+	opProcessors := make(map[string]func(messaging.Message, *client.ApiClient) error)
 	opProcessors[messaging.OP_CREATE] = opCreate
 	opProcessors[messaging.OP_UPDATE] = opUpdate
 	opProcessors[messaging.OP_DELETE] = opDelete
