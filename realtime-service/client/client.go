@@ -4,7 +4,6 @@ import (
 	"github.com/go-neutrino/neutrino/client"
 	"github.com/go-neutrino/neutrino/config"
 	"github.com/go-neutrino/neutrino/log"
-	"github.com/go-neutrino/neutrino/messaging"
 	"github.com/go-neutrino/neutrino/models"
 	"sync"
 )
@@ -45,7 +44,7 @@ func NewClient(appId string) *NeutrinoClient {
 
 			typeName := m["type"]
 			for _, listener := range c.listeners {
-				if listener.Name == typeName {
+				if listener.DataName == typeName {
 					listener.onDataMessage(m)
 				}
 			}
@@ -65,7 +64,7 @@ func NewClient(appId string) *NeutrinoClient {
 	return c
 }
 
-func (c *NeutrinoClient) Register(u, p string) (string, error) {
+func (c *NeutrinoClient) Register(u, p string) error {
 	return c.ApiClient.Register(u, p)
 }
 

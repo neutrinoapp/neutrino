@@ -2,6 +2,7 @@ package neutrinoclient
 
 import (
 	"github.com/go-neutrino/neutrino/log"
+	"github.com/go-neutrino/neutrino/messaging"
 	"github.com/go-neutrino/neutrino/models"
 )
 
@@ -12,8 +13,8 @@ type NeutrinoEvent struct {
 
 type NeutrinoData struct {
 	*NeutrinoClient
-	Name  string
-	Event chan NeutrinoEvent
+	DataName string
+	Event    chan NeutrinoEvent
 }
 
 const (
@@ -52,7 +53,7 @@ func (c *NeutrinoClient) Data(name string) *NeutrinoData {
 
 	d := &NeutrinoData{
 		NeutrinoClient: c,
-		Name:           name,
+		DataName:       name,
 		Event:          make(chan NeutrinoEvent),
 	}
 
@@ -64,7 +65,38 @@ func (c *NeutrinoClient) Data(name string) *NeutrinoData {
 }
 
 func (d *NeutrinoData) GetUrl() string {
-	return d.NeutrinoClient.RealtimeAddr + "app"
+	return d.NeutrinoClient.ApiAddr + "app"
+}
+
+func (d *NeutrinoData) Create(m models.JSON) {
+	messaging.GetMessageBuilder().Build(
+		messaging.OP_CREATE,
+		messaging.ORIGIN_CLIENT,
+		m,
+		nil,
+		d.DataName,
+	).Send(d.WebsocketClient.GetConnection())
+}
+
+func (d *NeutrinoData) Update(id string, m models.JSON) {
+	m["_id"] = id
+	messaging.GetMessageBuilder().Build(
+		messaging.OP_UPDATE,
+		messaging.ORIGIN_CLIENT,
+		m,
+		nil,
+		d.DataName,
+	).Send(d.WebsocketClient.GetConnection())
+}
+
+func (d *NeutrinoData) Delete(id string) {
+	messaging.GetMessageBuilder().Build(
+		messaging.OP_DELETE,
+		messaging.ORIGIN_CLIENT,
+		models.JSON{"_id": id},
+		nil,
+		d.DataName,
+	).Send(d.WebsocketClient.GetConnection())
 }
 
 func (d *NeutrinoData) onDataMessage(m models.JSON) {

@@ -3,6 +3,7 @@ package integrationtests
 import (
 	"github.com/go-neutrino/neutrino/client"
 	"github.com/go-neutrino/neutrino/config"
+	"github.com/go-neutrino/neutrino/log"
 	"github.com/go-neutrino/neutrino/realtime-service/client"
 	"math/rand"
 	"strconv"
@@ -14,7 +15,7 @@ var (
 	AppId          = ""
 	Email          = ""
 	Password       = ""
-	ApiClient      client.ApiClient
+	ApiClient      *client.ApiClient
 	RealtimeClient *neutrinoclient.NeutrinoClient
 	RealtimeData   *neutrinoclient.NeutrinoData
 )
@@ -33,7 +34,12 @@ func init() {
 
 	ApiClient.Register(Email, Password)
 	ApiClient.Login(Email, Password)
-	AppId = ApiClient.CreateApp(randomString())
+	AppId, err := ApiClient.CreateApp(randomString())
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
 	ApiClient.AppId = AppId
 
 	RealtimeClient = neutrinoclient.NewClient(AppId)
