@@ -80,6 +80,7 @@ func (t *TypesController) InsertInTypeHandler(c *gin.Context) {
 
 	messageBuilder := messaging.GetMessageBuilder()
 
+	token := c.MustGet("token").(string)
 	notification.Notify(messageBuilder.Build(
 		messaging.OP_CREATE,
 		messaging.ORIGIN_API,
@@ -87,6 +88,7 @@ func (t *TypesController) InsertInTypeHandler(c *gin.Context) {
 		nil,
 		typeName,
 		appId,
+		token,
 	))
 
 	RespondId(body["_id"], c)
@@ -168,6 +170,7 @@ func (t *TypesController) UpdateTypeItemById(c *gin.Context) {
 
 	messageBuilder := messaging.GetMessageBuilder()
 
+	token := c.MustGet("token").(string)
 	notification.Notify(messageBuilder.Build(
 		messaging.OP_UPDATE,
 		messaging.ORIGIN_API,
@@ -175,6 +178,7 @@ func (t *TypesController) UpdateTypeItemById(c *gin.Context) {
 		nil,
 		typeName,
 		appId,
+		token,
 	))
 }
 
@@ -196,6 +200,7 @@ func (t *TypesController) DeleteTypeItemById(c *gin.Context) {
 
 	messageBuilder := messaging.GetMessageBuilder()
 
+	token := c.MustGet("token").(string)
 	notification.Notify(messageBuilder.Build(
 		messaging.OP_DELETE,
 		messaging.ORIGIN_API,
@@ -203,5 +208,6 @@ func (t *TypesController) DeleteTypeItemById(c *gin.Context) {
 		nil,
 		typeName,
 		appId,
+		token,
 	))
 }

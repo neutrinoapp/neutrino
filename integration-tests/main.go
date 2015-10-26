@@ -43,5 +43,6 @@ func init() {
 	ApiClient.AppId = AppId
 
 	RealtimeClient = neutrinoclient.NewClient(AppId)
+	RealtimeClient.Token = ApiClient.Token
 	RealtimeData = RealtimeClient.Data("test")
 }

@@ -84,9 +84,6 @@ $ go test ./integration-tests/
 - [ ] Sort out permissions
 - [ ] Js client
 
-Initial request -> No token needed, know only the app name(and the parent user of the app)
-    - /data?app=appId
-
 User logged in -> Get token from api service and reauthenticate with the realtime service
     - HTTP GET -> /v1/api/token?username=username&password=password
     - Conn.Token = token

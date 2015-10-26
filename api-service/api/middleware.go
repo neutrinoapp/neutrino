@@ -32,7 +32,6 @@ func authWithToken(c *gin.Context, userToken string) error {
 		return []byte(tokenSecret), nil
 	})
 
-	c.Set("token", token)
 	c.Set("user", token.Claims["user"])
 
 	return err
@@ -44,7 +43,6 @@ func authWithMaster(c *gin.Context, key string) error {
 
 func authorizeMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-
 		authHeader := c.Request.Header.Get("Authorization")
 
 		if authHeader == "" {
@@ -72,6 +70,8 @@ func authorizeMiddleware() gin.HandlerFunc {
 			//TODO: err
 			return
 		}
+
+		c.Set("token", authValue)
 
 		c.Next()
 	}

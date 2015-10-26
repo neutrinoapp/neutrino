@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/go-neutrino/neutrino/client"
 	"github.com/go-neutrino/neutrino/config"
+	"github.com/go-neutrino/neutrino/log"
 	"github.com/go-neutrino/neutrino/messaging"
 	"strconv"
 )
@@ -17,11 +18,15 @@ func (p *clientMessageProcessor) Process(mType int, m messaging.Message) error {
 		return errors.New("Unsupported message type: " + strconv.Itoa(mType))
 	}
 
+	mStr, _ := m.Serialize().String()
+	log.Info("Got message from client....processing:", mStr)
+
 	opProcessor := p.OpProcessors[m.Operation]
 
 	apiPort := config.Get(config.KEY_API_PORT)
 	//TODO: guess not
 	c := client.NewApiClient("http://localhost"+apiPort+"/v1/", m.App)
+	c.Token = m.Token
 	return opProcessor(m, c)
 }
 

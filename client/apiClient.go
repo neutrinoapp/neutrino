@@ -21,7 +21,15 @@ func NewApiClient(url, appId string) *ApiClient {
 }
 
 func (c *ApiClient) SendRequest(url, method string, body interface{}) (models.JSON, error) {
-	log.Info("Sending request", url, method, body)
+	log.Info(
+		"Sending request",
+		"BaseUrl:", c.BaseUrl,
+		"Url:", url,
+		"Method:", method,
+		"Body:", body,
+		"Token:", c.Token,
+		"AppId:", c.AppId,
+	)
 	var bodyStr = ""
 	if body != nil {
 		b, err := json.Marshal(body)

@@ -12,9 +12,9 @@ type NeutrinoEvent struct {
 }
 
 type NeutrinoData struct {
-	*NeutrinoClient
-	DataName string
-	Event    chan NeutrinoEvent
+	NeutrinoClient *NeutrinoClient
+	DataName       string
+	Event          chan NeutrinoEvent
 }
 
 const (
@@ -47,10 +47,6 @@ func (c *NeutrinoClient) Data(name string) *NeutrinoData {
 		return dataMap[name]
 	}
 
-	//TODO: find out why multiple data objects do not allow
-	//multiple channel receiving
-	//workaround: use singleton per type name
-
 	d := &NeutrinoData{
 		NeutrinoClient: c,
 		DataName:       name,
@@ -75,8 +71,9 @@ func (d *NeutrinoData) Create(m models.JSON) {
 		m,
 		nil,
 		d.DataName,
-		d.AppId,
-	).Send(d.WebsocketClient.GetConnection())
+		d.NeutrinoClient.AppId,
+		d.NeutrinoClient.Token,
+	).Send(d.NeutrinoClient.WebsocketClient.GetConnection())
 }
 
 func (d *NeutrinoData) Update(id string, m models.JSON) {
@@ -87,8 +84,9 @@ func (d *NeutrinoData) Update(id string, m models.JSON) {
 		m,
 		nil,
 		d.DataName,
-		d.AppId,
-	).Send(d.WebsocketClient.GetConnection())
+		d.NeutrinoClient.AppId,
+		d.NeutrinoClient.Token,
+	).Send(d.NeutrinoClient.WebsocketClient.GetConnection())
 }
 
 func (d *NeutrinoData) Delete(id string) {
@@ -98,8 +96,9 @@ func (d *NeutrinoData) Delete(id string) {
 		models.JSON{"_id": id},
 		nil,
 		d.DataName,
-		d.AppId,
-	).Send(d.WebsocketClient.GetConnection())
+		d.NeutrinoClient.AppId,
+		d.NeutrinoClient.Token,
+	).Send(d.NeutrinoClient.WebsocketClient.GetConnection())
 }
 
 func (d *NeutrinoData) onDataMessage(m models.JSON) {
