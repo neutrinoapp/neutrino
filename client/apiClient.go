@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"github.com/go-neutrino/neutrino/log"
 	"github.com/go-neutrino/neutrino/models"
+	"io/ioutil"
 	"net/http"
 	"strings"
-	"io/ioutil"
 )
 
 type ApiClient struct {

@@ -47,7 +47,7 @@ func TestCreateItemFromClient(t *testing.T) {
 
 func TestUpdateItemFromClient(t *testing.T) {
 	RealtimeData.Create(models.JSON{
-		"test":"",
+		"test": "",
 	})
 	sleep()
 
@@ -72,5 +72,35 @@ func TestUpdateItemFromClient(t *testing.T) {
 	item = items[0]
 	if item["test"] != "updated" {
 		t.Error("Item not updated properly")
+	}
+}
+
+func TestDeleteItemFromClient(t *testing.T) {
+	dType := randomString()
+	d := RealtimeClient.Data(dType)
+
+	d.Create(models.JSON{
+		"test": "",
+	})
+	sleep()
+
+	items, err := ApiClient.GetItems(dType)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	item := items[0]
+	d.Delete(item["_id"].(string))
+	sleep()
+
+	items, err = ApiClient.GetItems(dType)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if len(items) > 0 {
+		t.Error("Item not deleted properly")
 	}
 }
