@@ -79,15 +79,5 @@ $ go test ./integration-tests/
 # TODO
 #### Updated on the go:
 
-- [ ] Transport token from client to realtime service when communicating in realtime
-- [ ] Handle services authentication from/to api/realtime/clients
-- [ ] Sort out permissions
 - [ ] Js client
-
-User logged in -> Get token from api service and reauthenticate with the realtime service
-    - HTTP GET -> /v1/api/token?username=username&password=password
-    - Conn.Token = token
-    
-On authentication-required request
-    - Validate token
-    - Execute
+- [ ] Sort out permissions
