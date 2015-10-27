@@ -18,6 +18,7 @@ var (
 	ApiClient      *client.ApiClient
 	RealtimeClient *neutrinoclient.NeutrinoClient
 	RealtimeData   *neutrinoclient.NeutrinoData
+	DataType = "test"
 )
 
 func randomString() string {
