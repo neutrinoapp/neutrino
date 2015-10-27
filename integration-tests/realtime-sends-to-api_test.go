@@ -18,7 +18,7 @@ func init() {
 			break
 		}
 
-		time.Sleep(time.Second * 5)
+		sleep()
 	}
 }
 
@@ -28,13 +28,16 @@ func sleep() {
 }
 
 func TestCreateItemFromClient(t *testing.T) {
-	RealtimeData.Create(models.JSON{
+	testType := randomString()
+	d := RealtimeClient.Data(testType)
+
+	d.Create(models.JSON{
 		"test": "integration",
 	})
 
 	sleep()
 
-	items, err := ApiClient.GetItems(DataType)
+	items, err := ApiClient.GetItems(testType)
 	if err != nil {
 		t.Error(err)
 		return
@@ -46,24 +49,27 @@ func TestCreateItemFromClient(t *testing.T) {
 }
 
 func TestUpdateItemFromClient(t *testing.T) {
-	RealtimeData.Create(models.JSON{
+	testType := randomString()
+	d := RealtimeClient.Data(testType)
+
+	d.Create(models.JSON{
 		"test": "",
 	})
 	sleep()
 
-	items, err := ApiClient.GetItems(DataType)
+	items, err := ApiClient.GetItems(testType)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
 	item := items[0]
-	RealtimeData.Update(item["_id"].(string), models.JSON{
+	d.Update(item["_id"].(string), models.JSON{
 		"test": "updated",
 	})
 	sleep()
 
-	items, err = ApiClient.GetItems(DataType)
+	items, err = ApiClient.GetItems(testType)
 	if err != nil {
 		t.Error(err)
 		return
