@@ -9,7 +9,7 @@ import (
 var initialized bool
 
 func initMiddleware(e *gin.Engine) {
-	e.Use(defaultContentTypeMiddleware())
+	e.Use(defaultContentTypeMiddleware(), CORSMiddleware())
 }
 
 func initRoutes(e *gin.Engine) {

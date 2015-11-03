@@ -5,6 +5,7 @@ import (
 	"github.com/go-neutrino/neutrino/api-service/db"
 	"github.com/go-neutrino/neutrino/log"
 	"github.com/go-neutrino/neutrino/models"
+	"github.com/go-neutrino/neutrino/utils"
 	"gopkg.in/dgrijalva/jwt-go.v2"
 	"strings"
 )
@@ -20,8 +21,8 @@ func authWithToken(c *gin.Context, userToken string) error {
 		tokenSecretRecord, err := db.NewSystemDbService().FindId("accountSecret", nil)
 
 		if err != nil {
-			log.Error("Account secret error: ", err)
 			//we probably do not have such collection. Use a default secret and warn.
+			log.Error("Account secret error: ", err)
 			tokenSecretRecord = models.JSON{
 				"value": "",
 			}
@@ -56,14 +57,17 @@ func authorizeMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		authType := authHeaderParts[0]
+		authType := strings.ToLower(authHeaderParts[0])
 		authValue := authHeaderParts[1]
 
+		//TODO: authorization for master token, master key, normal token, app id only
 		var err error
-		if authType == "Bearer" {
+		if authType == "bearer" {
 			err = authWithToken(c, authValue)
-		} else if authType == "MasterKey" {
+		} else if authType == "masterkey" {
 			err = authWithMaster(c, authValue)
+		} else {
+			c.Next()
 		}
 
 		if err != nil {
@@ -93,17 +97,55 @@ func injectAppMiddleware() gin.HandlerFunc {
 		appId := c.Param("appId")
 
 		if appId != "" {
-			//TODO: cache this
-			d := db.NewAppsDbService(c.MustGet("user").(string))
+			//TODO: cache all this
+			u, userExists := c.Get("user")
+			p := utils.PathOfUrl(c.Request.URL.String())
+			if !userExists && p != "login" && p != "register" {
+				//TODO: handle non authorized data access - anonymous
+				log.Error(RestErrorUnauthorized(c))
+				return
+			}
+
+			if !userExists {
+				d := db.NewAppsMapDbService()
+				appMapDoc, err := d.FindOne(models.JSON{
+					"appId": appId,
+				}, nil)
+
+				if err != nil {
+					log.Error(RestError(c, err))
+					return
+				}
+
+				u = appMapDoc["user"].(string)
+			}
+
+			d := db.NewAppsDbService(u.(string))
 			app, err := d.FindId(appId, nil)
 			if err != nil {
-				RestErrorAppNotFound(c)
+				log.Error(RestErrorAppNotFound(c))
 				return
 			}
 
 			c.Set("app", models.JSON{}.FromMap(app))
 		} else {
-			RestError(c, "Invalid app id.")
+			log.Error(RestError(c, "Invalid app id."))
+		}
+	}
+}
+
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, UPDATE")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		c.Writer.Header().Set("Access-Control-Expose-Headers", "Content-Length")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(200)
+		} else {
+			c.Next()
 		}
 	}
 }

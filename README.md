@@ -79,5 +79,6 @@ $ go test ./integration-tests/
 # TODO
 #### Updated on the go:
 
+- [ ] Api tests for authenticated/unauthenticated requests for login/register and /data
 - [ ] Js client
 - [ ] Sort out permissions

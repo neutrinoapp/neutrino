@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-neutrino/neutrino/api-service/db"
+	"github.com/go-neutrino/neutrino/log"
 	"github.com/go-neutrino/neutrino/models"
 	"github.com/go-neutrino/neutrino/utils"
 	"github.com/go-neutrino/neutrino/utils/webUtils"
@@ -22,18 +23,18 @@ func (a *ApplicationController) CreateApplicationHandler(c *gin.Context) {
 	body := &ApplicationModel{}
 
 	if err := c.Bind(body); err != nil {
-		RestError(c, err)
+		log.Error(RestError(c, err))
 		return
 	}
 
 	if body.Name == "" {
-		RestErrorInvalidBody(c)
+		log.Error(RestErrorInvalidBody(c))
 		return
 	}
 
-	d := db.NewAppsDbService(c.MustGet("user").(string))
-
 	username := c.MustGet("user").(string)
+	d := db.NewAppsDbService(username)
+
 	doc := models.JSON{
 		"name":      body.Name,
 		"owner":     username,
@@ -43,11 +44,23 @@ func (a *ApplicationController) CreateApplicationHandler(c *gin.Context) {
 	}
 
 	if err := d.Insert(doc); err != nil {
-		RestError(c, err)
+		log.Error(RestError(c, err))
 		return
 	}
 
-	RespondId(doc["_id"], c)
+	appId := doc["_id"]
+	appsMapDb := db.NewAppsMapDbService()
+	err := appsMapDb.Insert(models.JSON{
+		"appId": appId,
+		"user":  username,
+	})
+
+	if err != nil {
+		log.Error(RestError(c, err))
+		return
+	}
+
+	RespondId(appId, c)
 }
 
 func (a *ApplicationController) GetApplicationsHandler(c *gin.Context) {

@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-neutrino/neutrino/api-service/db"
+	"github.com/go-neutrino/neutrino/log"
 	"github.com/go-neutrino/neutrino/models"
 	"github.com/go-neutrino/neutrino/utils/webUtils"
 	"golang.org/x/crypto/bcrypt"
@@ -24,13 +25,13 @@ func registerUser(c *gin.Context, d db.DbService) {
 	var u models.JSON
 
 	if err := c.Bind(&u); err != nil {
-		RestErrorInvalidBody(c)
+		log.Error(RestErrorInvalidBody(c))
 		return
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u["password"].(string)), 10)
 	if err != nil {
-		RestError(c, err)
+		log.Error(RestError(c, err))
 		return
 	}
 
@@ -41,7 +42,7 @@ func registerUser(c *gin.Context, d db.DbService) {
 	}
 
 	if err := d.Insert(doc); err != nil {
-		RestError(c, err)
+		log.Error(RestError(c, err))
 		return
 	}
 
@@ -52,21 +53,21 @@ func loginUser(c *gin.Context, d db.DbService) {
 	var u models.JSON
 
 	if err := c.Bind(&u); err != nil {
-		RestError(c, err)
+		log.Error(RestError(c, err))
 		return
 	}
 
 	existingUser, err := d.FindId(u["email"].(string), nil)
 
 	if err != nil {
-		RestError(c, err)
+		log.Error(RestError(c, err))
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword(existingUser["password"].([]byte), []byte(u["password"].(string)))
 
 	if err != nil {
-		RestError(c, err)
+		log.Error(RestError(c, err))
 		return
 	}
 
@@ -77,7 +78,7 @@ func loginUser(c *gin.Context, d db.DbService) {
 	tokenStr, err := token.SignedString([]byte(""))
 
 	if err != nil {
-		RestError(c, err)
+		log.Error(RestError(c, err))
 		return
 	}
 

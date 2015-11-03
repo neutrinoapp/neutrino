@@ -123,7 +123,3 @@ func (d *NeutrinoData) dispatchEvent(ev NeutrinoEvent) {
 	log.Info("Dispatching event:", ev.Code, ev.Data)
 	d.Event <- ev
 }
-
-func (d *NeutrinoData) getDataUrl() string {
-	return d.NeutrinoClient.getAppUrl() + "/data"
-}

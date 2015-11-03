@@ -22,3 +22,8 @@ func WhitelistFields(fields []string, obj map[string]interface{}) map[string]int
 
 	return result
 }
+
+func PathOfUrl(p string) string {
+	split := strings.Split(p, "/")
+	return split[len(split)-1]
+}

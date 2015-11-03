@@ -2,9 +2,9 @@ package db
 
 import (
 	"github.com/go-neutrino/neutrino/config"
+	"github.com/go-neutrino/neutrino/log"
 	"github.com/go-neutrino/neutrino/utils"
 	"gopkg.in/mgo.v2"
-	"log"
 )
 
 var connectionPool map[string]*mgo.Session
@@ -18,6 +18,7 @@ type DbService interface {
 	Update(q, u map[string]interface{}) error
 	FindId(id, fields interface{}) (map[string]interface{}, error)
 	Find(query, fields interface{}) ([]map[string]interface{}, error)
+	FindOne(query, fiends interface{}) (map[string]interface{}, error)
 	RemoveId(id interface{}) error
 	UpdateId(id, u interface{}) error
 }
@@ -33,6 +34,16 @@ func NewDbService(dbName, colName string, index mgo.Index) DbService {
 	return &d
 }
 
+func NewAppsMapDbService() DbService {
+	return NewDbService(Constants.DatabaseName(), Constants.AppsMapCollection(), mgo.Index{
+		Key:        []string{"$text:appId"},
+		Unique:     true,
+		DropDups:   true,
+		Background: true,
+		Sparse:     false,
+	})
+}
+
 func NewUsersDbService() DbService {
 	return NewDbService(Constants.DatabaseName(), Constants.UsersCollection(), mgo.Index{})
 }
@@ -42,15 +53,13 @@ func NewTypeDbService(appId, typeName string) DbService {
 }
 
 func NewAppsDbService(user string) DbService {
-	index := mgo.Index{
+	return NewDbService(Constants.DatabaseName(), user+"."+Constants.ApplicationsCollection(), mgo.Index{
 		Key:        []string{"$text:name"},
 		Unique:     true,
 		DropDups:   true,
 		Background: true,
 		Sparse:     false,
-	}
-
-	return NewDbService(Constants.DatabaseName(), user+"."+Constants.ApplicationsCollection(), index)
+	})
 }
 
 func NewAppUsersDbService(appId string) DbService {
@@ -80,7 +89,7 @@ func (d *dbService) GetSession() *mgo.Session {
 	if storedSession == nil {
 		session, err := mgo.Dial(d.connectionString)
 		if err != nil {
-			log.Fatal(err)
+			log.Error(err)
 		}
 
 		connectionPool[d.connectionString] = session
@@ -90,7 +99,7 @@ func (d *dbService) GetSession() *mgo.Session {
 
 		if len(d.index.Key) > 0 {
 			if err := collection.EnsureIndex(d.index); err != nil {
-				log.Fatal(err)
+				log.Error(err)
 			}
 		}
 	}
@@ -147,6 +156,22 @@ func (d *dbService) Find(query, fields interface{}) ([]map[string]interface{}, e
 	err := collection.Find(query).Select(fields).All(&result)
 
 	return result, err
+}
+
+func (d *dbService) FindOne(query, fields interface{}) (map[string]interface{}, error) {
+	res, err := d.Find(query, fields)
+	if err != nil {
+		return nil, err
+	}
+
+	var val map[string]interface{}
+	if len(res) > 0 {
+		val = res[0]
+	} else {
+		val = make(map[string]interface{})
+	}
+
+	return val, nil
 }
 
 func (d *dbService) RemoveId(id interface{}) error {

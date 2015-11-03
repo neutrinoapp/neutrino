@@ -20,3 +20,7 @@ func (c *constants) ApplicationsCollection() string {
 func (c *constants) SystemCollection() string {
 	return "system"
 }
+
+func (c *constants) AppsMapCollection() string {
+	return "appsMap"
+}

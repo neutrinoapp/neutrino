@@ -75,10 +75,6 @@ func (c *NeutrinoClient) Login(u, p string) (string, error) {
 	return token, err
 }
 
-func (c *NeutrinoClient) getAppUrl() string {
-	return c.RealtimeAddr + "/app/" + c.AppId
-}
-
 func (c *NeutrinoClient) registerDataListener(d *NeutrinoData) {
 	m := &sync.Mutex{}
 	m.Lock()
