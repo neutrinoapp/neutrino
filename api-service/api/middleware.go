@@ -67,6 +67,7 @@ func authorizeMiddleware() gin.HandlerFunc {
 			token, err = authWithMaster(c, authValue)
 		} else {
 			c.Next()
+			return
 		}
 
 		c.Set("user", token.Claims["user"])
