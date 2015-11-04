@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func authWithToken(c *gin.Context, userToken string) error {
+func authWithToken(c *gin.Context, userToken string) (*jwt.Token, error) {
 	token, err := jwt.Parse(userToken, func(token *jwt.Token) (interface{}, error) {
 		if jwt.GetSigningMethod("HS256") != token.Method {
 			//TODO: "Invalid signing token algorithm."
@@ -33,13 +33,11 @@ func authWithToken(c *gin.Context, userToken string) error {
 		return []byte(tokenSecret), nil
 	})
 
-	c.Set("user", token.Claims["user"])
-
-	return err
+	return token, err
 }
 
-func authWithMaster(c *gin.Context, key string) error {
-	return nil
+func authWithMaster(c *gin.Context, key string) (*jwt.Token, error) {
+	return nil, nil
 }
 
 func authorizeMiddleware() gin.HandlerFunc {
@@ -61,14 +59,18 @@ func authorizeMiddleware() gin.HandlerFunc {
 		authValue := authHeaderParts[1]
 
 		//TODO: authorization for master token, master key, normal token, app id only
+		var token *jwt.Token
 		var err error
 		if authType == "bearer" {
-			err = authWithToken(c, authValue)
+			token, err = authWithToken(c, authValue)
 		} else if authType == "masterkey" {
-			err = authWithMaster(c, authValue)
+			token, err = authWithMaster(c, authValue)
 		} else {
 			c.Next()
 		}
+
+		c.Set("user", token.Claims["user"])
+		c.Set("inApp", token.Claims["inApp"])
 
 		if err != nil {
 			//TODO: err
@@ -94,6 +96,7 @@ func defaultContentTypeMiddleware() gin.HandlerFunc {
 
 func injectAppMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		//TODO: do we always need the app injected?
 		appId := c.Param("appId")
 
 		if appId != "" {
@@ -104,6 +107,15 @@ func injectAppMiddleware() gin.HandlerFunc {
 				//TODO: handle non authorized data access - anonymous
 				log.Error(RestErrorUnauthorized(c))
 				return
+			}
+
+			if userExists {
+				//check if the user is inApp (not the owner of the app)
+				//if it is, we need to find the app by id
+				isInAppUser := c.MustGet("inApp").(bool)
+				if isInAppUser {
+					userExists = false
+				}
 			}
 
 			if !userExists {

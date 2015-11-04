@@ -79,6 +79,8 @@ $ go test ./integration-tests/
 # TODO
 #### Updated on the go:
 
+- [ ] Automatic data join
+- [ ] Api filtering/sorting/etc - http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api
 - [ ] Api tests for authenticated/unauthenticated requests for login/register and /data
 - [ ] Js client
 - [ ] Sort out permissions

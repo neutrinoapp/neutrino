@@ -42,6 +42,7 @@ func registerUser(c *gin.Context, d db.DbService) {
 	}
 
 	if err := d.Insert(doc); err != nil {
+		//TODO: user exists
 		log.Error(RestError(c, err))
 		return
 	}
@@ -49,7 +50,7 @@ func registerUser(c *gin.Context, d db.DbService) {
 	webUtils.OK(c)
 }
 
-func loginUser(c *gin.Context, d db.DbService) {
+func loginUser(c *gin.Context, d db.DbService, isApp bool) {
 	var u models.JSON
 
 	if err := c.Bind(&u); err != nil {
@@ -74,6 +75,7 @@ func loginUser(c *gin.Context, d db.DbService) {
 	token := jwt.New(jwt.GetSigningMethod("HS256"))
 	token.Claims["user"] = u["email"].(string)
 	token.Claims["expiration"] = time.Now().Add(time.Minute + 60).Unix()
+	token.Claims["inApp"] = isApp
 
 	tokenStr, err := token.SignedString([]byte(""))
 
@@ -96,9 +98,9 @@ func (a *AuthController) AppRegisterUserHandler(c *gin.Context) {
 }
 
 func (a *AuthController) LoginUserHandler(c *gin.Context) {
-	loginUser(c, db.NewUsersDbService())
+	loginUser(c, db.NewUsersDbService(), false)
 }
 
 func (a *AuthController) AppLoginUserHandler(c *gin.Context) {
-	loginUser(c, db.NewAppUsersDbService(c.Param("appId")))
+	loginUser(c, db.NewAppUsersDbService(c.Param("appId")), true)
 }
