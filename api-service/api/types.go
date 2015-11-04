@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-neutrino/neutrino/api-service/db"
 	"github.com/go-neutrino/neutrino/api-service/notification"
+	"github.com/go-neutrino/neutrino/log"
 	"github.com/go-neutrino/neutrino/messaging"
 	"github.com/go-neutrino/neutrino/models"
 	"github.com/go-neutrino/neutrino/utils/webUtils"
@@ -14,13 +15,13 @@ type TypesController struct {
 }
 
 func (t *TypesController) ensureType(typeName string, c *gin.Context) {
-	app := c.MustGet("app").(models.JSON)
+	appId := c.Param("appId")
 	user := c.MustGet("user").(string)
 
 	go func() {
 		//we do not need to wait for this op
 		d := db.NewAppsDbService(user)
-		d.UpdateId(app["_id"],
+		d.UpdateId(appId,
 			models.JSON{
 				"$addToSet": models.JSON{
 					"types": typeName,
@@ -31,8 +32,7 @@ func (t *TypesController) ensureType(typeName string, c *gin.Context) {
 }
 
 func (t *TypesController) GetTypesHandler(c *gin.Context) {
-	app := c.MustGet("app").(models.JSON)
-
+	app := c.MustGet("getApp").(GetAppFunc)()
 	c.JSON(http.StatusOK, app["types"])
 }
 
@@ -40,10 +40,8 @@ func (t *TypesController) DeleteType(c *gin.Context) {
 	appId := c.Param("appId")
 	typeName := c.Param("typeName")
 
-	app := c.MustGet("app").(models.JSON)
-
 	d := db.NewAppsDbService(c.MustGet("user").(string))
-	d.UpdateId(app["_id"],
+	d.UpdateId(appId,
 		models.JSON{
 			"$pull": models.JSON{
 				"types": typeName,
@@ -99,29 +97,12 @@ func (t *TypesController) GetTypeDataHandler(c *gin.Context) {
 	typeName := c.Param("typeName")
 
 	t.ensureType(typeName, c)
-
-	app := c.MustGet("app").(models.JSON)
-	types := app["types"].([]interface{})
-	found := false
-
-	for _, t := range types {
-		if value, ok := t.(string); ok && value == typeName {
-			found = true
-			break
-		}
-	}
-
-	if !found {
-		RestErrorNotFound(c)
-		return
-	}
-
 	d := db.NewTypeDbService(appId, typeName)
 
 	typeData, err := d.Find(nil, nil)
 
 	if err != nil {
-		RestError(c, err)
+		log.Error(RestError(c, err))
 		return
 	}
 
@@ -140,7 +121,7 @@ func (t *TypesController) GetTypeItemById(c *gin.Context) {
 	item, err := d.FindId(itemId, nil)
 
 	if err != nil {
-		RestError(c, err)
+		log.Error(RestError(c, err))
 		return
 	}
 
@@ -157,10 +138,12 @@ func (t *TypesController) UpdateTypeItemById(c *gin.Context) {
 	d := db.NewTypeDbService(appId, typeName)
 	body := webUtils.GetBody(c)
 
-	err := d.UpdateId(itemId, body)
+	err := d.UpdateId(itemId, models.JSON{
+		"$set": body,
+	})
 
 	if err != nil {
-		RestError(c, err)
+		log.Error(RestError(c, err))
 		return
 	}
 
@@ -194,7 +177,7 @@ func (t *TypesController) DeleteTypeItemById(c *gin.Context) {
 	err := d.RemoveId(itemId)
 
 	if err != nil {
-		RestError(c, err)
+		log.Error(RestError(c, err))
 		return
 	}
 

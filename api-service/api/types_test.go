@@ -43,7 +43,7 @@ func TestDeleteType(t *testing.T) {
 
 func TestGetAndInsertTypeData(t *testing.T) {
 	if isTravis() {
-		//investigate why the get request returns no results
+		//TODO: investigate why the get request returns no results
 		return
 	}
 

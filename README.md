@@ -47,7 +47,7 @@ To run the integration tests run:
 
 ```bash
 #make sure that you have all the services running including nats and mongodb
-$ go test ./integration-tests/ 
+$ make integration
 ```
 
 # Goals for the initial release
