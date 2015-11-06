@@ -1,9 +1,10 @@
 package api
 
 import (
-	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"github.com/go-neutrino/neutrino/models"
+"errors"
 )
 
 func RestErrorInvalidBody(c *gin.Context) error {
@@ -33,10 +34,6 @@ func RestError(c *gin.Context, err interface{}) error {
 		msg = t
 	}
 
-	getError := func() error {
-		return errors.New(msg)
-	}
-
 	if msg == "not found" || msg == "app not found" {
 		status = http.StatusNotFound
 	} else if msg == "invalid request body" {
@@ -45,11 +42,11 @@ func RestError(c *gin.Context, err interface{}) error {
 		status = http.StatusUnauthorized
 	} else if msg == "ns not found" {
 		//mongo throws this error when a collection does not exist and we call drop
-		return getError()
+		return errors.New(msg)
 	}
 
-	requestError := getError()
-	c.AbortWithError(status, requestError)
+	c.JSON(status, models.JSON{"error": msg});
+	c.Abort()
 
-	return requestError
+	return errors.New(msg)
 }

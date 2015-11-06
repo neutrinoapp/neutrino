@@ -32,8 +32,10 @@ func (t *TypesController) ensureType(typeName string, c *gin.Context) {
 }
 
 func (t *TypesController) GetTypesHandler(c *gin.Context) {
-	app := c.MustGet("getApp").(GetAppFunc)()
-	c.JSON(http.StatusOK, app["types"])
+	app := GetApplication(c, c.Param("appId"))
+	if app != nil {
+		c.JSON(http.StatusOK, app["types"])
+	}
 }
 
 func (t *TypesController) DeleteType(c *gin.Context) {

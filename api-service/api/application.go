@@ -85,7 +85,8 @@ func (a *ApplicationController) GetApplicationsHandler(c *gin.Context) {
 }
 
 func (a *ApplicationController) GetApplicationHandler(c *gin.Context) {
-	if app, exists := c.Get("app"); exists {
+	app := GetApplication(c, c.Param("appId"))
+	if app != nil {
 		c.JSON(http.StatusOK, app)
 	}
 }

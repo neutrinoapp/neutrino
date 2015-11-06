@@ -29,15 +29,16 @@ func TestDeleteType(t *testing.T) {
 	deleteReq.CodeIs(200)
 
 	getReq := sendAuthenticatedRequest("GET", "/app/"+app.Id+"/data/"+typeName, nil, t)
-	getReq.CodeIs(404)
+	//we dynamically create types so no not found errors
+	getReq.CodeIs(200)
 
 	appReq := sendAuthenticatedRequest("GET", "/app/"+app.Id, nil, t)
 	updatedApp := appReq.BodyJSON()
 
 	types := updatedApp["types"].([]interface{})
 
-	if len(types) > 1 {
-		t.Error("Type not deleted correctly")
+	if len(types) != 2 {
+		t.Error("Types not correct count, should be users, " + typeName)
 	}
 }
 

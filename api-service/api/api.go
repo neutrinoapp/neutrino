@@ -27,7 +27,7 @@ func initRoutes(e *gin.Engine) {
 			appGroup.POST("", appController.CreateApplicationHandler)
 			appGroup.GET("", appController.GetApplicationsHandler)
 
-			appIdGroup := appGroup.Group("/:appId", injectAppMiddleware())
+			appIdGroup := appGroup.Group("/:appId", validateAppMiddleware())
 			{
 				appIdGroup.GET("", appController.GetApplicationHandler)
 				appIdGroup.DELETE("", appController.DeleteApplicationHandler)
