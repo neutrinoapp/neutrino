@@ -22,12 +22,12 @@ func initRoutes(e *gin.Engine) {
 		v1.POST("/login", authController.LoginUserHandler)
 		v1.POST("/register", authController.RegisterUserHandler)
 
-		appGroup := v1.Group("/app", authorizeMiddleware())
+		appGroup := v1.Group("/app", authorizeMiddleware(), validateAppOperationsAuthorizationMiddleware())
 		{
 			appGroup.POST("", appController.CreateApplicationHandler)
 			appGroup.GET("", appController.GetApplicationsHandler)
 
-			appIdGroup := appGroup.Group("/:appId", validateAppMiddleware())
+			appIdGroup := appGroup.Group("/:appId", validateAppMiddleware(), validateAppPermissionsMiddleware())
 			{
 				appIdGroup.GET("", appController.GetApplicationHandler)
 				appIdGroup.DELETE("", appController.DeleteApplicationHandler)

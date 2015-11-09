@@ -9,6 +9,7 @@ import (
 	"github.com/go-neutrino/neutrino/utils/webUtils"
 	"net/http"
 	"time"
+"strings"
 )
 
 type ApplicationModel struct {
@@ -32,7 +33,7 @@ func (a *ApplicationController) CreateApplicationHandler(c *gin.Context) {
 		return
 	}
 
-	username := c.MustGet("user").(string)
+	username := ApiUser(c).Name
 	d := db.NewAppsDbService(username)
 
 	doc := models.JSON{
@@ -40,7 +41,7 @@ func (a *ApplicationController) CreateApplicationHandler(c *gin.Context) {
 		"owner":     username,
 		"types":     []string{"users"},
 		"createdAt": time.Now(),
-		"masterKey": utils.GetCleanUUID(),
+		"masterKey": strings.ToUpper(utils.GetCleanUUID()),
 	}
 
 	if err := d.Insert(doc); err != nil {
@@ -52,6 +53,7 @@ func (a *ApplicationController) CreateApplicationHandler(c *gin.Context) {
 	appsMapDb := db.NewAppsMapDbService()
 	err := appsMapDb.Insert(models.JSON{
 		"appId": appId,
+		"masterKey": doc["masterKey"],
 		"user":  username,
 	})
 
@@ -64,7 +66,7 @@ func (a *ApplicationController) CreateApplicationHandler(c *gin.Context) {
 }
 
 func (a *ApplicationController) GetApplicationsHandler(c *gin.Context) {
-	user := c.MustGet("user").(string)
+	user := ApiUser(c).Name
 	d := db.NewAppsDbService(user)
 
 	res, err := d.Find(
@@ -85,7 +87,7 @@ func (a *ApplicationController) GetApplicationsHandler(c *gin.Context) {
 }
 
 func (a *ApplicationController) GetApplicationHandler(c *gin.Context) {
-	app := GetApplication(c, c.Param("appId"))
+	app := Application(c, c.Param("appId"))
 	if app != nil {
 		c.JSON(http.StatusOK, app)
 	}
@@ -94,7 +96,7 @@ func (a *ApplicationController) GetApplicationHandler(c *gin.Context) {
 func (a *ApplicationController) DeleteApplicationHandler(c *gin.Context) {
 	appId := c.Param("appId")
 
-	d := db.NewAppsDbService(c.MustGet("user").(string))
+	d := db.NewAppsDbService(ApiUser(c).Name)
 	err := d.RemoveId(appId)
 
 	if err != nil {
@@ -105,7 +107,7 @@ func (a *ApplicationController) DeleteApplicationHandler(c *gin.Context) {
 
 func (a *ApplicationController) UpdateApplicationHandler(c *gin.Context) {
 	appId := c.Param("appId")
-	d := db.NewAppsDbService(c.MustGet("user").(string))
+	d := db.NewAppsDbService(ApiUser(c).Name)
 	doc := utils.WhitelistFields([]string{"name"}, webUtils.GetBody(c))
 
 	err := d.Update(models.JSON{

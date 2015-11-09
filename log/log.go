@@ -38,6 +38,6 @@ func Info(v ...interface{}) {
 }
 
 func Error(v ...interface{}) {
-	//TODO: proper error logging
+	log.Println("Stack:")
 	log.Println(args(v)...)
 }

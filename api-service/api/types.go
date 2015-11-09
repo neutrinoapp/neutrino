@@ -16,7 +16,7 @@ type TypesController struct {
 
 func (t *TypesController) ensureType(typeName string, c *gin.Context) {
 	appId := c.Param("appId")
-	user := c.MustGet("user").(string)
+	user := ApiUser(c).Name
 
 	go func() {
 		//we do not need to wait for this op
@@ -32,7 +32,7 @@ func (t *TypesController) ensureType(typeName string, c *gin.Context) {
 }
 
 func (t *TypesController) GetTypesHandler(c *gin.Context) {
-	app := GetApplication(c, c.Param("appId"))
+	app := Application(c, c.Param("appId"))
 	if app != nil {
 		c.JSON(http.StatusOK, app["types"])
 	}
@@ -42,7 +42,7 @@ func (t *TypesController) DeleteType(c *gin.Context) {
 	appId := c.Param("appId")
 	typeName := c.Param("typeName")
 
-	d := db.NewAppsDbService(c.MustGet("user").(string))
+	d := db.NewAppsDbService(ApiUser(c).Name)
 	d.UpdateId(appId,
 		models.JSON{
 			"$pull": models.JSON{
@@ -80,7 +80,7 @@ func (t *TypesController) InsertInTypeHandler(c *gin.Context) {
 
 	messageBuilder := messaging.GetMessageBuilder()
 
-	token := c.MustGet("token").(string)
+	token := ApiUser(c).Key
 	notification.Notify(messageBuilder.Build(
 		messaging.OP_CREATE,
 		messaging.ORIGIN_API,
@@ -155,7 +155,7 @@ func (t *TypesController) UpdateTypeItemById(c *gin.Context) {
 
 	messageBuilder := messaging.GetMessageBuilder()
 
-	token := c.MustGet("token").(string)
+	token := ApiUser(c).Key
 	notification.Notify(messageBuilder.Build(
 		messaging.OP_UPDATE,
 		messaging.ORIGIN_API,
@@ -185,7 +185,7 @@ func (t *TypesController) DeleteTypeItemById(c *gin.Context) {
 
 	messageBuilder := messaging.GetMessageBuilder()
 
-	token := c.MustGet("token").(string)
+	token := ApiUser(c).Key
 	notification.Notify(messageBuilder.Build(
 		messaging.OP_DELETE,
 		messaging.ORIGIN_API,

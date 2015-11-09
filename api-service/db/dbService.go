@@ -18,7 +18,7 @@ type DbService interface {
 	Update(q, u map[string]interface{}) error
 	FindId(id, fields interface{}) (map[string]interface{}, error)
 	Find(query, fields interface{}) ([]map[string]interface{}, error)
-	FindOne(query, fiends interface{}) (map[string]interface{}, error)
+	FindOne(query, fields interface{}) (map[string]interface{}, error)
 	RemoveId(id interface{}) error
 	UpdateId(id, u interface{}) error
 }

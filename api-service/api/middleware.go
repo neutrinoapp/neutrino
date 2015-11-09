@@ -9,7 +9,10 @@ import (
 	"strings"
 )
 
-type GetAppFunc func() (models.JSON, error)
+type apiUser struct {
+	Name, Key string
+	Master, InApp bool
+}
 
 func authWithToken(c *gin.Context, userToken string) (*jwt.Token, error) {
 	token, err := jwt.Parse(userToken, func(token *jwt.Token) (interface{}, error) {
@@ -19,11 +22,11 @@ func authWithToken(c *gin.Context, userToken string) (*jwt.Token, error) {
 		}
 
 		//TODO: cache this
-		tokenSecretRecord, err := db.NewSystemDbService().FindId("accountSecret", nil)
+		tokenSecretRecord, accountSecretError := db.NewSystemDbService().FindId("accountSecret", nil)
 
-		if err != nil {
+		if accountSecretError != nil {
 			//we probably do not have such collection. Use a default secret and warn.
-			log.Error("Account secret error: ", err)
+			log.Error("Account secret error: ", accountSecretError)
 			tokenSecretRecord = models.JSON{
 				"value": "",
 			}
@@ -37,8 +40,21 @@ func authWithToken(c *gin.Context, userToken string) (*jwt.Token, error) {
 	return token, err
 }
 
-func authWithMaster(c *gin.Context, key string) (*jwt.Token, error) {
-	return nil, nil
+func authWithMaster(c *gin.Context, key string) (string, error) {
+	d := db.NewAppsMapDbService()
+	res, err := d.FindOne(models.JSON{
+		"masterKey": key,
+	}, nil)
+
+	if err != nil {
+		return "", err
+	}
+
+	if res == nil || res["user"] == nil {
+		return "", BuildError("Invalid master key")
+	}
+
+	return res["user"].(string), nil
 }
 
 func authorizeMiddleware() gin.HandlerFunc {
@@ -46,13 +62,13 @@ func authorizeMiddleware() gin.HandlerFunc {
 		authHeader := c.Request.Header.Get("Authorization")
 
 		if authHeader == "" {
-			//TODO: not authorized
+			log.Error(RestErrorUnauthorized(c))
 			return
 		}
 
 		authHeaderParts := strings.SplitN(authHeader, " ", 2)
 		if len(authHeaderParts) != 2 {
-			//TODO: not authorized
+			log.Error(RestErrorUnauthorized(c))
 			return
 		}
 
@@ -62,18 +78,29 @@ func authorizeMiddleware() gin.HandlerFunc {
 		//TODO: authorization for master token, master key, normal token, app id only
 		var token *jwt.Token
 		var err error
+		user := &apiUser{}
 		if authType == "bearer" {
 			token, err = authWithToken(c, authValue)
+			if err == nil {
+				user.Name = token.Claims["user"].(string)
+				user.InApp = token.Claims["inApp"].(bool)
+				user.Master = false
+				user.Key = authValue
+			}
 		} else if authType == "masterkey" {
-			token, err = authWithMaster(c, authValue)
+			userName, err := authWithMaster(c, authValue)
+			if err == nil {
+				user.Name = userName
+				user.InApp = false
+				user.Master = true
+				user.Key = authValue
+			}
 		} else {
 			c.Next()
 			return
 		}
 
-		c.Set("user", token.Claims["user"])
-		c.Set("inApp", token.Claims["inApp"])
-		c.Set("token", authValue)
+		c.Set("user", user)
 
 		if err != nil {
 			log.Error(RestError(c, err))
@@ -97,11 +124,33 @@ func defaultContentTypeMiddleware() gin.HandlerFunc {
 
 func validateAppMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		//TODO: do we always need the app injected?
 		appId := c.Param("appId")
-
+		log.Info(appId)
 		if appId == "" {
 			log.Error(RestError(c, "Invalid app id."))
+		} else {
+			c.Next()
+		}
+	}
+}
+
+func validateAppPermissionsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		inApp := ApiUser(c).InApp
+		if inApp {
+			log.Error(RestErrorUnauthorized(c))
+			c.Next()
+			return
+		}
+	}
+}
+
+func validateAppOperationsAuthorizationMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user := ApiUser(c)
+		if user.InApp && !user.Master {
+			log.Error(RestErrorUnauthorized(c))
+			return
 		}
 	}
 }

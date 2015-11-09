@@ -8,9 +8,19 @@ import (
 	"github.com/go-neutrino/neutrino/api-service/db"
 )
 
-func GetApplication(c *gin.Context, appId string) models.JSON {
+func ApiUser(c *gin.Context) *apiUser {
+	val, exists := c.Get("user")
+	if exists {
+		return val.(*apiUser)
+	}
+
+	return nil
+}
+
+func Application(c *gin.Context, appId string) models.JSON {
 	//TODO: cache all this
-	u, userExists := c.Get("user")
+	u := ApiUser(c)
+	userExists := u != nil
 	p := utils.PathOfUrl(c.Request.URL.String())
 	if !userExists && p != "login" && p != "register" {
 		//TODO: handle non authorized data access - anonymous
@@ -21,13 +31,14 @@ func GetApplication(c *gin.Context, appId string) models.JSON {
 	if userExists {
 		//check if the user is inApp (not the owner of the app)
 		//if it is, we need to find the app by id
-		isInAppUser := c.MustGet("inApp").(bool)
+		isInAppUser := u.InApp
 		if isInAppUser {
 			userExists = false
 		}
 	}
 
 	if !userExists {
+		u = &apiUser{}
 		d := db.NewAppsMapDbService()
 		appMapDoc, err := d.FindOne(models.JSON{
 			"appId": appId,
@@ -38,10 +49,10 @@ func GetApplication(c *gin.Context, appId string) models.JSON {
 			return nil
 		}
 
-		u = appMapDoc["user"].(string)
+		u.Name = appMapDoc["user"].(string)
 	}
 
-	d := db.NewAppsDbService(u.(string))
+	d := db.NewAppsDbService(u.Name)
 	app, err := d.FindId(appId, nil)
 	if err != nil {
 		log.Error(RestErrorAppNotFound(c))

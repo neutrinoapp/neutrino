@@ -4,8 +4,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"github.com/go-neutrino/neutrino/models"
-"errors"
+	"errors"
 )
+
+type restError struct {
+	error
+	Message string
+	Code int
+}
+
+func (e restError) Error() string {
+	return e.Message
+}
 
 func RestErrorInvalidBody(c *gin.Context) error {
 	return RestError(c, "invalid request body")
@@ -23,7 +33,7 @@ func RestErrorUnauthorized(c *gin.Context) error {
 	return RestError(c, "not authorized")
 }
 
-func RestError(c *gin.Context, err interface{}) error {
+func BuildError(err interface{}) restError {
 	status := http.StatusInternalServerError
 
 	var msg string
@@ -32,21 +42,35 @@ func RestError(c *gin.Context, err interface{}) error {
 		msg = t.Error()
 	case string:
 		msg = t
+		if msg == "not found" || msg == "app not found" {
+			status = http.StatusNotFound
+		} else if msg == "invalid request body" {
+			status = http.StatusBadRequest
+		} else if msg == "not authorized" {
+			status = http.StatusUnauthorized
+		}
+	case int:
+		status = t
+		if status == http.StatusNotFound {
+			msg = "not found"
+		} else if status == http.StatusBadRequest {
+			msg = "invalid request body"
+		} else if status == http.StatusUnauthorized {
+			msg = "not authorized"
+		}
 	}
 
-	if msg == "not found" || msg == "app not found" {
-		status = http.StatusNotFound
-	} else if msg == "invalid request body" {
-		status = http.StatusBadRequest
-	} else if msg == "not authorized" {
-		status = http.StatusUnauthorized
-	} else if msg == "ns not found" {
-		//mongo throws this error when a collection does not exist and we call drop
-		return errors.New(msg)
+	return restError{
+		Message: msg,
+		Code: status,
 	}
+}
 
-	c.JSON(status, models.JSON{"error": msg});
+func RestError(c *gin.Context, err interface{}) error {
+	restError := BuildError(err)
+
+	c.JSON(restError.Code, models.JSON{"error": restError.Message});
 	c.Abort()
 
-	return errors.New(msg)
+	return errors.New(restError.Message)
 }
