@@ -1,20 +1,27 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
-	"net/http"
-	"github.com/go-neutrino/neutrino/models"
 	"errors"
+	"net/http"
+
+	"fmt"
+
+	"github.com/gin-gonic/gin"
+	"github.com/go-neutrino/neutrino/models"
 )
 
 type restError struct {
 	error
 	Message string
-	Code int
+	Code    int
 }
 
 func (e restError) Error() string {
 	return e.Message
+}
+
+func (e restError) String() string {
+	return fmt.Sprintf("Message: %s, Code: %v", e.Message, e.Code)
 }
 
 func RestErrorInvalidBody(c *gin.Context) error {
@@ -35,13 +42,9 @@ func RestErrorUnauthorized(c *gin.Context) error {
 
 func BuildError(err interface{}) restError {
 	status := http.StatusInternalServerError
-
 	var msg string
-	switch t := err.(type) {
-	case error:
-		msg = t.Error()
-	case string:
-		msg = t
+
+	setStatus := func(msg string) {
 		if msg == "not found" || msg == "app not found" {
 			status = http.StatusNotFound
 		} else if msg == "invalid request body" {
@@ -49,8 +52,9 @@ func BuildError(err interface{}) restError {
 		} else if msg == "not authorized" {
 			status = http.StatusUnauthorized
 		}
-	case int:
-		status = t
+	}
+
+	setMessage := func(status int) {
 		if status == http.StatusNotFound {
 			msg = "not found"
 		} else if status == http.StatusBadRequest {
@@ -60,17 +64,29 @@ func BuildError(err interface{}) restError {
 		}
 	}
 
+	switch t := err.(type) {
+	case error:
+		msg = t.Error()
+		setStatus(msg)
+	case string:
+		msg = t
+		setStatus(msg)
+	case int:
+		status = t
+		setMessage(status)
+	}
+
 	return restError{
 		Message: msg,
-		Code: status,
+		Code:    status,
 	}
 }
 
 func RestError(c *gin.Context, err interface{}) error {
 	restError := BuildError(err)
 
-	c.JSON(restError.Code, models.JSON{"error": restError.Message});
+	c.JSON(restError.Code, models.JSON{"error": restError.Message})
 	c.Abort()
 
-	return errors.New(restError.Message)
+	return errors.New(restError.String())
 }

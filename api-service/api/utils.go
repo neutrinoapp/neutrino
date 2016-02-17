@@ -1,11 +1,11 @@
 package api
 
 import (
+	"github.com/gin-gonic/gin"
+	"github.com/go-neutrino/neutrino/api-service/db"
+	"github.com/go-neutrino/neutrino/log"
 	"github.com/go-neutrino/neutrino/models"
 	"github.com/go-neutrino/neutrino/utils"
-	"github.com/gin-gonic/gin"
-	"github.com/go-neutrino/neutrino/log"
-	"github.com/go-neutrino/neutrino/api-service/db"
 )
 
 func ApiUser(c *gin.Context) *apiUser {
@@ -14,7 +14,7 @@ func ApiUser(c *gin.Context) *apiUser {
 		return val.(*apiUser)
 	}
 
-	return nil
+	return &apiUser{}
 }
 
 func Application(c *gin.Context, appId string) models.JSON {

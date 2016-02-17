@@ -1,6 +1,8 @@
 package api
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-neutrino/neutrino/api-service/db"
 	"github.com/go-neutrino/neutrino/api-service/notification"
@@ -8,7 +10,6 @@ import (
 	"github.com/go-neutrino/neutrino/messaging"
 	"github.com/go-neutrino/neutrino/models"
 	"github.com/go-neutrino/neutrino/utils/webUtils"
-	"net/http"
 )
 
 type TypesController struct {
@@ -57,7 +58,8 @@ func (t *TypesController) DeleteType(c *gin.Context) {
 
 	dropError := collection.DropCollection()
 
-	if dropError != nil {
+	//if the collection is already dropped do not send back the error
+	if dropError != nil && dropError.Error() != "ns not found" {
 		RestError(c, dropError)
 		return
 	}

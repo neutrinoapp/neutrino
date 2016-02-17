@@ -3,9 +3,6 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/go-neutrino/neutrino/api-service/db"
-	"github.com/go-neutrino/neutrino/models"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -16,6 +13,13 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"bytes"
+
+	"github.com/gin-gonic/gin"
+	"github.com/go-neutrino/neutrino/api-service/db"
+	"github.com/go-neutrino/neutrino/log"
+	"github.com/go-neutrino/neutrino/models"
 )
 
 var (
@@ -31,8 +35,16 @@ type ResRecorder struct {
 
 func (r *ResRecorder) CodeIs(s int) {
 	if r.Code != s {
-		_, file, line, _ := runtime.Caller(2)
-		r.t.Error(r.Code, "is different from", s, file+":"+strconv.Itoa(line))
+		buf := bytes.Buffer{}
+
+		for i := 1; i <= 10; i++ {
+			_, file, line, _ := runtime.Caller(i)
+			if file != "" {
+				buf.WriteString(fmt.Sprintf("\r\n%s:%s", file, strconv.Itoa(line)))
+			}
+		}
+
+		r.t.Error(r.Code, "is different from", s, buf.String())
 	}
 }
 
@@ -71,26 +83,28 @@ func sendRequest(method, path string, body interface{}, t *testing.T) *ResRecord
 		db.Initialize()
 		httptest.NewServer(e)
 
+		log.Info("Method: -> %s, Path: -> %s, body: -> %v, token: -> %s", method, path, body, token)
+
 		e.Use(func() gin.HandlerFunc {
 			return func(c *gin.Context) {
-				fmt.Println("###")
-				fmt.Println("URL: -> " + c.Request.URL.String())
-				fmt.Println("Method: -> " + c.Request.Method)
+				log.Info("###")
+				log.Info("URL: -> " + c.Request.URL.String())
+				log.Info("Method: -> " + c.Request.Method)
 
-				fmt.Println("Headers: ->")
+				log.Info("Headers: ->")
 				for k := range c.Request.Header {
-					fmt.Println(c.Request.Header[k])
+					t.Log(c.Request.Header[k])
 				}
-				fmt.Println("<-")
+				log.Info("<-")
 
 				if user, exists := c.Get("user"); exists {
-					fmt.Println("User: -> ", user)
+					log.Info("User: -> ", user)
 				}
 
 				b, _ := ioutil.ReadAll(c.Request.Body)
-				fmt.Println("Body: -> ", string(b))
+				log.Info("Body: -> ", string(b))
 
-				fmt.Println("### -->>")
+				log.Info("### -->>")
 
 				c.Next()
 			}
