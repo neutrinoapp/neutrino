@@ -1,16 +1,17 @@
 package api
 
 import (
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-neutrino/neutrino/api-service/db"
 	"github.com/go-neutrino/neutrino/log"
 	"github.com/go-neutrino/neutrino/models"
 	"gopkg.in/dgrijalva/jwt-go.v2"
-	"strings"
 )
 
 type apiUser struct {
-	Name, Key string
+	Name, Key     string
 	Master, InApp bool
 }
 
@@ -57,57 +58,60 @@ func authWithMaster(c *gin.Context, key string) (string, error) {
 	return res["user"].(string), nil
 }
 
-func authorizeMiddleware() gin.HandlerFunc {
+func authorizeMiddleware(stop bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.Request.Header.Get("Authorization")
 
-		if authHeader == "" {
-			log.Error(RestErrorUnauthorized(c))
-			return
-		}
-
-		authHeaderParts := strings.SplitN(authHeader, " ", 2)
-		if len(authHeaderParts) != 2 {
-			log.Error(RestErrorUnauthorized(c))
-			return
-		}
-
-		authType := strings.ToLower(authHeaderParts[0])
-		authValue := authHeaderParts[1]
-
-		//TODO: authorization for master token, master key, normal token, app id only
-		var token *jwt.Token
-		var err error
-		user := &apiUser{}
-		if authType == "bearer" {
-			token, err = authWithToken(c, authValue)
-			if err == nil {
-				user.Name = token.Claims["user"].(string)
-				user.InApp = token.Claims["inApp"].(bool)
-				user.Master = false
-				user.Key = authValue
+		if authHeader != "" {
+			authHeaderParts := strings.SplitN(authHeader, " ", 2)
+			if len(authHeaderParts) != 2 {
+				log.Error(RestErrorUnauthorized(c))
+				return
 			}
-		} else if authType == "masterkey" {
-			userName, err := authWithMaster(c, authValue)
-			if err == nil {
-				user.Name = userName
-				user.InApp = false
-				user.Master = true
-				user.Key = authValue
+
+			authType := strings.ToLower(authHeaderParts[0])
+			authValue := authHeaderParts[1]
+
+			//TODO: authorization for master token, master key, normal token, app id only
+			var token *jwt.Token
+			var err error
+			user := &apiUser{}
+			if authType == "bearer" {
+				token, err = authWithToken(c, authValue)
+				if err == nil {
+					user.Name = token.Claims["user"].(string)
+					user.InApp = token.Claims["inApp"].(bool)
+					user.Master = false
+					user.Key = authValue
+				}
+			} else if authType == "masterkey" {
+				userName, err := authWithMaster(c, authValue)
+				if err == nil {
+					user.Name = userName
+					user.InApp = false
+					user.Master = true
+					user.Key = authValue
+				}
+			} else {
+				c.Next()
+				return
 			}
-		} else {
+
+			c.Set("user", user)
+
+			if err != nil {
+				log.Error(RestError(c, err))
+				return
+			}
+
 			c.Next()
-			return
+		} else {
+			if !stop {
+				c.Next()
+			} else {
+				log.Error(RestErrorUnauthorized(c))
+			}
 		}
-
-		c.Set("user", user)
-
-		if err != nil {
-			log.Error(RestError(c, err))
-			return
-		}
-
-		c.Next()
 	}
 }
 
@@ -136,9 +140,9 @@ func validateAppMiddleware() gin.HandlerFunc {
 
 func validateAppPermissionsMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		inApp := ApiUser(c).InApp
-		if inApp {
-			log.Error(RestErrorUnauthorized(c))
+		user := ApiUser(c)
+		if !user.Master {
+			log.Error(RestErrorUnauthorized(c), user)
 			c.Next()
 			return
 		}
@@ -149,7 +153,7 @@ func validateAppOperationsAuthorizationMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := ApiUser(c)
 		if user.InApp && !user.Master {
-			log.Error(RestErrorUnauthorized(c))
+			log.Error(RestErrorUnauthorized(c), user)
 			return
 		}
 	}

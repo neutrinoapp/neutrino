@@ -73,6 +73,10 @@ func (t *TypesController) InsertInTypeHandler(c *gin.Context) {
 	t.ensureType(typeName, c)
 
 	d := db.NewTypeDbService(appId, typeName)
+	if body == nil {
+		body = make(map[string]interface{})
+	}
+
 	err := d.Insert(body)
 
 	if err != nil {

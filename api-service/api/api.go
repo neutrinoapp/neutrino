@@ -1,9 +1,10 @@
 package api
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-neutrino/neutrino/models"
-	"net/http"
 )
 
 var initialized bool
@@ -22,21 +23,21 @@ func initRoutes(e *gin.Engine) {
 		v1.POST("/login", authController.LoginUserHandler)
 		v1.POST("/register", authController.RegisterUserHandler)
 
-		appGroup := v1.Group("/app", authorizeMiddleware(), validateAppOperationsAuthorizationMiddleware())
+		appGroup := v1.Group("/app", authorizeMiddleware(false))
 		{
-			appGroup.POST("", appController.CreateApplicationHandler)
-			appGroup.GET("", appController.GetApplicationsHandler)
+			appGroup.POST("", appController.CreateApplicationHandler, validateAppOperationsAuthorizationMiddleware())
+			appGroup.GET("", appController.GetApplicationsHandler, validateAppOperationsAuthorizationMiddleware())
 
-			appIdGroup := appGroup.Group("/:appId", validateAppMiddleware(), validateAppPermissionsMiddleware())
+			appIdGroup := appGroup.Group("/:appId", validateAppMiddleware())
 			{
-				appIdGroup.GET("", appController.GetApplicationHandler)
-				appIdGroup.DELETE("", appController.DeleteApplicationHandler)
-				appIdGroup.PUT("", appController.UpdateApplicationHandler)
+				appIdGroup.GET("", appController.GetApplicationHandler, validateAppPermissionsMiddleware())
+				appIdGroup.DELETE("", appController.DeleteApplicationHandler, validateAppPermissionsMiddleware())
+				appIdGroup.PUT("", appController.UpdateApplicationHandler, validateAppPermissionsMiddleware())
 
 				appIdGroup.POST("/register", authController.AppRegisterUserHandler)
 				appIdGroup.POST("/login", authController.AppLoginUserHandler)
 
-				dataGroup := appIdGroup.Group("/data")
+				dataGroup := appIdGroup.Group("/data", authorizeMiddleware(true))
 				{
 					dataGroup.GET("", typesController.GetTypesHandler)
 					dataGroup.DELETE("/:typeName", typesController.DeleteType)

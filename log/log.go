@@ -1,6 +1,7 @@
 package log
 
 import (
+	"fmt"
 	"log"
 	"path/filepath"
 	"runtime"
@@ -28,7 +29,15 @@ func args(args []interface{}) []interface{} {
 	fileAndLine := callerFile + ":" + strconv.Itoa(line)
 
 	a := make([]interface{}, 0)
-	a = append(a, args, fileAndLine)
+
+	stringifiedArgs := make([]string, 0)
+
+	for i := range args {
+		arg := args[i]
+		stringifiedArgs = append(stringifiedArgs, fmt.Sprintf("%+v", arg))
+	}
+
+	a = append(a, stringifiedArgs, fileAndLine)
 
 	return a
 }
