@@ -1,3 +1,5 @@
+default: get test
+
 test:
 	go test -v ./api-service/... ./queue-broker-service/... ./realtime-service/...
 
