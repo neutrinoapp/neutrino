@@ -81,7 +81,7 @@ func authorizeMiddleware(stop bool) gin.HandlerFunc {
 				if err == nil {
 					user.Name = token.Claims["user"].(string)
 					user.InApp = token.Claims["inApp"].(bool)
-					user.Master = false
+					user.Master = !user.InApp //we can use the token instead of a master key
 					user.Key = authValue
 				}
 			} else if authType == "masterkey" {

@@ -9,7 +9,10 @@ integration:
 get:
 	go get -t -v ./...
 
-all:
+kill:
+	-fuser -k 4000/tcp 5000/tcp 6000/tcp
+
+all: kill
 	bash start-all.sh
 
 build:
