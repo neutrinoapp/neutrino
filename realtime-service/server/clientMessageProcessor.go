@@ -2,11 +2,12 @@ package server
 
 import (
 	"errors"
+	"strconv"
+
 	"github.com/go-neutrino/neutrino/client"
 	"github.com/go-neutrino/neutrino/config"
 	"github.com/go-neutrino/neutrino/log"
 	"github.com/go-neutrino/neutrino/messaging"
-	"strconv"
 )
 
 type clientMessageProcessor struct {
@@ -18,7 +19,18 @@ func (p *clientMessageProcessor) Process(mType int, m messaging.Message) error {
 		return errors.New("Unsupported message type: " + strconv.Itoa(mType))
 	}
 
-	mStr, _ := m.Serialize().String()
+	model, err := m.Serialize()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	mStr, err := model.String()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
 	log.Info("Got message from client....processing:", mStr)
 
 	opProcessor := p.OpProcessors[m.Operation]

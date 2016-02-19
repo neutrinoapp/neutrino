@@ -32,6 +32,19 @@ func (j JSON) FromMap(m map[string]interface{}) JSON {
 	return j
 }
 
+func (j *JSON) FromObject(o interface{}) error {
+	data, err := json.Marshal(o)
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal(data, j); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (j *JSON) FromResponse(res *http.Response) error {
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {

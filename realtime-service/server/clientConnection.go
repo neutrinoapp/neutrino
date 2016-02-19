@@ -10,6 +10,8 @@ import (
 type ClientConnection interface {
 	GetProcessor() messaging.MessageProcessor
 	GetConnection() *websocket.Conn
+	GetClientId() string
+	GetAppId() string
 	Broadcast(string) error
 	Listen() error
 	Close() error
@@ -19,6 +21,15 @@ type clientConnection struct {
 	conn      *websocket.Conn
 	processor messaging.MessageProcessor
 	appId     string
+	clientId  string
+}
+
+func (r *clientConnection) GetClientId() string {
+	return r.clientId
+}
+
+func (r *clientConnection) GetAppId() string {
+	return r.appId
 }
 
 func (r *clientConnection) GetConnection() *websocket.Conn {
@@ -60,10 +71,11 @@ func (r *clientConnection) GetProcessor() messaging.MessageProcessor {
 	return r.processor
 }
 
-func NewConnection(c *websocket.Conn, appId string) ClientConnection {
+func NewConnection(c *websocket.Conn, appId, clientId string) ClientConnection {
 	r := &clientConnection{
 		conn:      c,
 		appId:     appId,
+		clientId:  clientId,
 		processor: NewClientMessageProcessor(),
 	}
 

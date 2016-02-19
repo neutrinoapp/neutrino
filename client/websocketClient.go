@@ -1,10 +1,11 @@
 package client
 
 import (
-	"github.com/go-neutrino/neutrino/log"
-	"github.com/gorilla/websocket"
 	"net/http"
 	"time"
+
+	"github.com/go-neutrino/neutrino/log"
+	"github.com/gorilla/websocket"
 )
 
 type WebsocketClient struct {
@@ -80,12 +81,14 @@ func (w *WebsocketClient) handleConnection() {
 		for {
 			if conn != nil {
 				_, m, err := conn.ReadMessage()
-				message := string(m)
 				if err != nil {
 					w.error <- err
-				} else {
-					w.Message <- message
+					continue
 				}
+
+				message := string(m)
+				log.Info("Received websocket message:", message)
+				w.Message <- message
 			}
 		}
 	}()
