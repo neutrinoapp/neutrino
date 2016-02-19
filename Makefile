@@ -11,3 +11,6 @@ get:
 
 all:
 	bash start-all.sh
+
+build:
+	bash build.sh
