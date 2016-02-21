@@ -19,7 +19,7 @@ func (p *clientMessageProcessor) Process(mType int, m messaging.Message) error {
 		return errors.New("Unsupported message type: " + strconv.Itoa(mType))
 	}
 
-	model, err := m.Serialize()
+	model, err := m.ToJson()
 	if err != nil {
 		log.Error(err)
 		return err
@@ -39,6 +39,7 @@ func (p *clientMessageProcessor) Process(mType int, m messaging.Message) error {
 	//TODO: guess not
 	c := client.NewApiClient("http://localhost"+apiPort+"/v1/", m.App)
 	c.Token = m.Token
+	c.ClientId = m.Options["clientId"].(string)
 	return opProcessor(m, c)
 }
 

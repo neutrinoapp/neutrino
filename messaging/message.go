@@ -28,16 +28,8 @@ type Message struct {
 	Token     string      `json:"token"`
 }
 
-func (m *Message) FromString(s string) error {
-	if err := json.Unmarshal([]byte(s), m); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (m Message) Send(c *websocket.Conn) error {
-	model, err := m.Serialize()
+	model, err := m.ToJson()
 	if err != nil {
 		return err
 	}
@@ -50,17 +42,15 @@ func (m Message) Send(c *websocket.Conn) error {
 	return c.WriteMessage(MESSAGE_TYPE_STRING, []byte(msg))
 }
 
-func (m Message) Serialize() (models.JSON, error) {
-	//return models.JSON{
-	//	"op":      m.Operation,
-	//	"origin":  m.Origin,
-	//	"options": m.Options,
-	//	"pld":     m.Payload,
-	//	"type":    m.Type,
-	//	"app":     m.App,
-	//	"token":   m.Token,
-	//}
+func (m *Message) FromString(s string) error {
+	if err := json.Unmarshal([]byte(s), m); err != nil {
+		return err
+	}
 
+	return nil
+}
+
+func (m Message) ToJson() (models.JSON, error) {
 	var model models.JSON
 
 	if err := model.FromObject(m); err != nil {

@@ -37,7 +37,7 @@ func (r *clientConnection) GetConnection() *websocket.Conn {
 }
 
 func (r *clientConnection) Broadcast(m string) error {
-	log.Info("Broadcasting message to clients:", m)
+	log.Info("Broadcasting message to client:", m, "with id:", r.clientId)
 	return r.conn.WriteMessage(messaging.MESSAGE_TYPE_STRING, []byte(m))
 }
 

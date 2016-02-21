@@ -85,13 +85,24 @@ func (t *TypesController) InsertInTypeHandler(c *gin.Context) {
 	}
 
 	messageBuilder := messaging.GetMessageBuilder()
+	opts, exists := c.Get("options")
+	var optsJson models.JSON
+	if exists {
+		json, err := opts.(models.Options).ToJson()
+		if err != nil {
+			log.Error(RestError(c, err))
+			return
+		}
+
+		optsJson = json
+	}
 
 	token := ApiUser(c).Key
 	notification.Notify(messageBuilder.Build(
 		messaging.OP_CREATE,
 		messaging.ORIGIN_API,
 		body,
-		nil,
+		optsJson,
 		typeName,
 		appId,
 		token,
@@ -160,13 +171,24 @@ func (t *TypesController) UpdateTypeItemById(c *gin.Context) {
 	payload["_id"] = itemId
 
 	messageBuilder := messaging.GetMessageBuilder()
+	opts, exists := c.Get("options")
+	var optsJson models.JSON
+	if exists {
+		json, err := opts.(models.Options).ToJson()
+		if err != nil {
+			log.Error(RestError(c, err))
+			return
+		}
+
+		optsJson = json
+	}
 
 	token := ApiUser(c).Key
 	notification.Notify(messageBuilder.Build(
 		messaging.OP_UPDATE,
 		messaging.ORIGIN_API,
 		payload,
-		nil,
+		optsJson,
 		typeName,
 		appId,
 		token,
@@ -190,13 +212,24 @@ func (t *TypesController) DeleteTypeItemById(c *gin.Context) {
 	}
 
 	messageBuilder := messaging.GetMessageBuilder()
+	opts, exists := c.Get("options")
+	var optsJson models.JSON
+	if exists {
+		json, err := opts.(models.Options).ToJson()
+		if err != nil {
+			log.Error(RestError(c, err))
+			return
+		}
+
+		optsJson = json
+	}
 
 	token := ApiUser(c).Key
 	notification.Notify(messageBuilder.Build(
 		messaging.OP_DELETE,
 		messaging.ORIGIN_API,
 		models.JSON{"_id": itemId},
-		nil,
+		optsJson,
 		typeName,
 		appId,
 		token,

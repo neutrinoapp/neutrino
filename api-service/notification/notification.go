@@ -20,7 +20,7 @@ func init() {
 func Notify(m messaging.Message) {
 	conn := natsClient.GetConnection()
 	if conn != nil {
-		model, err := m.Serialize()
+		model, err := m.ToJson()
 		if err != nil {
 			log.Error(err)
 			return

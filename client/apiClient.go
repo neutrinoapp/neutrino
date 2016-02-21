@@ -2,22 +2,24 @@ package client
 
 import (
 	"encoding/json"
-	"github.com/go-neutrino/neutrino/log"
-	"github.com/go-neutrino/neutrino/models"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/go-neutrino/neutrino/log"
+	"github.com/go-neutrino/neutrino/models"
 )
 
 type ApiClient struct {
-	BaseUrl, Token, AppId string
+	BaseUrl, Token, ClientId, AppId string
 }
 
 func NewApiClient(url, appId string) *ApiClient {
 	return &ApiClient{
-		BaseUrl: url,
-		Token:   "",
-		AppId:   appId,
+		BaseUrl:  url,
+		Token:    "",
+		ClientId: "",
+		AppId:    appId,
 	}
 }
 
@@ -50,6 +52,10 @@ func (c *ApiClient) SendRequest(url, method string, body interface{}, isArray bo
 
 	if c.Token != "" {
 		req.Header.Set("Authorization", "Bearer "+c.Token)
+	}
+
+	if c.ClientId != "" {
+		req.Header.Set("NeutrinoOptins", c.ClientId)
 	}
 
 	client := http.Client{}

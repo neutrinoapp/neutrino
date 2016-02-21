@@ -18,7 +18,7 @@ func initRoutes(e *gin.Engine) {
 	appController := &ApplicationController{}
 	typesController := &TypesController{}
 
-	v1 := e.Group("/v1")
+	v1 := e.Group("/v1", processHeadersMiddleware())
 	{
 		v1.POST("/login", authController.LoginUserHandler)
 		v1.POST("/register", authController.RegisterUserHandler)
