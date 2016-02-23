@@ -1,9 +1,9 @@
 package integrationtests
 
 import (
+	"github.com/go-neutrino/neutrino/realtime-service/client"
 	"github.com/go-neutrino/neutrino/src/common/log"
 	"github.com/go-neutrino/neutrino/src/common/models"
-	"github.com/go-neutrino/neutrino/realtime-service/client"
 	"sync"
 	"testing"
 	"time"

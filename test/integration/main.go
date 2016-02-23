@@ -1,10 +1,10 @@
 package integrationtests
 
 import (
+	"github.com/go-neutrino/neutrino/realtime-service/client"
 	"github.com/go-neutrino/neutrino/src/common/client"
 	"github.com/go-neutrino/neutrino/src/common/config"
 	"github.com/go-neutrino/neutrino/src/common/log"
-	"github.com/go-neutrino/neutrino/realtime-service/client"
 	"math/rand"
 	"strconv"
 	"time"
