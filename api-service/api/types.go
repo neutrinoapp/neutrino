@@ -60,7 +60,7 @@ func (t *TypesController) DeleteType(c *gin.Context) {
 
 	//if the collection is already dropped do not send back the error
 	if dropError != nil && dropError.Error() != "ns not found" {
-		RestError(c, dropError)
+		log.Error(RestError(c, dropError))
 		return
 	}
 }
@@ -80,7 +80,7 @@ func (t *TypesController) InsertInTypeHandler(c *gin.Context) {
 	err := d.Insert(body)
 
 	if err != nil {
-		RestError(c, err)
+		log.Error(RestError(c, err))
 		return
 	}
 

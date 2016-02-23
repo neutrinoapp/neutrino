@@ -1,15 +1,16 @@
 package api
 
 import (
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-neutrino/neutrino/api-service/db"
 	"github.com/go-neutrino/neutrino/log"
 	"github.com/go-neutrino/neutrino/models"
 	"github.com/go-neutrino/neutrino/utils"
 	"github.com/go-neutrino/neutrino/utils/webUtils"
-	"net/http"
-	"time"
-"strings"
 )
 
 type ApplicationModel struct {
@@ -52,9 +53,9 @@ func (a *ApplicationController) CreateApplicationHandler(c *gin.Context) {
 	appId := doc["_id"]
 	appsMapDb := db.NewAppsMapDbService()
 	err := appsMapDb.Insert(models.JSON{
-		"appId": appId,
+		"appId":     appId,
 		"masterKey": doc["masterKey"],
-		"user":  username,
+		"user":      username,
 	})
 
 	if err != nil {
@@ -79,7 +80,7 @@ func (a *ApplicationController) GetApplicationsHandler(c *gin.Context) {
 	)
 
 	if err != nil {
-		RestError(c, err)
+		log.Error(RestError(c, err))
 		return
 	}
 
@@ -100,7 +101,7 @@ func (a *ApplicationController) DeleteApplicationHandler(c *gin.Context) {
 	err := d.RemoveId(appId)
 
 	if err != nil {
-		RestError(c, err)
+		log.Error(RestError(c, err))
 		return
 	}
 }
@@ -117,7 +118,7 @@ func (a *ApplicationController) UpdateApplicationHandler(c *gin.Context) {
 	})
 
 	if err != nil {
-		RestError(c, err)
+		log.Error(RestError(c, err))
 		return
 	}
 }
