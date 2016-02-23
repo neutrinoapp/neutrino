@@ -1,19 +1,25 @@
 default: get test
 
 test:
-	go test -v ./api-service/... ./queue-broker-service/... ./realtime-service/...
+	go test -v services/api/... services/realtime/...
 
 integration:
-	go test -v ./integration-tests/
+	go test -v test/integration/
 
 get:
 	go get -t -v ./...
 
-kill:
-	-fuser -k 4000/tcp 5000/tcp 6000/tcp
+killapi:
+	-fuser -k 4000/tcp
 
-all: kill
-	bash start-all.sh
+api: killapi
+	go run src/services/api/main.go
+
+killrealtime:
+	-fuser -k 6000/tcp
+
+realtime: killrealtime
+	go run src/services/realtime/main.go
 
 build:
-	bash build.sh
+	bash scripts/build.sh
