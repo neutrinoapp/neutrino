@@ -1,11 +1,10 @@
 package client
 
 import (
-	"net/http"
 	"time"
 
-	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/gorilla/websocket"
+	"github.com/neutrinoapp/neutrino/src/common/log"
 )
 
 type WebsocketClient struct {
@@ -95,15 +94,4 @@ func (w *WebsocketClient) handleConnection() {
 
 	time.Sleep(time.Second * 2)
 	go onError(nil, true)
-}
-
-func NewWebsocketUpgrader() websocket.Upgrader {
-	return websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
-		CheckOrigin: func(r *http.Request) bool {
-			//allow connections from any origin
-			return true
-		},
-	}
 }

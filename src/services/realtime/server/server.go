@@ -13,7 +13,6 @@ import (
 )
 
 var (
-	upgrader             = client.NewWebsocketUpgrader()
 	realtimeRedisSubject string
 	redisClient          *redis.Client
 )
@@ -123,7 +122,7 @@ func Initialize() (*http.Server, error) {
 			case m := <-interceptor.m:
 				switch msg := m.(type) {
 				case *turnpike.Subscribe:
-
+					redisClient.Set(msg.Topic, 1, 0)
 				}
 			}
 		}
