@@ -27,7 +27,7 @@ func authWithToken(c *gin.Context, userToken string) (*jwt.Token, error) {
 
 		if accountSecretError != nil {
 			//we probably do not have such collection. Use a default secret and warn.
-			log.Error("Account secret error: ", accountSecretError)
+			log.Info("Account secret error: ", accountSecretError)
 			tokenSecretRecord = models.JSON{
 				"value": "",
 			}

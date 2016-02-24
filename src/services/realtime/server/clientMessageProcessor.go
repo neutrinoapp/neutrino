@@ -14,33 +14,49 @@ type clientMessageProcessor struct {
 	OpProcessors map[string]func(messaging.Message, *client.ApiClient) error
 }
 
-func (p *clientMessageProcessor) Process(mType int, m messaging.Message) error {
+var clientsCache map[string]*client.ApiClient
+
+func init() {
+	clientsCache = make(map[string]*client.ApiClient)
+}
+
+func (p *clientMessageProcessor) Process(mType int, m string) error {
 	if mType != messaging.MESSAGE_TYPE_STRING {
 		return errors.New("Unsupported message type: " + strconv.Itoa(mType))
 	}
 
-	model, err := m.ToJson()
+	var msg messaging.Message
+	err := msg.FromString(m)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
-	mStr, err := model.String()
-	if err != nil {
-		log.Error(err)
-		return err
+	if msg.Origin == messaging.ORIGIN_API {
+		log.Info("Skipping processing message from API", m)
+		return nil
 	}
 
-	log.Info("Got message from client....processing:", mStr)
+	log.Info("Got message from client....processing:", m)
 
-	opProcessor := p.OpProcessors[m.Operation]
+	opProcessor := p.OpProcessors[msg.Operation]
 
-	apiPort := config.Get(config.KEY_API_PORT)
-	//TODO: guess not
-	c := client.NewApiClient("http://localhost"+apiPort+"/v1/", m.App)
-	c.Token = m.Token
-	c.ClientId = m.Options["clientId"].(string)
-	return opProcessor(m, c)
+	var c *client.ApiClient
+	if clientsCache[msg.App] != nil {
+		c = clientsCache[msg.App]
+	} else {
+		apiAddr := config.Get(config.KEY_API_ADDR)
+		c = client.NewApiClient(apiAddr, msg.App)
+	}
+
+	c.Token = msg.Token
+
+	opts := msg.Options
+	if opts != nil && opts["clientId"] != nil {
+		c.ClientId = opts["clientId"].(string)
+	}
+
+	return opProcessor(msg, c)
 }
 
 func opCreate(m messaging.Message, c *client.ApiClient) error {

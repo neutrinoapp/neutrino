@@ -1,8 +1,9 @@
 package client
 
 import (
-	"github.com/neutrinoapp/neutrino/src/common/log"
 	"time"
+
+	"github.com/neutrinoapp/neutrino/src/common/log"
 )
 
 type Client struct {

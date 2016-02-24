@@ -14,7 +14,7 @@ type (
 		ApiAddr         string
 		AppId           string
 		Token           string
-		WebsocketClient *client.WebsocketClient
+		WebsocketClient *client.WebSocketClient
 		ApiClient       *client.ApiClient
 		listeners       []*NeutrinoData
 	}

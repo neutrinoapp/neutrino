@@ -9,14 +9,14 @@ import (
 )
 
 var (
-	redisClient         *redis.Client
-	realtimeJobsSubject string
+	redisClient *redis.Client
+	wsClient    *client.WebSocketClient
 )
 
 func init() {
 	redisClient = client.GetNewRedisClient()
-
-	realtimeJobsSubject = config.Get(config.CONST_REALTIME_JOBS_SUBJ)
+	wsClient = client.NewWebsocketClient([]string{config.CONST_DEFAULT_REALM})
+	go wsClient.Connect()
 }
 
 func Notify(m messaging.Message) {
@@ -32,10 +32,12 @@ func Notify(m messaging.Message) {
 		return
 	}
 
-	log.Info("Publishing to queue subject: " + realtimeJobsSubject + " data: " + str)
-	pubErr := redisClient.Publish(realtimeJobsSubject, str).Err()
-	if pubErr != nil {
-		log.Error(pubErr)
+	topic := messaging.GetTopic(m)
+	log.Info("Publishing topic: " + topic + " data: " + str)
+	//TODO: throws error if the connection was lost
+	publishErr := wsClient.GetConnection().Publish(topic, []interface{}{str}, nil)
+	if publishErr != nil {
+		log.Error(publishErr)
 		return
 	}
 }
