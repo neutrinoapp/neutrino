@@ -23,32 +23,43 @@ func init() {
 	redisClient = client.GetNewRedisClient()
 }
 
-func Initialize() {
+func Initialize() *http.Server {
 	turnpike.Debug()
 
-	http.HandleFunc("/data", func(w http.ResponseWriter, r *http.Request) {
-		conn, err := upgrader.Upgrade(w, r, nil)
+	s := turnpike.NewBasicWebsocketServer(config.CONST_DEFAULT_REALM)
+	s.Upgrader.CheckOrigin = func(r *http.Request) bool {
+		//allow connections from any origin
+		return true
+	}
 
-		if err != nil {
-			log.Error(err)
-			return
-		}
+	server := &http.Server{
+		Handler: s,
+		Addr:    config.Get(config.KEY_REALTIME_PORT),
+	}
 
-		//TODO: token authentication
-		appId := r.URL.Query().Get("app")
-		clientId := r.URL.Query().Get("id")
-		realtimeConn := NewConnection(conn, appId, clientId)
-
-		log.Info("New connection for app:", appId)
-
-		GetConnectionStore().Put(appId, realtimeConn)
-	})
+	//http.HandleFunc("/data", func(w http.ResponseWriter, r *http.Request) {
+	//	conn, err := upgrader.Upgrade(w, r, nil)
+	//
+	//	if err != nil {
+	//		log.Error(err)
+	//		return
+	//	}
+	//
+	//	//TODO: token authentication
+	//	appId := r.URL.Query().Get("app")
+	//	clientId := r.URL.Query().Get("id")
+	//	realtimeConn := NewConnection(conn, appId, clientId)
+	//
+	//	log.Info("New connection for app:", appId)
+	//
+	//	GetConnectionStore().Put(appId, realtimeConn)
+	//})
 
 	//TODO: do not fail
 	realtimeSub, err := redisClient.Subscribe(realtimeRedisSubject)
 	if err != nil {
 		log.Error(err)
-		return
+		return nil
 	}
 
 	go func() {
@@ -90,4 +101,6 @@ func Initialize() {
 			}
 		}
 	}()
+
+	return server
 }
