@@ -6,7 +6,11 @@ import (
 )
 
 func main() {
-	wsServer := server.Initialize()
+	wsServer, err := server.Initialize()
+	if err != nil {
+		log.Error(err)
+		return
+	}
 
 	log.Info("Realtime service listening:", wsServer.Addr)
 	log.Error(wsServer.ListenAndServe())

@@ -21,7 +21,7 @@ func fileAndLineFromStack(frame int) string {
 }
 
 func args(args []interface{}) []interface{} {
-	stackLength := 2
+	stackLength := 3
 
 	if len(args) > 1 {
 		lastEl := args[len(args)-1]

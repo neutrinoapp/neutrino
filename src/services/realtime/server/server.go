@@ -23,20 +23,15 @@ func init() {
 	redisClient = client.GetNewRedisClient()
 }
 
-func Initialize() *http.Server {
-	turnpike.Debug()
+type wsInterceptor struct {
+	m chan turnpike.Message
+}
 
-	s := turnpike.NewBasicWebsocketServer(config.CONST_DEFAULT_REALM)
-	s.Upgrader.CheckOrigin = func(r *http.Request) bool {
-		//allow connections from any origin
-		return true
-	}
+func (i *wsInterceptor) Intercept(session turnpike.Session, msg *turnpike.Message) {
+	i.m <- *msg
+}
 
-	server := &http.Server{
-		Handler: s,
-		Addr:    config.Get(config.KEY_REALTIME_PORT),
-	}
-
+func Initialize() (*http.Server, error) {
 	//http.HandleFunc("/data", func(w http.ResponseWriter, r *http.Request) {
 	//	conn, err := upgrader.Upgrade(w, r, nil)
 	//
@@ -58,8 +53,7 @@ func Initialize() *http.Server {
 	//TODO: do not fail
 	realtimeSub, err := redisClient.Subscribe(realtimeRedisSubject)
 	if err != nil {
-		log.Error(err)
-		return nil
+		return nil, err
 	}
 
 	go func() {
@@ -102,5 +96,43 @@ func Initialize() *http.Server {
 		}
 	}()
 
-	return server
+	turnpike.Debug()
+
+	r := turnpike.Realm{}
+	interceptor := &wsInterceptor{
+		m: make(chan turnpike.Message),
+	}
+
+	r.Interceptor = interceptor
+
+	realms := map[string]turnpike.Realm{}
+	realms[config.CONST_DEFAULT_REALM] = r
+	wsServer, err := turnpike.NewWebsocketServer(realms)
+	if err != nil {
+		return nil, err
+	}
+
+	wsServer.Upgrader.CheckOrigin = func(r *http.Request) bool {
+		//allow connections from any origin
+		return true
+	}
+
+	go func() {
+		for {
+			select {
+			case m := <-interceptor.m:
+				switch msg := m.(type) {
+				case *turnpike.Subscribe:
+
+				}
+			}
+		}
+	}()
+
+	server := &http.Server{
+		Handler: wsServer,
+		Addr:    config.Get(config.KEY_REALTIME_PORT),
+	}
+
+	return server, nil
 }
