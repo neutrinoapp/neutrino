@@ -1,6 +1,6 @@
 package messaging
 
-import "github.com/go-neutrino/neutrino/src/common/models"
+import "github.com/neutrinoapp/neutrino/src/common/models"
 
 type MessageBuilder interface {
 	Build(op string, origin string, payload models.JSON, options models.JSON, t, app, token string) Message

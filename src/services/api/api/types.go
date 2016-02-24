@@ -4,12 +4,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-neutrino/neutrino/src/common/log"
-	"github.com/go-neutrino/neutrino/src/common/messaging"
-	"github.com/go-neutrino/neutrino/src/common/models"
-	"github.com/go-neutrino/neutrino/src/common/utils/webUtils"
-	"github.com/go-neutrino/neutrino/src/services/api/db"
-	"github.com/go-neutrino/neutrino/src/services/api/notification"
+	"github.com/neutrinoapp/neutrino/src/common/log"
+	"github.com/neutrinoapp/neutrino/src/common/messaging"
+	"github.com/neutrinoapp/neutrino/src/common/models"
+	"github.com/neutrinoapp/neutrino/src/common/utils/webUtils"
+	"github.com/neutrinoapp/neutrino/src/services/api/db"
+	"github.com/neutrinoapp/neutrino/src/services/api/notification"
 )
 
 type TypesController struct {

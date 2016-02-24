@@ -23,3 +23,6 @@ realtime: killrealtime
 
 build:
 	bash scripts/build.sh
+
+dev:
+	bash scripts/dev-setup.sh

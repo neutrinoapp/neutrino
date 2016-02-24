@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/go-neutrino/neutrino/src/common/log"
+	"github.com/neutrinoapp/neutrino/src/common/log"
 	"time"
 )
 

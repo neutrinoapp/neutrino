@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-neutrino/neutrino/src/common/models"
+	"github.com/neutrinoapp/neutrino/src/common/models"
 )
 
 type restError struct {

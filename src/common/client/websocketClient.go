@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-neutrino/neutrino/src/common/log"
+	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/gorilla/websocket"
 )
 

@@ -2,10 +2,10 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/go-neutrino/neutrino/src/common/log"
-	"github.com/go-neutrino/neutrino/src/common/models"
-	"github.com/go-neutrino/neutrino/src/common/utils"
-	"github.com/go-neutrino/neutrino/src/services/api/db"
+	"github.com/neutrinoapp/neutrino/src/common/log"
+	"github.com/neutrinoapp/neutrino/src/common/models"
+	"github.com/neutrinoapp/neutrino/src/common/utils"
+	"github.com/neutrinoapp/neutrino/src/services/api/db"
 )
 
 func ApiUser(c *gin.Context) *apiUser {

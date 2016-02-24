@@ -4,24 +4,28 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/go-neutrino/neutrino/src/common/client"
-	"github.com/go-neutrino/neutrino/src/common/config"
-	"github.com/go-neutrino/neutrino/src/common/log"
-	"github.com/go-neutrino/neutrino/src/common/messaging"
+	"github.com/neutrinoapp/neutrino/src/common/client"
+	"github.com/neutrinoapp/neutrino/src/common/config"
+	"github.com/neutrinoapp/neutrino/src/common/log"
+	"github.com/neutrinoapp/neutrino/src/common/messaging"
+	"gopkg.in/jcelliott/turnpike.v2"
+	"gopkg.in/redis.v3"
 )
 
 var (
-	upgrader     = client.NewWebsocketUpgrader()
-	brokerClient *client.WebsocketClient
+	upgrader             = client.NewWebsocketUpgrader()
+	realtimeRedisSubject string
+	redisClient          *redis.Client
 )
 
 func init() {
-	brokerHost := config.Get(config.KEY_BROKER_HOST)
-	brokerPort := config.Get(config.KEY_BROKER_PORT)
-	brokerClient = client.NewWebsocketClient(brokerHost + brokerPort + "/register")
+	realtimeRedisSubject = config.Get(config.CONST_REALTIME_JOBS_SUBJ)
+	redisClient = client.GetNewRedisClient()
 }
 
 func Initialize() {
+	turnpike.Debug()
+
 	http.HandleFunc("/data", func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 
@@ -40,40 +44,49 @@ func Initialize() {
 		GetConnectionStore().Put(appId, realtimeConn)
 	})
 
+	//TODO: do not fail
+	realtimeSub, err := redisClient.Subscribe(realtimeRedisSubject)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
 	go func() {
 		for {
-			select {
-			case msg := <-brokerClient.Message:
-				{
-					log.Info("Realtime service got message from broker, broadcasting:", msg)
-					var m messaging.Message
-					if err := m.FromString(msg); err != nil {
-						log.Error(err)
-						continue
-					}
+			redisMsg, err := realtimeSub.ReceiveMessage()
+			if err != nil {
+				log.Error(err)
+				continue
+			}
 
-					appId := m.App
-					if appId == "" {
-						log.Error(errors.New("No appId provided with realtime notification."), m)
-						continue
-					}
+			msg := redisMsg.Payload
+			log.Info("Realtime service got message from redis, broadcasting:", msg)
+			var m messaging.Message
+			if err := m.FromString(msg); err != nil {
+				log.Error(err)
+				continue
+			}
 
-					log.Info("Broadcasting:", msg, "to", appId)
-					connsForApp := GetConnectionStore().Get(appId)
-					for _, conn := range connsForApp {
-						connClientId := conn.GetClientId()
-						if m.Origin == messaging.ORIGIN_CLIENT &&
-							m.Options != nil &&
-							m.Options["clientId"] != nil &&
-							m.Options["clientId"] == connClientId {
+			appId := m.App
+			if appId == "" {
+				log.Error(errors.New("No appId provided with realtime notification."), m)
+				continue
+			}
 
-							log.Info("Skipping broadcast to client", connClientId, "has same id.")
-							continue
-						}
+			log.Info("Broadcasting:", msg, "to", appId)
+			connsForApp := GetConnectionStore().Get(appId)
+			for _, conn := range connsForApp {
+				connClientId := conn.GetClientId()
+				if m.Origin == messaging.ORIGIN_CLIENT &&
+					m.Options != nil &&
+					m.Options["clientId"] != nil &&
+					m.Options["clientId"] == connClientId {
 
-						conn.Broadcast(msg)
-					}
+					log.Info("Skipping broadcast to client", connClientId, "has same id.")
+					continue
 				}
+
+				conn.Broadcast(msg)
 			}
 		}
 	}()

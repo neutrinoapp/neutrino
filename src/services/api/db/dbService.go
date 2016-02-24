@@ -1,9 +1,9 @@
 package db
 
 import (
-	"github.com/go-neutrino/neutrino/src/common/config"
-	"github.com/go-neutrino/neutrino/src/common/log"
-	"github.com/go-neutrino/neutrino/src/common/utils"
+	"github.com/neutrinoapp/neutrino/src/common/config"
+	"github.com/neutrinoapp/neutrino/src/common/log"
+	"github.com/neutrinoapp/neutrino/src/common/utils"
 	"gopkg.in/mgo.v2"
 )
 

@@ -26,10 +26,10 @@ Interactive documentation can be found [here](http://docs.realbas3.apiary.io/#re
 ### You need NATS and MongoDB running, refer to **dev-setup.sh**
 
 ```bash
-$ go get github.com/go-neutrino/neutrino
+$ go get github.com/neutrinoapp/neutrino
 ```
 
-In the root of the project - `$GOPATH/src/github.com/go-neutrino/neutrino` you need to run all the services:
+In the root of the project - `$GOPATH/src/github.com/neutrinoapp/neutrino` you need to run all the services:
 
 ```bash
 $ go run api-service/main.go

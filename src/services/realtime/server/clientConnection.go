@@ -1,9 +1,9 @@
 package server
 
 import (
-	"github.com/go-neutrino/neutrino/src/common/log"
-	"github.com/go-neutrino/neutrino/src/common/messaging"
-	"github.com/go-neutrino/neutrino/src/common/models"
+	"github.com/neutrinoapp/neutrino/src/common/log"
+	"github.com/neutrinoapp/neutrino/src/common/messaging"
+	"github.com/neutrinoapp/neutrino/src/common/models"
 	"github.com/gorilla/websocket"
 )
 

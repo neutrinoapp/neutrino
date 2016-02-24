@@ -3,9 +3,9 @@ package main
 import (
 	"net/http"
 
-	"github.com/go-neutrino/neutrino/src/common/config"
-	"github.com/go-neutrino/neutrino/src/common/log"
-	"github.com/go-neutrino/neutrino/src/services/realtime/server"
+	"github.com/neutrinoapp/neutrino/src/common/config"
+	"github.com/neutrinoapp/neutrino/src/common/log"
+	"github.com/neutrinoapp/neutrino/src/services/realtime/server"
 )
 
 func main() {

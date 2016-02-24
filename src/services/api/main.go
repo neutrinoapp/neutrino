@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/go-neutrino/neutrino/src/common/config"
-	"github.com/go-neutrino/neutrino/src/services/api/api"
-	"github.com/go-neutrino/neutrino/src/services/api/db"
+	"github.com/neutrinoapp/neutrino/src/common/config"
+	"github.com/neutrinoapp/neutrino/src/services/api/api"
+	"github.com/neutrinoapp/neutrino/src/services/api/db"
 )
 
 func main() {

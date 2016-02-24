@@ -4,10 +4,10 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/go-neutrino/neutrino/src/common/client"
-	"github.com/go-neutrino/neutrino/src/common/config"
-	"github.com/go-neutrino/neutrino/src/common/log"
-	"github.com/go-neutrino/neutrino/src/common/messaging"
+	"github.com/neutrinoapp/neutrino/src/common/client"
+	"github.com/neutrinoapp/neutrino/src/common/config"
+	"github.com/neutrinoapp/neutrino/src/common/log"
+	"github.com/neutrinoapp/neutrino/src/common/messaging"
 )
 
 type clientMessageProcessor struct {

@@ -3,7 +3,7 @@ package messaging
 import (
 	"encoding/json"
 
-	"github.com/go-neutrino/neutrino/src/common/models"
+	"github.com/neutrinoapp/neutrino/src/common/models"
 	"github.com/gorilla/websocket"
 )
 

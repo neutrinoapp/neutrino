@@ -1,6 +1,7 @@
 package log
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"path/filepath"
@@ -10,6 +11,13 @@ import (
 
 func init() {
 	log.SetFlags(log.LstdFlags)
+}
+
+func fileAndLineFromStack(frame int) string {
+	_, caller, line, _ := runtime.Caller(frame)
+	callerFile := filepath.Base(caller)
+	fileAndLine := callerFile + ":" + strconv.Itoa(line)
+	return fileAndLine
 }
 
 func args(args []interface{}) []interface{} {
@@ -24,9 +32,7 @@ func args(args []interface{}) []interface{} {
 		}
 	}
 
-	_, caller, line, _ := runtime.Caller(stackLength)
-	callerFile := filepath.Base(caller)
-	fileAndLine := callerFile + ":" + strconv.Itoa(line)
+	fileAndLine := fileAndLineFromStack(stackLength)
 
 	a := make([]interface{}, 0)
 
@@ -47,6 +53,21 @@ func Info(v ...interface{}) {
 }
 
 func Error(v ...interface{}) {
-	log.Println("Stack:")
-	log.Println(args(v)...)
+	var stackBuf bytes.Buffer
+
+	for i := 1; i <= 10; i++ {
+		fileAndLine := fileAndLineFromStack(i)
+		if fileAndLine == ".:0" {
+			break
+		}
+
+		stackBuf.WriteString("\r\n\t" + fileAndLine)
+	}
+
+	errorArgs := args(v)
+	finalErrorArgs := make([]interface{}, 1)
+	finalErrorArgs[0] = "Error: "
+
+	log.Println(append(finalErrorArgs, errorArgs...))
+	log.Println("[Stack: " + stackBuf.String() + "]")
 }
