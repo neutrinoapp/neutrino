@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"strings"
 
-	"strconv"
-
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/models"
 )
@@ -56,15 +54,25 @@ func (c *ApiClient) SendRequest(url, method string, body interface{}, isArray bo
 		return nil, err
 	}
 
+	opts := models.Options{}
+
 	if c.Token != "" {
 		req.Header.Set("Authorization", "Bearer "+c.Token)
 	}
 
 	if c.ClientId != "" {
-		req.Header.Set("NeutrinoOptins", c.ClientId)
+		opts.ClientId = &c.ClientId
 	}
 
-	req.Header.Set("NeutrinoNotifyRealtime", strconv.FormatBool(c.NotifyRealTime))
+	opts.Notify = &c.NotifyRealTime
+
+	optsS, err := opts.String()
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
+	req.Header.Set("NeutrinoOptions", optsS)
 
 	client := http.Client{}
 	res, err := client.Do(req)

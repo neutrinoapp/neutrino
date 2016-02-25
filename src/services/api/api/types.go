@@ -12,15 +12,6 @@ import (
 	"github.com/neutrinoapp/neutrino/src/services/api/notification"
 )
 
-func shouldNotify(c *gin.Context) bool {
-	v, exists := c.Get(HEADER_NOTIFY)
-	if exists {
-		return v.(bool)
-	}
-
-	return false
-}
-
 type TypesController struct {
 }
 
@@ -93,21 +84,11 @@ func (t *TypesController) InsertInTypeHandler(c *gin.Context) {
 		return
 	}
 
-	if !shouldNotify(c) {
-		return
-	}
-
 	messageBuilder := messaging.GetMessageBuilder()
-	opts, exists := c.Get(HEADER_OPTIONS)
-	var optsJson models.JSON
-	if exists {
-		json, err := opts.(models.Options).ToJson()
-		if err != nil {
-			log.Error(RestError(c, err))
-			return
-		}
+	opts := GetHeaderOptions(c)
 
-		optsJson = json
+	if !*opts.Notify {
+		return
 	}
 
 	token := ApiUser(c).Key
@@ -115,7 +96,7 @@ func (t *TypesController) InsertInTypeHandler(c *gin.Context) {
 		messaging.OP_CREATE,
 		messaging.ORIGIN_API,
 		body,
-		optsJson,
+		opts,
 		typeName,
 		appId,
 		token,
@@ -179,33 +160,23 @@ func (t *TypesController) UpdateTypeItemById(c *gin.Context) {
 		return
 	}
 
-	if !shouldNotify(c) {
-		return
-	}
-
 	payload := models.JSON{}
 	payload.FromMap(body)
 	payload["_id"] = itemId
 
-	messageBuilder := messaging.GetMessageBuilder()
-	opts, exists := c.Get(HEADER_OPTIONS)
-	var optsJson models.JSON
-	if exists {
-		json, err := opts.(models.Options).ToJson()
-		if err != nil {
-			log.Error(RestError(c, err))
-			return
-		}
+	opts := GetHeaderOptions(c)
 
-		optsJson = json
+	if !*opts.Notify {
+		return
 	}
 
+	messageBuilder := messaging.GetMessageBuilder()
 	token := ApiUser(c).Key
 	notification.Notify(messageBuilder.Build(
 		messaging.OP_UPDATE,
 		messaging.ORIGIN_API,
 		payload,
-		optsJson,
+		opts,
 		typeName,
 		appId,
 		token,
@@ -228,29 +199,19 @@ func (t *TypesController) DeleteTypeItemById(c *gin.Context) {
 		return
 	}
 
-	if !shouldNotify(c) {
+	opts := GetHeaderOptions(c)
+
+	if !*opts.Notify {
 		return
 	}
 
 	messageBuilder := messaging.GetMessageBuilder()
-	opts, exists := c.Get(HEADER_OPTIONS)
-	var optsJson models.JSON
-	if exists {
-		json, err := opts.(models.Options).ToJson()
-		if err != nil {
-			log.Error(RestError(c, err))
-			return
-		}
-
-		optsJson = json
-	}
-
 	token := ApiUser(c).Key
 	notification.Notify(messageBuilder.Build(
 		messaging.OP_DELETE,
 		messaging.ORIGIN_API,
 		models.JSON{"_id": itemId},
-		optsJson,
+		opts,
 		typeName,
 		appId,
 		token,

@@ -3,7 +3,7 @@ package messaging
 import "github.com/neutrinoapp/neutrino/src/common/models"
 
 type MessageBuilder interface {
-	Build(op string, origin string, payload models.JSON, options models.JSON, t, app, token string) Message
+	Build(op string, origin string, payload models.JSON, options models.Options, t, app, token string) Message
 	BuildFromModel(m models.JSON) Message
 }
 
@@ -20,7 +20,7 @@ func GetMessageBuilder() MessageBuilder {
 	return b
 }
 
-func (b *messageBuilder) Build(op string, og string, pld models.JSON, opts models.JSON, t, app, token string) Message {
+func (b *messageBuilder) Build(op string, og string, pld models.JSON, opts models.Options, t, app, token string) Message {
 	return Message{
 		Operation: op,
 		Origin:    og,
@@ -33,10 +33,10 @@ func (b *messageBuilder) Build(op string, og string, pld models.JSON, opts model
 }
 
 func (b *messageBuilder) BuildFromModel(m models.JSON) Message {
-	optionsMap := m["options"]
-	options := models.JSON{}
-	if optionsMap != nil {
-		options.FromMap(optionsMap.(map[string]interface{}))
+	optionsI := m["options"]
+	var options models.Options
+	if optionsI != nil {
+		options = optionsI.(models.Options)
 	}
 
 	pldMap := m["pld"]

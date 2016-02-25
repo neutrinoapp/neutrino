@@ -3,7 +3,8 @@ package models
 import "encoding/json"
 
 type Options struct {
-	ClientId string `json:"clientId"`
+	ClientId *string `json:"clientId"`
+	Notify   *bool   `json:"notify"`
 }
 
 func (m Options) ToJson() (JSON, error) {
@@ -22,4 +23,13 @@ func (m *Options) FromString(s string) error {
 	}
 
 	return nil
+}
+
+func (m Options) String() (string, error) {
+	b, err := json.Marshal(m)
+	if err != nil {
+		return "", err
+	}
+
+	return string(b), nil
 }

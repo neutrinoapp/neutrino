@@ -79,3 +79,12 @@ func RespondId(id interface{}, c *gin.Context) {
 
 	c.JSON(http.StatusOK, i)
 }
+
+func GetHeaderOptions(c *gin.Context) models.Options {
+	v, exists := c.Get(HEADER_OPTIONS)
+	if !exists {
+		return models.Options{}
+	}
+
+	return v.(models.Options)
+}

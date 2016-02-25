@@ -3,7 +3,6 @@ package messaging
 import (
 	"encoding/json"
 
-	"github.com/gorilla/websocket"
 	"github.com/neutrinoapp/neutrino/src/common/models"
 )
 
@@ -16,31 +15,15 @@ const (
 	ORIGIN_CLIENT string = "client"
 )
 
-var MESSAGE_TYPE_STRING int = 1
-
 type Message struct {
-	Operation string      `json:"op"`
-	Origin    string      `json:"origin"`
-	Options   models.JSON `json:"options"`
-	Payload   models.JSON `json:"pld"`
-	Type      string      `json:"type"`
-	App       string      `json:"app"`
-	Token     string      `json:"token"`
-	Topic     string      `json:"topic"`
-}
-
-func (m Message) Send(c *websocket.Conn) error {
-	model, err := m.ToJson()
-	if err != nil {
-		return err
-	}
-
-	msg, err := model.String()
-	if err != nil {
-		return err
-	}
-
-	return c.WriteMessage(MESSAGE_TYPE_STRING, []byte(msg))
+	Operation string         `json:"op"`
+	Origin    string         `json:"origin"`
+	Options   models.Options `json:"options"`
+	Payload   models.JSON    `json:"pld"`
+	Type      string         `json:"type"`
+	App       string         `json:"app"`
+	Token     string         `json:"token"`
+	Topic     string         `json:"topic"`
 }
 
 func (m *Message) FromString(s string) error {
@@ -59,4 +42,13 @@ func (m Message) ToJson() (models.JSON, error) {
 	}
 
 	return model, nil
+}
+
+func (m Message) String() (string, error) {
+	b, err := json.Marshal(m)
+	if err != nil {
+		return "", err
+	}
+
+	return string(b), nil
 }

@@ -3,8 +3,6 @@ package api
 import (
 	"strings"
 
-	"strconv"
-
 	"github.com/gin-gonic/gin"
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/models"
@@ -192,11 +190,13 @@ func processHeadersMiddleware() gin.HandlerFunc {
 		var options models.Options
 		options.FromString(optionsHeader)
 
-		c.Set(HEADER_OPTIONS, options)
-
-		val, err := strconv.ParseBool(c.Request.Header.Get(HEADER_NOTIFY))
-		if err == nil {
-			c.Set(HEADER_NOTIFY, val)
+		if options.Notify == nil {
+			notify := true
+			options.Notify = &notify
 		}
+
+		log.Info("Request options:", optionsHeader)
+
+		c.Set(HEADER_OPTIONS, options)
 	}
 }

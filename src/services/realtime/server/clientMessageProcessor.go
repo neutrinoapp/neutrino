@@ -1,9 +1,6 @@
 package server
 
 import (
-	"errors"
-	"strconv"
-
 	"github.com/neutrinoapp/neutrino/src/common/client"
 	"github.com/neutrinoapp/neutrino/src/common/config"
 	"github.com/neutrinoapp/neutrino/src/common/log"
@@ -20,11 +17,7 @@ func init() {
 	clientsCache = make(map[string]*client.ApiClient)
 }
 
-func (p *clientMessageProcessor) Process(mType int, m string) error {
-	if mType != messaging.MESSAGE_TYPE_STRING {
-		return errors.New("Unsupported message type: " + strconv.Itoa(mType))
-	}
-
+func (p *clientMessageProcessor) Process(m string) error {
 	var msg messaging.Message
 	err := msg.FromString(m)
 	if err != nil {
@@ -52,8 +45,8 @@ func (p *clientMessageProcessor) Process(mType int, m string) error {
 	c.Token = msg.Token
 
 	opts := msg.Options
-	if opts != nil && opts["clientId"] != nil {
-		c.ClientId = opts["clientId"].(string)
+	if *opts.ClientId != "" {
+		c.ClientId = *opts.ClientId
 	}
 
 	return opProcessor(msg, c)
