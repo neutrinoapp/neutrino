@@ -3,11 +3,18 @@ package api
 import (
 	"strings"
 
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/models"
 	"github.com/neutrinoapp/neutrino/src/services/api/db"
 	"gopkg.in/dgrijalva/jwt-go.v2"
+)
+
+const (
+	HEADER_OPTIONS = "NeutrinoOptions"
+	HEADER_NOTIFY  = "NeutrinoNotifyRealtime"
 )
 
 type apiUser struct {
@@ -177,7 +184,7 @@ func CORSMiddleware() gin.HandlerFunc {
 
 func processHeadersMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		optionsHeader := c.Request.Header.Get("NeutrinoOptions")
+		optionsHeader := c.Request.Header.Get(HEADER_OPTIONS)
 		if optionsHeader == "" {
 			optionsHeader = "{}"
 		}
@@ -185,6 +192,11 @@ func processHeadersMiddleware() gin.HandlerFunc {
 		var options models.Options
 		options.FromString(optionsHeader)
 
-		c.Set("options", options)
+		c.Set(HEADER_OPTIONS, options)
+
+		val, err := strconv.ParseBool(c.Request.Header.Get(HEADER_NOTIFY))
+		if err == nil {
+			c.Set(HEADER_NOTIFY, val)
+		}
 	}
 }

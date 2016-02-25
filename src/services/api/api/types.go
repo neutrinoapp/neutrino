@@ -12,6 +12,15 @@ import (
 	"github.com/neutrinoapp/neutrino/src/services/api/notification"
 )
 
+func shouldNotify(c *gin.Context) bool {
+	v, exists := c.Get(HEADER_NOTIFY)
+	if exists {
+		return v.(bool)
+	}
+
+	return false
+}
+
 type TypesController struct {
 }
 
@@ -84,8 +93,12 @@ func (t *TypesController) InsertInTypeHandler(c *gin.Context) {
 		return
 	}
 
+	if !shouldNotify(c) {
+		return
+	}
+
 	messageBuilder := messaging.GetMessageBuilder()
-	opts, exists := c.Get("options")
+	opts, exists := c.Get(HEADER_OPTIONS)
 	var optsJson models.JSON
 	if exists {
 		json, err := opts.(models.Options).ToJson()
@@ -166,12 +179,16 @@ func (t *TypesController) UpdateTypeItemById(c *gin.Context) {
 		return
 	}
 
+	if !shouldNotify(c) {
+		return
+	}
+
 	payload := models.JSON{}
 	payload.FromMap(body)
 	payload["_id"] = itemId
 
 	messageBuilder := messaging.GetMessageBuilder()
-	opts, exists := c.Get("options")
+	opts, exists := c.Get(HEADER_OPTIONS)
 	var optsJson models.JSON
 	if exists {
 		json, err := opts.(models.Options).ToJson()
@@ -211,8 +228,12 @@ func (t *TypesController) DeleteTypeItemById(c *gin.Context) {
 		return
 	}
 
+	if !shouldNotify(c) {
+		return
+	}
+
 	messageBuilder := messaging.GetMessageBuilder()
-	opts, exists := c.Get("options")
+	opts, exists := c.Get(HEADER_OPTIONS)
 	var optsJson models.JSON
 	if exists {
 		json, err := opts.(models.Options).ToJson()

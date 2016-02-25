@@ -3,8 +3,8 @@ package messaging
 import (
 	"encoding/json"
 
-	"github.com/neutrinoapp/neutrino/src/common/models"
 	"github.com/gorilla/websocket"
+	"github.com/neutrinoapp/neutrino/src/common/models"
 )
 
 const (
@@ -26,6 +26,7 @@ type Message struct {
 	Type      string      `json:"type"`
 	App       string      `json:"app"`
 	Token     string      `json:"token"`
+	Topic     string      `json:"topic"`
 }
 
 func (m Message) Send(c *websocket.Conn) error {

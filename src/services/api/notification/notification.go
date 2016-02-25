@@ -20,6 +20,9 @@ func init() {
 }
 
 func Notify(m messaging.Message) {
+	topic := messaging.BuildTopic(m)
+	m.Topic = topic
+
 	model, err := m.ToJson()
 	if err != nil {
 		log.Error(err)
@@ -32,7 +35,6 @@ func Notify(m messaging.Message) {
 		return
 	}
 
-	topic := messaging.GetTopic(m)
 	log.Info("Publishing topic: " + topic + " data: " + str)
 	//TODO: throws error if the connection was lost
 	publishErr := wsClient.GetConnection().Publish(topic, []interface{}{str}, nil)

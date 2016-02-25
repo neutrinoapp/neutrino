@@ -69,7 +69,6 @@ func Initialize() (*http.Server, error) {
 						}
 					}
 				}
-
 			}
 		}
 	}()

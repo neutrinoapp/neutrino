@@ -6,20 +6,24 @@ import (
 	"net/http"
 	"strings"
 
+	"strconv"
+
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/models"
 )
 
 type ApiClient struct {
 	BaseUrl, Token, ClientId, AppId string
+	NotifyRealTime                  bool
 }
 
 func NewApiClient(url, appId string) *ApiClient {
 	return &ApiClient{
-		BaseUrl:  url,
-		Token:    "",
-		ClientId: "",
-		AppId:    appId,
+		BaseUrl:        url,
+		Token:          "",
+		ClientId:       "",
+		NotifyRealTime: false,
+		AppId:          appId,
 	}
 }
 
@@ -32,7 +36,9 @@ func (c *ApiClient) SendRequest(url, method string, body interface{}, isArray bo
 		"Body:", body,
 		"Token:", c.Token,
 		"AppId:", c.AppId,
+		"NotifyRealtime", c.NotifyRealTime,
 	)
+
 	var bodyStr = ""
 	if body != nil {
 		b, err := json.Marshal(body)
@@ -57,6 +63,8 @@ func (c *ApiClient) SendRequest(url, method string, body interface{}, isArray bo
 	if c.ClientId != "" {
 		req.Header.Set("NeutrinoOptins", c.ClientId)
 	}
+
+	req.Header.Set("NeutrinoNotifyRealtime", strconv.FormatBool(c.NotifyRealTime))
 
 	client := http.Client{}
 	res, err := client.Do(req)
