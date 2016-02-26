@@ -2,8 +2,8 @@ package server
 
 import (
 	"net/http"
+	"sync"
 
-	"github.com/anacrolix/sync"
 	"github.com/neutrinoapp/neutrino/src/common/client"
 	"github.com/neutrinoapp/neutrino/src/common/config"
 	"github.com/neutrinoapp/neutrino/src/common/log"
