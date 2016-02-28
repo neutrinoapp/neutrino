@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/neutrinoapp/neutrino/src/common/expression"
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/models"
 	"github.com/neutrinoapp/neutrino/src/services/api/db"
@@ -198,5 +199,17 @@ func processHeadersMiddleware() gin.HandlerFunc {
 		log.Info("Request options:", optionsHeader)
 
 		c.Set(HEADER_OPTIONS, options)
+	}
+}
+
+func parseExpressionsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		query := c.Request.URL.Query()
+		g, err := expression.ParseExpressionGroup(query)
+		if err != nil {
+			log.Error(err)
+		}
+
+		log.Info(g)
 	}
 }

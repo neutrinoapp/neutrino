@@ -37,7 +37,7 @@ func initRoutes(e *gin.Engine) {
 				appIdGroup.POST("/register", authController.AppRegisterUserHandler)
 				appIdGroup.POST("/login", authController.AppLoginUserHandler)
 
-				dataGroup := appIdGroup.Group("/data", authorizeMiddleware(true))
+				dataGroup := appIdGroup.Group("/data", authorizeMiddleware(true), parseExpressionsMiddleware())
 				{
 					dataGroup.GET("", typesController.GetTypesHandler)
 					dataGroup.DELETE("/:typeName", typesController.DeleteType)
