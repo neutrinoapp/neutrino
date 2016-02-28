@@ -84,23 +84,21 @@ func (t *TypesController) InsertInTypeHandler(c *gin.Context) {
 		return
 	}
 
-	messageBuilder := messaging.GetMessageBuilder()
 	opts := GetHeaderOptions(c)
 
-	if !*opts.Notify {
-		return
+	if *opts.Notify {
+		messageBuilder := messaging.GetMessageBuilder()
+		token := ApiUser(c).Key
+		notification.Notify(messageBuilder.Build(
+			messaging.OP_CREATE,
+			messaging.ORIGIN_API,
+			body,
+			opts,
+			typeName,
+			appId,
+			token,
+		))
 	}
-
-	token := ApiUser(c).Key
-	notification.Notify(messageBuilder.Build(
-		messaging.OP_CREATE,
-		messaging.ORIGIN_API,
-		body,
-		opts,
-		typeName,
-		appId,
-		token,
-	))
 
 	RespondId(body["_id"], c)
 }
@@ -166,21 +164,19 @@ func (t *TypesController) UpdateTypeItemById(c *gin.Context) {
 
 	opts := GetHeaderOptions(c)
 
-	if !*opts.Notify {
-		return
+	if *opts.Notify {
+		messageBuilder := messaging.GetMessageBuilder()
+		token := ApiUser(c).Key
+		notification.Notify(messageBuilder.Build(
+			messaging.OP_UPDATE,
+			messaging.ORIGIN_API,
+			payload,
+			opts,
+			typeName,
+			appId,
+			token,
+		))
 	}
-
-	messageBuilder := messaging.GetMessageBuilder()
-	token := ApiUser(c).Key
-	notification.Notify(messageBuilder.Build(
-		messaging.OP_UPDATE,
-		messaging.ORIGIN_API,
-		payload,
-		opts,
-		typeName,
-		appId,
-		token,
-	))
 }
 
 func (t *TypesController) DeleteTypeItemById(c *gin.Context) {
@@ -201,19 +197,17 @@ func (t *TypesController) DeleteTypeItemById(c *gin.Context) {
 
 	opts := GetHeaderOptions(c)
 
-	if !*opts.Notify {
-		return
+	if *opts.Notify {
+		messageBuilder := messaging.GetMessageBuilder()
+		token := ApiUser(c).Key
+		notification.Notify(messageBuilder.Build(
+			messaging.OP_DELETE,
+			messaging.ORIGIN_API,
+			models.JSON{"_id": itemId},
+			opts,
+			typeName,
+			appId,
+			token,
+		))
 	}
-
-	messageBuilder := messaging.GetMessageBuilder()
-	token := ApiUser(c).Key
-	notification.Notify(messageBuilder.Build(
-		messaging.OP_DELETE,
-		messaging.ORIGIN_API,
-		models.JSON{"_id": itemId},
-		opts,
-		typeName,
-		appId,
-		token,
-	))
 }

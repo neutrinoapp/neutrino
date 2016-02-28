@@ -60,7 +60,10 @@ func handleRpc(c *turnpike.Client) {
 	getArgs := func(args []interface{}) (messaging.Message, *client.ApiClient, error) {
 		var m messaging.Message
 
-		b, err := json.Marshal(args[0])
+		incomingMsg := args[0]
+		log.Info("RCP message:", incomingMsg)
+
+		b, err := json.Marshal(incomingMsg)
 		if err != nil {
 			return m, nil, err
 		}
@@ -72,6 +75,12 @@ func handleRpc(c *turnpike.Client) {
 
 		c := client.NewApiClientCached(m.App)
 		c.Token = m.Token
+		if m.Options.Notify != nil {
+			c.NotifyRealTime = *m.Options.Notify
+		} else {
+			c.NotifyRealTime = false
+		}
+
 		return m, c, nil
 	}
 
@@ -110,6 +119,7 @@ func handleRpc(c *turnpike.Client) {
 			return &turnpike.CallResult{Err: turnpike.URI(err.Error())}
 		}
 
+		log.Info(resp)
 		return &turnpike.CallResult{Args: []interface{}{resp["_id"]}}
 	}
 
@@ -134,9 +144,31 @@ func handleRpc(c *turnpike.Client) {
 		return &turnpike.CallResult{Args: []interface{}{id}}
 	}
 
+	dataUpdate := func(args []interface{}, kwargs map[string]interface{}) *turnpike.CallResult {
+		m, c, err := getArgs(args)
+		if err != nil {
+			log.Error(err)
+			return &turnpike.CallResult{Err: turnpike.URI(err.Error())}
+		}
+
+		id, ok := m.Payload["_id"].(string)
+		if !ok {
+			return &turnpike.CallResult{Err: turnpike.URI(fmt.Sprintf("Incorrect payload, %v", m.Payload))}
+		}
+
+		_, err = c.UpdateItem(m.Type, id, m.Payload)
+		if err != nil {
+			log.Error(err)
+			return &turnpike.CallResult{Err: turnpike.URI(err.Error())}
+		}
+
+		return &turnpike.CallResult{Args: []interface{}{id}}
+	}
+
 	c.BasicRegister("data.read", dataRead)
 	c.BasicRegister("data.create", dataCreate)
 	c.BasicRegister("data.remove", dataRemove)
+	c.BasicRegister("data.update", dataUpdate)
 }
 
 func handleNatsConnection(c *turnpike.Client) {

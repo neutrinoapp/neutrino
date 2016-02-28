@@ -94,8 +94,8 @@ func (c *ApiClient) SendRequest(url, method string, body interface{}, isArray bo
 	client := http.Client{}
 	res, err := client.Do(req)
 	if res.StatusCode != http.StatusOK {
-		//TODO: error?
-		return nil, nil
+		log.Info(res, err)
+		return res, err
 	}
 
 	defer res.Body.Close()
@@ -111,6 +111,7 @@ func (c *ApiClient) SendRequest(url, method string, body interface{}, isArray bo
 	}
 
 	if string(bodyRes) == "" {
+		log.Info("Empty body response!")
 		return nil, nil
 	}
 

@@ -10,12 +10,6 @@ type clientMessageProcessor struct {
 	OpProcessors map[string]func(messaging.Message, *client.ApiClient) error
 }
 
-var clientsCache map[string]*client.ApiClient
-
-func init() {
-	clientsCache = make(map[string]*client.ApiClient)
-}
-
 func (p *clientMessageProcessor) Process(m string) error {
 	var msg messaging.Message
 	err := msg.FromString(m)
@@ -35,6 +29,11 @@ func (p *clientMessageProcessor) Process(m string) error {
 
 	c := client.NewApiClientCached(msg.App)
 	c.Token = msg.Token
+	if msg.Options.Notify != nil {
+		c.NotifyRealTime = *msg.Options.Notify
+	} else {
+		c.NotifyRealTime = false
+	}
 
 	opts := msg.Options
 	if *opts.ClientId != "" {
