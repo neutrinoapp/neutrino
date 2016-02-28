@@ -8,8 +8,7 @@ import (
 func main() {
 	wsServer, err := server.Initialize()
 	if err != nil {
-		log.Error(err)
-		return
+		panic(err)
 	}
 
 	log.Info("Realtime service listening:", wsServer.Addr)

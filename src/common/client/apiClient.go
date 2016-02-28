@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/neutrinoapp/neutrino/src/common/config"
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/models"
 )
@@ -15,7 +16,23 @@ type ApiClient struct {
 	NotifyRealTime                  bool
 }
 
-func NewApiClient(url, appId string) *ApiClient {
+var clientCache map[string]*ApiClient
+
+func init() {
+	clientCache = make(map[string]*ApiClient)
+}
+
+func NewApiClientCached(appId string) *ApiClient {
+	if clientCache[appId] == nil {
+		clientCache[appId] = NewApiClient(appId)
+	}
+
+	return clientCache[appId]
+}
+
+func NewApiClient(appId string) *ApiClient {
+	url := config.Get(config.KEY_API_ADDR)
+
 	return &ApiClient{
 		BaseUrl:        url,
 		Token:          "",
@@ -76,6 +93,11 @@ func (c *ApiClient) SendRequest(url, method string, body interface{}, isArray bo
 
 	client := http.Client{}
 	res, err := client.Do(req)
+	if res.StatusCode != http.StatusOK {
+		//TODO: error?
+		return nil, nil
+	}
+
 	defer res.Body.Close()
 	if err != nil {
 		log.Error(err)
@@ -93,6 +115,7 @@ func (c *ApiClient) SendRequest(url, method string, body interface{}, isArray bo
 	}
 
 	var result interface{}
+	log.Info("API response: ", string(bodyRes))
 	if isArray {
 		jsonArray := make([]models.JSON, 0)
 		err = json.Unmarshal(bodyRes, &jsonArray)

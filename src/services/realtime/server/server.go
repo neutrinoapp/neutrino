@@ -4,6 +4,10 @@ import (
 	"net/http"
 	"sync"
 
+	"encoding/json"
+
+	"fmt"
+
 	"github.com/neutrinoapp/neutrino/src/common/client"
 	"github.com/neutrinoapp/neutrino/src/common/config"
 	"github.com/neutrinoapp/neutrino/src/common/log"
@@ -35,50 +39,9 @@ func (i *wsInterceptor) Intercept(session turnpike.Session, msg *turnpike.Messag
 }
 
 func Initialize() (*http.Server, error) {
-	interceptor := &wsInterceptor{
-		m: make(chan turnpike.Message),
-	}
-
-	r := turnpike.Realm{}
-	r.Interceptor = interceptor
-
-	realms := map[string]turnpike.Realm{}
-	realms[config.CONST_DEFAULT_REALM] = r
-	wsServer, err := turnpike.NewWebsocketServer(realms)
+	wsServer, server, err := handlerWebSocketServer()
 	if err != nil {
 		return nil, err
-	}
-
-	wsServer.Upgrader.CheckOrigin = func(r *http.Request) bool {
-		//allow connections from any origin
-		return true
-	}
-
-	go func() {
-		for {
-			select {
-			case m := <-interceptor.m:
-				switch msg := m.(type) {
-				case *turnpike.Subscribe:
-					//TODO: put special subscriptions into redis, e.g. filtering
-				case *turnpike.Publish:
-					if len(msg.Arguments) > 0 {
-						m, ok := msg.Arguments[0].(string)
-						if ok {
-							apiError := messageProcessor.Process(m)
-							if apiError != nil {
-								log.Error(apiError)
-							}
-						}
-					}
-				}
-			}
-		}
-	}()
-
-	server := &http.Server{
-		Handler: wsServer,
-		Addr:    config.Get(config.KEY_REALTIME_PORT),
 	}
 
 	c, err := wsServer.GetLocalClient(config.CONST_DEFAULT_REALM, nil)
@@ -87,6 +50,96 @@ func Initialize() (*http.Server, error) {
 		return nil, err
 	}
 
+	handleNatsConnection(c)
+	handleRpc(c)
+
+	return server, nil
+}
+
+func handleRpc(c *turnpike.Client) {
+	getArgs := func(args []interface{}) (messaging.Message, *client.ApiClient, error) {
+		var m messaging.Message
+
+		b, err := json.Marshal(args[0])
+		if err != nil {
+			return m, nil, err
+		}
+
+		err = json.Unmarshal(b, &m)
+		if err != nil {
+			return m, nil, err
+		}
+
+		c := client.NewApiClientCached(m.App)
+		c.Token = m.Token
+		return m, c, nil
+	}
+
+	dataRead := func(args []interface{}, kwargs map[string]interface{}) *turnpike.CallResult {
+		m, c, err := getArgs(args)
+		if err != nil {
+			log.Error(err)
+			return &turnpike.CallResult{Err: turnpike.URI(err.Error())}
+		}
+
+		var clientResult interface{}
+		if id, ok := m.Payload["_id"].(string); ok {
+			clientResult, err = c.GetItem(m.Type, id)
+		} else {
+			clientResult, err = c.GetItems(m.Type)
+		}
+
+		if err != nil {
+			log.Error(err)
+			return &turnpike.CallResult{Err: turnpike.URI(err.Error())}
+		}
+
+		return &turnpike.CallResult{Args: []interface{}{clientResult}}
+	}
+
+	dataCreate := func(args []interface{}, kwargs map[string]interface{}) *turnpike.CallResult {
+		m, c, err := getArgs(args)
+		if err != nil {
+			log.Error(err)
+			return &turnpike.CallResult{Err: turnpike.URI(err.Error())}
+		}
+
+		resp, err := c.CreateItem(m.Type, m.Payload)
+		if err != nil {
+			log.Error(err)
+			return &turnpike.CallResult{Err: turnpike.URI(err.Error())}
+		}
+
+		return &turnpike.CallResult{Args: []interface{}{resp}}
+	}
+
+	dataRemove := func(args []interface{}, kwargs map[string]interface{}) *turnpike.CallResult {
+		m, c, err := getArgs(args)
+		if err != nil {
+			log.Error(err)
+			return &turnpike.CallResult{Err: turnpike.URI(err.Error())}
+		}
+
+		id, ok := m.Payload["_id"].(string)
+		if !ok {
+			return &turnpike.CallResult{Err: turnpike.URI(fmt.Sprintf("Incorrect payload, %v", m.Payload))}
+		}
+
+		_, err = c.DeleteItem(m.Type, id)
+		if err != nil {
+			log.Error(err)
+			return &turnpike.CallResult{Err: turnpike.URI(err.Error())}
+		}
+
+		return &turnpike.CallResult{Args: []interface{}{id}}
+	}
+
+	c.BasicRegister("data.read", dataRead)
+	c.BasicRegister("data.create", dataCreate)
+	c.BasicRegister("data.remove", dataRemove)
+}
+
+func handleNatsConnection(c *turnpike.Client) {
 	var mu sync.Mutex
 	go func() {
 		err := natsClient.Subscribe(config.CONST_REALTIME_JOBS_SUBJ, func(mStr string) {
@@ -114,6 +167,54 @@ func Initialize() (*http.Server, error) {
 			return
 		}
 	}()
+}
 
-	return server, nil
+func handlerWebSocketServer() (*turnpike.WebsocketServer, *http.Server, error) {
+	interceptor := &wsInterceptor{
+		m: make(chan turnpike.Message),
+	}
+
+	r := turnpike.Realm{}
+	r.Interceptor = interceptor
+
+	realms := map[string]turnpike.Realm{}
+	realms[config.CONST_DEFAULT_REALM] = r
+	wsServer, err := turnpike.NewWebsocketServer(realms)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	wsServer.Upgrader.CheckOrigin = func(r *http.Request) bool {
+		//allow connections from any origin
+		return true
+	}
+
+	go func() {
+		for {
+			select {
+			case m := <-interceptor.m:
+				switch msg := m.(type) {
+				case *turnpike.Subscribe:
+				//TODO: put special subscriptions into redis, e.g. filtering
+				case *turnpike.Publish:
+					if len(msg.Arguments) > 0 {
+						m, ok := msg.Arguments[0].(string)
+						if ok {
+							apiError := messageProcessor.Process(m)
+							if apiError != nil {
+								log.Error(apiError)
+							}
+						}
+					}
+				}
+			}
+		}
+	}()
+
+	server := &http.Server{
+		Handler: wsServer,
+		Addr:    config.Get(config.KEY_REALTIME_PORT),
+	}
+
+	return wsServer, server, nil
 }

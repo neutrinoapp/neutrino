@@ -2,7 +2,6 @@ package server
 
 import (
 	"github.com/neutrinoapp/neutrino/src/common/client"
-	"github.com/neutrinoapp/neutrino/src/common/config"
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/messaging"
 )
@@ -34,14 +33,7 @@ func (p *clientMessageProcessor) Process(m string) error {
 
 	opProcessor := p.OpProcessors[msg.Operation]
 
-	var c *client.ApiClient
-	if clientsCache[msg.App] != nil {
-		c = clientsCache[msg.App]
-	} else {
-		apiAddr := config.Get(config.KEY_API_ADDR)
-		c = client.NewApiClient(apiAddr, msg.App)
-	}
-
+	c := client.NewApiClientCached(msg.App)
 	c.Token = msg.Token
 
 	opts := msg.Options

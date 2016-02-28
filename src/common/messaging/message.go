@@ -10,6 +10,7 @@ const (
 	OP_UPDATE string = "update"
 	OP_CREATE string = "create"
 	OP_DELETE string = "delete"
+	OP_READ   string = "read"
 
 	ORIGIN_API    string = "api"
 	ORIGIN_CLIENT string = "client"
