@@ -110,7 +110,7 @@ func handleRpc(c *turnpike.Client) {
 			return &turnpike.CallResult{Err: turnpike.URI(err.Error())}
 		}
 
-		return &turnpike.CallResult{Args: []interface{}{resp}}
+		return &turnpike.CallResult{Args: []interface{}{resp["_id"]}}
 	}
 
 	dataRemove := func(args []interface{}, kwargs map[string]interface{}) *turnpike.CallResult {
