@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	HEADER_OPTIONS = "NeutrinoOptions"
-	HEADER_NOTIFY  = "NeutrinoNotifyRealtime"
+	CONTEXT_HEADER_OPTIONS = "NeutrinoOptions"
+	CONTEXT_EXPRESSION     = "Expression"
 )
 
 type apiUser struct {
@@ -183,7 +183,7 @@ func CORSMiddleware() gin.HandlerFunc {
 
 func processHeadersMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		optionsHeader := c.Request.Header.Get(HEADER_OPTIONS)
+		optionsHeader := c.Request.Header.Get(CONTEXT_HEADER_OPTIONS)
 		if optionsHeader == "" {
 			optionsHeader = "{}"
 		}
@@ -198,7 +198,8 @@ func processHeadersMiddleware() gin.HandlerFunc {
 
 		log.Info("Request options:", optionsHeader)
 
-		c.Set(HEADER_OPTIONS, options)
+		c.Set(CONTEXT_HEADER_OPTIONS, options)
+		c.Next()
 	}
 }
 
@@ -208,8 +209,12 @@ func parseExpressionsMiddleware() gin.HandlerFunc {
 		g, err := expression.ParseExpressionGroup(query)
 		if err != nil {
 			log.Error(err)
+			c.Next()
+			return
 		}
 
-		log.Info(g)
+		log.Info("Expression: ", g)
+
+		c.Set(CONTEXT_EXPRESSION, g)
 	}
 }

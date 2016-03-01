@@ -10,7 +10,7 @@ get:
 	go get -t -v ./...
 
 killapi:
-	-fuser -k 4000/tcp
+	-fuser -k 5000/tcp
 
 api: killapi
 	go run src/services/api/main.go

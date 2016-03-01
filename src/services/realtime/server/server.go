@@ -8,10 +8,13 @@ import (
 
 	"fmt"
 
+	"strings"
+
 	"github.com/neutrinoapp/neutrino/src/common/client"
 	"github.com/neutrinoapp/neutrino/src/common/config"
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/messaging"
+	"github.com/neutrinoapp/neutrino/src/common/models"
 	"gopkg.in/jcelliott/turnpike.v2"
 	"gopkg.in/redis.v3"
 )
@@ -227,8 +230,22 @@ func handlerWebSocketServer() (*turnpike.WebsocketServer, *http.Server, error) {
 			case m := <-interceptor.m:
 				switch msg := m.(type) {
 				case *turnpike.Subscribe:
+					filter := models.JSON{}
+					if msg.Options != nil {
+						if f, ok := msg.Options["filter"].(map[string]interface{}); ok {
+							filter.FromMap(f)
+
+							topicArguments := strings.Split(msg.Topic, ".")
+							baseTopic := messaging.BuildTopicArbitrary(topicArguments[:len(topicArguments)-1])
+
+							redisClient.LPush(baseTopic, msg.Topic)
+							log.Info(redisClient.Get(baseTopic).Val())
+						}
+					}
+
 				//TODO: put special subscriptions into redis, e.g. filtering
 				case *turnpike.Publish:
+
 					if len(msg.Arguments) > 0 {
 						m, ok := msg.Arguments[0].(string)
 						if ok {
