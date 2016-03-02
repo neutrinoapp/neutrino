@@ -5,6 +5,8 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/neutrinoapp/neutrino/src/common/log"
 )
 
 type JSON map[string]interface{}
@@ -61,4 +63,27 @@ func (j *JSON) FromResponse(res *http.Response) error {
 	}
 
 	return nil
+}
+
+func Convert(input interface{}, target interface{}) error {
+	if input == nil {
+		return nil
+	}
+
+	b, err := json.Marshal(input)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(b, target)
+}
+
+func String(input interface{}) string {
+	b, err := json.Marshal(input)
+	if err != nil {
+		log.Error(err)
+		return "{}"
+	}
+
+	return string(b)
 }

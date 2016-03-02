@@ -10,6 +10,8 @@ import (
 
 	"strings"
 
+	"strconv"
+
 	"github.com/neutrinoapp/neutrino/src/common/client"
 	"github.com/neutrinoapp/neutrino/src/common/config"
 	"github.com/neutrinoapp/neutrino/src/common/log"
@@ -20,14 +22,12 @@ import (
 )
 
 var (
-	realtimeRedisSubject string
-	redisClient          *redis.Client
-	natsClient           *client.NatsClient
-	messageProcessor     messaging.MessageProcessor
+	redisClient      *redis.Client
+	natsClient       *client.NatsClient
+	messageProcessor messaging.MessageProcessor
 )
 
 func init() {
-	realtimeRedisSubject = config.Get(config.CONST_REALTIME_JOBS_SUBJ)
 	redisClient = client.GetNewRedisClient()
 	messageProcessor = NewClientMessageProcessor()
 	natsClient = client.NewNatsClient(config.Get(config.KEY_QUEUE_ADDR))
@@ -38,7 +38,8 @@ type wsInterceptor struct {
 }
 
 func (i *wsInterceptor) Intercept(session turnpike.Session, msg *turnpike.Message) {
-	i.m <- *msg
+	m := *msg
+	i.m <- m
 }
 
 func Initialize() (*http.Server, error) {
@@ -64,7 +65,7 @@ func handleRpc(c *turnpike.Client) {
 		var m messaging.Message
 
 		incomingMsg := args[0]
-		log.Info("RCP message:", incomingMsg)
+		log.Info("RPC message:", incomingMsg)
 
 		b, err := json.Marshal(incomingMsg)
 		if err != nil {
@@ -224,28 +225,48 @@ func handlerWebSocketServer() (*turnpike.WebsocketServer, *http.Server, error) {
 		return true
 	}
 
+	c, err := wsServer.GetLocalClient(config.CONST_DEFAULT_REALM, nil)
+	if err != nil {
+		log.Error(err)
+		return nil, nil, err
+	}
+
 	go func() {
 		for {
 			select {
 			case m := <-interceptor.m:
 				switch msg := m.(type) {
 				case *turnpike.Subscribe:
-					filter := models.JSON{}
-					if msg.Options != nil {
-						if f, ok := msg.Options["filter"].(map[string]interface{}); ok {
-							filter.FromMap(f)
-
-							topicArguments := strings.Split(msg.Topic, ".")
-							baseTopic := messaging.BuildTopicArbitrary(topicArguments[:len(topicArguments)-1])
-
-							redisClient.LPush(baseTopic, msg.Topic)
-							log.Info(redisClient.Get(baseTopic).Val())
-						}
+					opts := models.SubscribeOptions{}
+					err := models.Convert(msg.Options, &opts)
+					if err != nil {
+						log.Error(err)
+						continue
 					}
 
-				//TODO: put special subscriptions into redis, e.g. filtering
-				case *turnpike.Publish:
+					if opts.IsSpecial() {
+						//remove the last part from 8139ed1ec39a467b96b0250dcf520749.todos.create.2882717310567
+						topic := fmt.Sprintf("%v", msg.Topic)
+						topicArguments := strings.Split(topic, ".")
+						uniqueTopicId := topicArguments[len(topicArguments)-1]
+						clientId := strconv.FormatUint(uint64(msg.Request), 10)
 
+						baseTopic := messaging.BuildTopicArbitrary(topicArguments[:len(topicArguments)-1]...)
+						opts.BaseTopic = baseTopic
+						opts.Topic = topic
+						opts.ClientId = msg.Request
+						opts.TopicId = uniqueTopicId
+
+						redisClient.SAdd(baseTopic, clientId)
+
+						redisClient.HSet(clientId, "baseTopic", opts.BaseTopic)
+						redisClient.HSet(clientId, "topic", opts.Topic)
+						redisClient.HSet(clientId, "clientId", clientId)
+						redisClient.HSet(clientId, "topicId", opts.TopicId)
+						redisClient.HSet(clientId, "filter", models.String(opts.Filter))
+					}
+
+				case *turnpike.Publish:
 					if len(msg.Arguments) > 0 {
 						m, ok := msg.Arguments[0].(string)
 						if ok {
@@ -254,7 +275,37 @@ func handlerWebSocketServer() (*turnpike.WebsocketServer, *http.Server, error) {
 								log.Error(apiError)
 							}
 						}
+
+						topic := string(msg.Topic)
+						log.Info("Sending out special messages:", topic)
+						clientIds := redisClient.SMembers(topic).Val()
+						msgRaw := models.JSON{}
+						msgRaw.FromString([]byte(m))
+						payload := msgRaw["pld"].(map[string]interface{})
+
+						for _, clientId := range clientIds {
+							filterString := redisClient.HGet(clientId, "filter").Val()
+							filter := models.JSON{}
+							filter.FromString([]byte(filterString))
+
+							passes := true
+							for k, v := range filter {
+								if payload[k] != v {
+									passes = false
+									break
+								}
+							}
+
+							if passes {
+								websocketcline
+							}
+
+							log.Info(filter)
+						}
 					}
+				case *turnpike.Goodbye:
+					clientId := string(msg.Request)
+					redisClient.Del(clientId)
 				}
 			}
 		}
