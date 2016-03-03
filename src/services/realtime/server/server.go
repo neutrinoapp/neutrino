@@ -43,14 +43,8 @@ func (i *wsInterceptor) Intercept(session turnpike.Session, msg *turnpike.Messag
 }
 
 func Initialize() (*http.Server, error) {
-	wsServer, server, err := handlerWebSocketServer()
+	_, server, c, err := handlerWebSocketServer()
 	if err != nil {
-		return nil, err
-	}
-
-	c, err := wsServer.GetLocalClient(config.CONST_DEFAULT_REALM, nil)
-	if err != nil {
-		log.Error(err)
 		return nil, err
 	}
 
@@ -205,7 +199,7 @@ func handleNatsConnection(c *turnpike.Client) {
 	}()
 }
 
-func handlerWebSocketServer() (*turnpike.WebsocketServer, *http.Server, error) {
+func handlerWebSocketServer() (*turnpike.WebsocketServer, *http.Server, *turnpike.Client, error) {
 	interceptor := &wsInterceptor{
 		m: make(chan turnpike.Message),
 	}
@@ -217,7 +211,7 @@ func handlerWebSocketServer() (*turnpike.WebsocketServer, *http.Server, error) {
 	realms[config.CONST_DEFAULT_REALM] = r
 	wsServer, err := turnpike.NewWebsocketServer(realms)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	wsServer.Upgrader.CheckOrigin = func(r *http.Request) bool {
@@ -228,7 +222,7 @@ func handlerWebSocketServer() (*turnpike.WebsocketServer, *http.Server, error) {
 	c, err := wsServer.GetLocalClient(config.CONST_DEFAULT_REALM, nil)
 	if err != nil {
 		log.Error(err)
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	go func() {
@@ -267,22 +261,31 @@ func handlerWebSocketServer() (*turnpike.WebsocketServer, *http.Server, error) {
 					}
 
 				case *turnpike.Publish:
-					if len(msg.Arguments) > 0 {
-						m, ok := msg.Arguments[0].(string)
-						if ok {
-							apiError := messageProcessor.Process(m)
-							if apiError != nil {
-								log.Error(apiError)
-							}
-						}
+					if len(msg.Arguments) == 0 {
+						continue
+					}
 
-						topic := string(msg.Topic)
-						log.Info("Sending out special messages:", topic)
-						clientIds := redisClient.SMembers(topic).Val()
-						msgRaw := models.JSON{}
-						msgRaw.FromString([]byte(m))
-						payload := msgRaw["pld"].(map[string]interface{})
+					m, ok := msg.Arguments[0].(string)
+					if !ok {
+						continue
+					}
 
+					apiError := messageProcessor.Process(m)
+					if apiError != nil {
+						log.Error(apiError)
+					}
+
+					topic := string(msg.Topic)
+					log.Info("Sending out special messages:", topic)
+					clientIds := redisClient.SMembers(topic).Val()
+					msgRaw := models.JSON{}
+					err := msgRaw.FromString([]byte(m))
+					if err != nil {
+						log.Error(err)
+						continue
+					}
+
+					if payload, ok := msgRaw["pld"].(map[string]interface{}); ok {
 						for _, clientId := range clientIds {
 							filterString := redisClient.HGet(clientId, "filter").Val()
 							filter := models.JSON{}
@@ -297,7 +300,13 @@ func handlerWebSocketServer() (*turnpike.WebsocketServer, *http.Server, error) {
 							}
 
 							if passes {
-								websocketcline
+								topic := redisClient.HGet(clientId, "topic").Val()
+								log.Info("Publishing to special topic: ", topic, m)
+								err := c.Publish(topic, []interface{}{msgRaw}, nil)
+								if err != nil {
+									log.Error(err)
+									continue
+								}
 							}
 
 							log.Info(filter)
@@ -316,5 +325,5 @@ func handlerWebSocketServer() (*turnpike.WebsocketServer, *http.Server, error) {
 		Addr:    config.Get(config.KEY_REALTIME_PORT),
 	}
 
-	return wsServer, server, nil
+	return wsServer, server, c, nil
 }
