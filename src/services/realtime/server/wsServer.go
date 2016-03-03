@@ -20,7 +20,7 @@ func NewWebSocketServer() (*turnpike.WebsocketServer, *http.Server, *turnpike.Cl
 	realms[config.CONST_DEFAULT_REALM] = r
 	wsServer, err := turnpike.NewWebsocketServer(realms)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	wsServer.Upgrader.CheckOrigin = func(r *http.Request) bool {
@@ -31,7 +31,7 @@ func NewWebSocketServer() (*turnpike.WebsocketServer, *http.Server, *turnpike.Cl
 	c, err := wsServer.GetLocalClient(config.CONST_DEFAULT_REALM, nil)
 	if err != nil {
 		log.Error(err)
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	server := &http.Server{
@@ -39,5 +39,5 @@ func NewWebSocketServer() (*turnpike.WebsocketServer, *http.Server, *turnpike.Cl
 		Addr:    config.Get(config.KEY_REALTIME_PORT),
 	}
 
-	return wsServer, server, c, nil
+	return wsServer, server, c, interceptor, nil
 }

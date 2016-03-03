@@ -13,9 +13,9 @@ import (
 )
 
 type WsMessageProcessor struct {
-	Interceptor     wsInterceptor
+	Interceptor     *wsInterceptor
 	RedisClient     *redis.Client
-	ClientProcessor clientMessageProcessor
+	ClientProcessor messaging.MessageProcessor
 	WsClient        *turnpike.Client
 }
 
@@ -38,18 +38,24 @@ func (p WsMessageProcessor) Process() {
 }
 
 func (p WsMessageProcessor) HandleGoodbye(msg *turnpike.Goodbye) {
+	log.Info("Handling goodbye message:", msg)
 	clientId := string(msg.Request)
 	p.RedisClient.Del(clientId)
 }
 
 func (p WsMessageProcessor) HandlePublish(msg *turnpike.Publish) {
+	log.Info("Handling publish message:", msg)
+	if string(msg.Topic) == "wamp.session.on_join" {
+		return
+	}
+
 	if len(msg.Arguments) == 0 {
 		return
 	}
 
 	m, ok := msg.Arguments[0].(string)
 	if !ok {
-		return
+		m = models.String(msg.Arguments[0])
 	}
 
 	apiError := p.ClientProcessor.Process(m)
@@ -62,7 +68,7 @@ func (p WsMessageProcessor) HandlePublish(msg *turnpike.Publish) {
 	msgRaw := models.JSON{}
 	err := msgRaw.FromString([]byte(m))
 	if err != nil {
-		log.Error(err)
+		log.Error(err, m)
 		return
 	}
 
@@ -101,6 +107,7 @@ func (p WsMessageProcessor) HandlePublish(msg *turnpike.Publish) {
 }
 
 func (p WsMessageProcessor) HandleSubscribe(msg *turnpike.Subscribe) {
+	log.Info("Handling subscribe msg:", msg)
 	opts := models.SubscribeOptions{}
 	err := models.Convert(msg.Options, &opts)
 	if err != nil {

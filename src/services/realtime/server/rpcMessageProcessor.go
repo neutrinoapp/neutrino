@@ -11,7 +11,8 @@ import (
 )
 
 type RpcMessageProcessor struct {
-	WsClient *turnpike.Client
+	WsClient    *turnpike.Client
+	WsProcessor WsMessageProcessor
 }
 
 func (p RpcMessageProcessor) Process() {
@@ -42,7 +43,7 @@ func (p RpcMessageProcessor) getArgs(args []interface{}) (messaging.Message, *cl
 	if m.Options.Notify != nil {
 		c.NotifyRealTime = *m.Options.Notify
 	} else {
-		c.NotifyRealTime = true
+		c.NotifyRealTime = false
 	}
 
 	return m, c, nil
@@ -82,6 +83,11 @@ func (p RpcMessageProcessor) handleDataCreate(args []interface{}, kwargs map[str
 		log.Error(err)
 		return &turnpike.CallResult{Err: turnpike.URI(err.Error())}
 	}
+
+	p.WsProcessor.HandlePublish(&turnpike.Publish{
+		Topic:     turnpike.URI(m.Topic),
+		Arguments: args,
+	})
 
 	log.Info(resp)
 	return &turnpike.CallResult{Args: []interface{}{resp["_id"]}}

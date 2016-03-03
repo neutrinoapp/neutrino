@@ -24,11 +24,11 @@ func Initialize() (*http.Server, error) {
 	natsProcessor := NatsMessageProcessor{natsClient, wsClient}
 	natsProcessor.Process()
 
-	rpcProcessor := RpcMessageProcessor{wsClient}
-	rpcProcessor.Process()
-
 	wsProcessor := WsMessageProcessor{interceptor, redisClient, clientMessageProcessor, wsClient}
 	wsProcessor.Process()
+
+	rpcProcessor := RpcMessageProcessor{wsClient, wsProcessor}
+	rpcProcessor.Process()
 
 	return server, nil
 }
