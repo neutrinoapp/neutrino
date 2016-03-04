@@ -49,38 +49,3 @@ To run the integration tests run:
 #make sure that you have all the services running including nats and mongodb
 $ make integration
 ```
-
-# Goals for the initial release
-
-- [x] MongoDB to store the data
-- [x] User management with JWT 
-- [x] Landing page (http://neutrinoapp.com)
-- [ ] App portal (http://app.neutrinoapp.com)
-- [ ] API server (http://api.neutrinoapp.com)
-- [x] CI
-- [x] Docs
-- [x] Postman Collection
-- [x] REST API
-  - [x] Create Applications
-  - [x] Read Applications
-  - [x] Delete Applications
-  - [x] Update Applications
-  - [x] Create types
-  - [x] Delete types
-  - [x] Insert types data
-  - [x] Read types data
-  - [x] Update types data
-  - [x] Delete types data
-  - [x] In-app user management
-- [ ] WebSockets API - Realtime API
-  - [x] Types support
-  - [ ] Javascript SDK
-
-# TODO
-#### Updated on the go:
-
-- [ ] Automatic data join
-- [ ] Api filtering/sorting/etc - http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api
-- [ ] Api tests for authenticated/unauthenticated requests for login/register and /data
-- [ ] Js client
-- [ ] Sort out permissions
