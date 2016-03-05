@@ -74,9 +74,6 @@ func (a *ApplicationController) GetApplicationsHandler(c *gin.Context) {
 		models.JSON{
 			"owner": user,
 		},
-		models.JSON{
-			"name": 1,
-		},
 	)
 
 	if err != nil {

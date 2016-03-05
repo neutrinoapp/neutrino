@@ -53,13 +53,11 @@ func (t *TypesController) DeleteType(c *gin.Context) {
 	)
 
 	database := db.NewTypeDbService(appId, typeName)
-	session, collection := database.GetCollection()
-	defer session.Close()
-
-	dropError := collection.DropCollection()
+	cursor, dropError := database.GetTable().TableDrop().Run(database.GetSession())
+	defer cursor.Close()
 
 	//if the collection is already dropped do not send back the error
-	if dropError != nil && dropError.Error() != "ns not found" {
+	if dropError != nil {
 		log.Error(RestError(c, dropError))
 		return
 	}
@@ -118,7 +116,7 @@ func (t *TypesController) GetTypeDataHandler(c *gin.Context) {
 
 	log.Info("Filter: ", query)
 
-	typeData, err := d.Find(query, nil)
+	typeData, err := d.Find(query)
 
 	if err != nil {
 		log.Error(RestError(c, err))
@@ -137,7 +135,7 @@ func (t *TypesController) GetTypeItemById(c *gin.Context) {
 
 	d := db.NewTypeDbService(appId, typeName)
 
-	item, err := d.FindId(itemId, nil)
+	item, err := d.FindId(itemId)
 
 	if err != nil {
 		log.Error(RestError(c, err))

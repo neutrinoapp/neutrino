@@ -9,8 +9,8 @@ func TestConfigDefaults(t *testing.T) {
 		t.Fatal("Incorrect key", KEY_QUEUE_ADDR)
 	}
 
-	if Get(KEY_MONGO_ADDR) != "localhost:27017" {
-		t.Fatal("Incorrect key", KEY_MONGO_ADDR)
+	if Get(KEY_RETHINK_KEY) != "localhost:27017" {
+		t.Fatal("Incorrect key", KEY_RETHINK_KEY)
 	}
 
 	if Get(KEY_API_PORT) != ":5000" {

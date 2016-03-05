@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	KEY_MONGO_ADDR = "mongo-host"
-	KEY_QUEUE_ADDR = "queue-host"
+	KEY_RETHINK_ADDR = "rethink-host"
+	KEY_QUEUE_ADDR   = "queue-host"
 
 	KEY_REDIS_ADDR = "redis-addr"
 
@@ -23,7 +23,7 @@ const (
 var c *viper.Viper
 
 func setDefaults(v *viper.Viper) {
-	v.SetDefault(KEY_MONGO_ADDR, "localhost:27017")
+	v.SetDefault(KEY_RETHINK_ADDR, "localhost:28015")
 	v.SetDefault(KEY_REDIS_ADDR, "localhost:6379")
 	v.SetDefault(KEY_QUEUE_ADDR, "nats://localhost:4222")
 

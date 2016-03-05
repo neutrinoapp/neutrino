@@ -67,7 +67,7 @@ func TestDbServiceGetDb(t *testing.T) {
 
 func TestDbServicGetCollection(t *testing.T) {
 	d := getDefaultDbService()
-	session, c := d.GetCollection()
+	session, c := d.GetTable()
 
 	if c == nil {
 		t.Error("Collection is nil")

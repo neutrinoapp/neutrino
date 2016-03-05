@@ -29,7 +29,7 @@ func authWithToken(c *gin.Context, userToken string) (*jwt.Token, error) {
 		}
 
 		//TODO: cache this
-		tokenSecretRecord, accountSecretError := db.NewSystemDbService().FindId("accountSecret", nil)
+		tokenSecretRecord, accountSecretError := db.NewSystemDbService().FindId("accountSecret")
 
 		if accountSecretError != nil {
 			//we probably do not have such collection. Use a default secret and warn.
@@ -51,7 +51,7 @@ func authWithMaster(c *gin.Context, key string) (string, error) {
 	d := db.NewAppsMapDbService()
 	res, err := d.FindOne(models.JSON{
 		"masterKey": key,
-	}, nil)
+	})
 
 	if err != nil {
 		return "", err

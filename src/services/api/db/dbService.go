@@ -3,187 +3,169 @@ package db
 import (
 	"github.com/neutrinoapp/neutrino/src/common/config"
 	"github.com/neutrinoapp/neutrino/src/common/log"
-	"github.com/neutrinoapp/neutrino/src/common/utils"
-	"gopkg.in/mgo.v2"
+
+	r "github.com/dancannon/gorethink"
+	"github.com/neutrinoapp/neutrino/src/common/models"
 )
 
-var connectionPool map[string]*mgo.Session
+var session *r.Session
 
 type DbService interface {
-	GetSettings() map[string]string
-	GetSession() *mgo.Session
-	GetDb() (*mgo.Session, *mgo.Database)
-	GetCollection() (*mgo.Session, *mgo.Collection)
+	GetSession() *r.Session
+	GetDb() r.Term
+	GetTable() r.Term
 	Insert(doc map[string]interface{}) error
 	Update(q, u map[string]interface{}) error
-	FindId(id, fields interface{}) (map[string]interface{}, error)
-	Find(query, fields interface{}) ([]map[string]interface{}, error)
-	FindOne(query, fields interface{}) (map[string]interface{}, error)
+	FindId(id interface{}) (map[string]interface{}, error)
+	Find(query interface{}) ([]map[string]interface{}, error)
+	FindOne(query interface{}) (map[string]interface{}, error)
 	RemoveId(id interface{}) error
 	UpdateId(id, u interface{}) error
 }
 
 type dbService struct {
-	connectionString, dbName, colName string
-	index                             mgo.Index
+	address, dbName, tableName string
 }
 
-func NewDbService(dbName, colName string, index mgo.Index) DbService {
-	connectionString := config.Get(config.KEY_MONGO_ADDR)
-	d := dbService{connectionString, dbName, colName, index}
+func NewDbService(dbName, tableName string) DbService {
+	address := config.Get(config.KEY_RETHINK_ADDR)
+	d := dbService{address, dbName, tableName}
 	return &d
 }
 
 func NewAppsMapDbService() DbService {
-	return NewDbService(Constants.DatabaseName(), Constants.AppsMapCollection(), mgo.Index{
-		Key:        []string{"$text:appId"},
-		Unique:     true,
-		DropDups:   true,
-		Background: true,
-		Sparse:     false,
-	})
+	return NewDbService(Constants.DatabaseName(), Constants.AppsMapCollection())
 }
 
 func NewUsersDbService() DbService {
-	return NewDbService(Constants.DatabaseName(), Constants.UsersCollection(), mgo.Index{})
+	return NewDbService(Constants.DatabaseName(), Constants.UsersCollection())
 }
 
 func NewTypeDbService(appId, typeName string) DbService {
-	return NewDbService(Constants.DatabaseName(), appId+"."+typeName, mgo.Index{})
+	return NewDbService(Constants.DatabaseName(), appId+"."+typeName)
 }
 
 func NewAppsDbService(user string) DbService {
-	return NewDbService(Constants.DatabaseName(), user+"."+Constants.ApplicationsCollection(), mgo.Index{
-		Key:        []string{"$text:name"},
-		Unique:     true,
-		DropDups:   true,
-		Background: true,
-		Sparse:     false,
-	})
+	return NewDbService(Constants.DatabaseName(), user+"."+Constants.ApplicationsCollection())
 }
 
 func NewAppUsersDbService(appId string) DbService {
-	return NewDbService(Constants.DatabaseName(), appId+"."+"users", mgo.Index{})
+	return NewDbService(Constants.DatabaseName(), appId+"."+"users")
 }
 
 func NewSystemDbService() DbService {
-	return NewDbService(Constants.DatabaseName(), Constants.SystemCollection(), mgo.Index{})
+	return NewDbService(Constants.DatabaseName(), Constants.SystemCollection())
 }
 
-func (d *dbService) GetSettings() map[string]string {
-	m := make(map[string]string)
-	m["ConnectionString"] = d.connectionString
-	m["DbName"] = d.dbName
-	m["ColName"] = d.colName
+func (d *dbService) GetSession() *r.Session {
+	if session == nil {
+		s, err := r.Connect(r.ConnectOpts{
+			Address: d.address,
+		})
 
-	return m
-}
-
-func (d *dbService) GetSession() *mgo.Session {
-	if connectionPool == nil {
-		connectionPool = make(map[string]*mgo.Session)
-	}
-
-	storedSession := connectionPool[d.connectionString]
-
-	if storedSession == nil {
-		session, err := mgo.Dial(d.connectionString)
 		if err != nil {
 			log.Error(err)
+			panic(err)
 		}
 
-		connectionPool[d.connectionString] = session
-		storedSession = session
-
-		_, collection := d.GetCollection()
-
-		if len(d.index.Key) > 0 {
-			if err := collection.EnsureIndex(d.index); err != nil {
-				log.Error(err)
-			}
-		}
+		session = s
 	}
 
-	return storedSession.Copy()
+	return session
 }
 
-func (d *dbService) GetDb() (*mgo.Session, *mgo.Database) {
-	session := d.GetSession()
-	db := session.DB(d.dbName)
-	return session, db
+func (d *dbService) GetDb() r.Term {
+	return r.DB(d.dbName)
 }
 
-func (d *dbService) GetCollection() (*mgo.Session, *mgo.Collection) {
-	session, db := d.GetDb()
-	col := db.C(d.colName)
-	return session, col
+func (d *dbService) GetTable() r.Term {
+	db := d.GetDb()
+
+	_, err := db.TableList().Contains(d.tableName).Do(func(tableExists bool) r.Term {
+		return r.Branch(
+			tableExists,
+			models.JSON{"created": 0},
+			db.TableCreate(d.tableName),
+		)
+	}).Run(d.GetSession())
+
+	if err != nil {
+		log.Error(err)
+	}
+
+	return d.GetDb().Table(d.tableName)
 }
 
 func (d *dbService) Insert(doc map[string]interface{}) error {
-	if _, ok := doc["_id"]; !ok {
-		doc["_id"] = utils.GetCleanUUID()
-	}
+	c, err := d.GetTable().Insert(doc).Run(d.GetSession())
+	defer c.Close()
 
-	session, collection := d.GetCollection()
-
-	defer session.Close()
-	return collection.Insert(doc)
+	return err
 }
 
 func (d *dbService) Update(q, u map[string]interface{}) error {
-	session, collection := d.GetCollection()
+	c, err := d.GetTable().Filter(q).Update(u).Run(d.GetSession())
+	defer c.Close()
 
-	defer session.Close()
-	return collection.Update(q, u)
+	return err
 }
 
-func (d *dbService) FindId(id, fields interface{}) (map[string]interface{}, error) {
-	result := map[string]interface{}{}
-
-	session, collection := d.GetCollection()
-
-	defer session.Close()
-	err := collection.FindId(id).Select(fields).One(&result)
-
-	return result, err
-}
-
-func (d *dbService) Find(query, fields interface{}) ([]map[string]interface{}, error) {
-	result := []map[string]interface{}{}
-	session, collection := d.GetCollection()
-
-	defer session.Close()
-	err := collection.Find(query).Select(fields).All(&result)
-
-	return result, err
-}
-
-func (d *dbService) FindOne(query, fields interface{}) (map[string]interface{}, error) {
-	res, err := d.Find(query, fields)
+func (d *dbService) FindId(id interface{}) (map[string]interface{}, error) {
+	c, err := d.GetTable().Get(id).Run(d.GetSession())
+	defer c.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	var val map[string]interface{}
-	if len(res) > 0 {
-		val = res[0]
-	} else {
-		val = make(map[string]interface{})
+	var result map[string]interface{}
+	err = c.All(&result)
+	if err != nil {
+		return nil, err
 	}
 
-	return val, nil
+	return result, nil
+}
+
+func (d *dbService) Find(query interface{}) ([]map[string]interface{}, error) {
+	c, err := d.GetTable().Filter(query).Run(d.GetSession())
+	defer c.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	var result []map[string]interface{}
+	err = c.All(&result)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (d *dbService) FindOne(query interface{}) (map[string]interface{}, error) {
+	c, err := d.GetTable().Filter(query).Limit(1).Run(d.GetSession())
+	defer c.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	var result map[string]interface{}
+	err = c.All(&result)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, err
 }
 
 func (d *dbService) RemoveId(id interface{}) error {
-	session, collection := d.GetCollection()
-
-	defer session.Close()
-	return collection.RemoveId(id)
+	c, err := d.GetTable().Get(id).Delete().Run(d.GetSession())
+	defer c.Close()
+	return err
 }
 
 func (d *dbService) UpdateId(id, u interface{}) error {
-	session, collection := d.GetCollection()
-	defer session.Close()
-
-	return collection.UpdateId(id, u)
+	c, err := d.GetTable().Get(id).Update(u).Run(d.GetSession())
+	defer c.Close()
+	return err
 }

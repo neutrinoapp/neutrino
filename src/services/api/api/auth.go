@@ -59,7 +59,7 @@ func loginUser(c *gin.Context, d db.DbService, isApp bool) {
 		return
 	}
 
-	existingUser, err := d.FindId(u["email"].(string), nil)
+	existingUser, err := d.FindId(u["email"].(string))
 
 	if err != nil {
 		log.Error(RestError(c, err))

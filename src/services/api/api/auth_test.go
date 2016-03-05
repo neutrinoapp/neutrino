@@ -1,17 +1,18 @@
 package api
 
 import (
-	"github.com/neutrinoapp/neutrino/src/common/models"
-	"github.com/neutrinoapp/neutrino/src/services/api/db"
 	"net/http"
 	"strings"
 	"testing"
+
+	"github.com/neutrinoapp/neutrino/src/common/models"
+	"github.com/neutrinoapp/neutrino/src/services/api/db"
 )
 
 func TestRegisterUser(t *testing.T) {
 	body := register(t)
 
-	res, err := db.NewUsersDbService().FindId(body["email"], nil)
+	res, err := db.NewUsersDbService().FindId(body["email"])
 
 	if res == nil || err != nil {
 		t.Fatal("User not created correctly", res, err)
@@ -43,7 +44,7 @@ func TestAppRegisterUser(t *testing.T) {
 	r := sendAuthenticatedRequest("POST", "/app/"+app.Id+"/register", b, t)
 	r.CodeIs(200)
 
-	res, err := db.NewAppUsersDbService(app.Id).FindId(b["email"], nil)
+	res, err := db.NewAppUsersDbService(app.Id).FindId(b["email"])
 
 	if res == nil || err != nil {
 		t.Fatal("User not created correctly", res, err)
