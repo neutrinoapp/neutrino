@@ -25,6 +25,7 @@ type DbService interface {
 	RemoveId(id interface{}) error
 	UpdateId(id, u interface{}) error
 	ReplaceId(id, u interface{}) error
+	Changes(filter, channel interface{}) error
 }
 
 type dbService struct {
@@ -177,4 +178,14 @@ func (d *dbService) UpdateId(id, u interface{}) error {
 func (d *dbService) ReplaceId(id, u interface{}) error {
 	_, err := d.GetTable().Get(id).Replace(u).RunWrite(d.GetSession())
 	return err
+}
+
+func (d *dbService) Changes(filter, channel interface{}) error {
+	c, err := d.GetTable().Filter(filter).Changes().Run(d.GetSession())
+	if err != nil {
+		return err
+	}
+
+	c.Listen(channel)
+	return nil
 }

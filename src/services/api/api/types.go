@@ -123,10 +123,13 @@ func (t *TypesController) GetTypeDataHandler(c *gin.Context) {
 	log.Info("Filter: ", query)
 
 	typeData, err := d.Find(query)
-
 	if err != nil {
 		log.Error(RestError(c, err))
 		return
+	}
+
+	if typeData == nil {
+		typeData = make([]map[string]interface{}, 0)
 	}
 
 	c.JSON(http.StatusOK, typeData)

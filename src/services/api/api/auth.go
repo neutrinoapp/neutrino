@@ -37,7 +37,7 @@ func registerUser(c *gin.Context, d db.DbService) {
 	}
 
 	doc := models.JSON{
-		"id":       u["email"].(string),
+		"id":        u["email"].(string),
 		"password":  hashedPassword,
 		"createdAt": time.Now(),
 	}
@@ -59,8 +59,7 @@ func loginUser(c *gin.Context, d db.DbService, isApp bool) {
 		return
 	}
 
-	existingUser, err := d.FindId(u["email"].(string))
-
+	existingUser, err := d.FindId(u["email"])
 	if err != nil {
 		log.Error(RestError(c, err))
 		return

@@ -2,12 +2,12 @@ package server
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/messaging"
 	"github.com/neutrinoapp/neutrino/src/common/models"
+	"github.com/neutrinoapp/neutrino/src/services/api/db"
 	"gopkg.in/jcelliott/turnpike.v2"
 	"gopkg.in/redis.v3"
 )
@@ -120,7 +120,7 @@ func (p WsMessageProcessor) HandleSubscribe(msg *turnpike.Subscribe) {
 		topic := fmt.Sprintf("%v", msg.Topic)
 		topicArguments := strings.Split(topic, ".")
 		uniqueTopicId := topicArguments[len(topicArguments)-1]
-		clientId := strconv.FormatUint(uint64(msg.Request), 10)
+		//clientId := strconv.FormatUint(uint64(msg.Request), 10)
 
 		baseTopic := messaging.BuildTopicArbitrary(topicArguments[:len(topicArguments)-1]...)
 		opts.BaseTopic = baseTopic
@@ -128,12 +128,29 @@ func (p WsMessageProcessor) HandleSubscribe(msg *turnpike.Subscribe) {
 		opts.ClientId = msg.Request
 		opts.TopicId = uniqueTopicId
 
-		p.RedisClient.SAdd(baseTopic, clientId)
+		d := db.NewTypeDbService(opts.AppId, opts.Type)
 
-		p.RedisClient.HSet(clientId, "baseTopic", opts.BaseTopic)
-		p.RedisClient.HSet(clientId, "topic", opts.Topic)
-		p.RedisClient.HSet(clientId, "clientId", clientId)
-		p.RedisClient.HSet(clientId, "topicId", opts.TopicId)
-		p.RedisClient.HSet(clientId, "filter", models.String(opts.Filter))
+		newValuesChan := make(chan interface{})
+		err := d.Changes(opts.Filter, newValuesChan)
+		if err != nil {
+			log.Error(err)
+			return
+		}
+
+		go func() {
+			for {
+				select {
+				case val := <-newValuesChan:
+					log.Info(val)
+				}
+			}
+		}()
+
+		//p.RedisClient.SAdd(baseTopic, clientId)
+		//p.RedisClient.HSet(clientId, "baseTopic", opts.BaseTopic)
+		//p.RedisClient.HSet(clientId, "topic", opts.Topic)
+		//p.RedisClient.HSet(clientId, "clientId", clientId)
+		//p.RedisClient.HSet(clientId, "topicId", opts.TopicId)
+		//p.RedisClient.HSet(clientId, "filter", models.String(opts.Filter))
 	}
 }
