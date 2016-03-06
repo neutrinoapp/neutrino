@@ -64,7 +64,7 @@ func TestUpdateItemFromClient(t *testing.T) {
 	}
 
 	item := items[0]
-	d.Update(item["_id"].(string), models.JSON{
+	d.Update(item["id"].(string), models.JSON{
 		"test": "updated",
 	})
 	sleep()
@@ -97,7 +97,7 @@ func TestDeleteItemFromClient(t *testing.T) {
 	}
 
 	item := items[0]
-	d.Delete(item["_id"].(string))
+	d.Delete(item["id"].(string))
 	sleep()
 
 	items, err = ApiClient.GetItems(dType)

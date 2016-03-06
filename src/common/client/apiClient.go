@@ -144,7 +144,7 @@ func (c *ApiClient) CreateApp(name string) (string, error) {
 		return "", err
 	}
 
-	return res.(models.JSON)["_id"].(string), nil
+	return res.(models.JSON)["id"].(string), nil
 }
 
 func (c *ApiClient) Register(email, password string) error {

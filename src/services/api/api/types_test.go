@@ -79,7 +79,7 @@ func TestGetByIdTypeData(t *testing.T) {
 	}, t)
 
 	res := rec.BodyJSON()
-	id := res["_id"].(string)
+	id := res["id"].(string)
 
 	rec1 := sendAuthenticatedRequest("GET", "/app/"+app.Id+"/data/"+typeName+"/"+id, nil, t)
 	item := rec1.BodyJSON()
@@ -99,7 +99,7 @@ func TestUpdateTypeItemById(t *testing.T) {
 	rec.CodeIs(200)
 
 	res := rec.BodyJSON()
-	id := res["_id"].(string)
+	id := res["id"].(string)
 
 	sendAuthenticatedRequest("PUT", "/app/"+app.Id+"/data/"+typeName+"/"+id, map[string]interface{}{
 		"field1": "testupdated",
@@ -124,7 +124,7 @@ func TestDeleteTypeItemById(t *testing.T) {
 	rec.CodeIs(200)
 
 	res := rec.BodyJSON()
-	id := res["_id"].(string)
+	id := res["id"].(string)
 
 	sendAuthenticatedRequest("DELETE", "/app/"+app.Id+"/data/"+typeName+"/"+id, nil, t)
 

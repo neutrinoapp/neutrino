@@ -3,9 +3,12 @@ package db
 import (
 	"github.com/neutrinoapp/neutrino/src/common/config"
 	"github.com/neutrinoapp/neutrino/src/common/log"
+	"github.com/neutrinoapp/neutrino/src/common/models"
+
+	"strings"
 
 	r "github.com/dancannon/gorethink"
-	"github.com/neutrinoapp/neutrino/src/common/models"
+	"github.com/neutrinoapp/neutrino/src/common/utils"
 )
 
 var session *r.Session
@@ -21,6 +24,7 @@ type DbService interface {
 	FindOne(query interface{}) (map[string]interface{}, error)
 	RemoveId(id interface{}) error
 	UpdateId(id, u interface{}) error
+	ReplaceId(id, u interface{}) error
 }
 
 type dbService struct {
@@ -29,6 +33,7 @@ type dbService struct {
 
 func NewDbService(dbName, tableName string) DbService {
 	address := config.Get(config.KEY_RETHINK_ADDR)
+	tableName = strings.Replace(strings.Replace(tableName, ".", "_", -1), "@", "_", -1)
 	d := dbService{address, dbName, tableName}
 	return &d
 }
@@ -81,7 +86,7 @@ func (d *dbService) GetDb() r.Term {
 func (d *dbService) GetTable() r.Term {
 	db := d.GetDb()
 
-	_, err := db.TableList().Contains(d.tableName).Do(func(tableExists bool) r.Term {
+	_, err := db.TableList().Contains(d.tableName).Do(func(tableExists r.Term) r.Term {
 		return r.Branch(
 			tableExists,
 			models.JSON{"created": 0},
@@ -93,19 +98,20 @@ func (d *dbService) GetTable() r.Term {
 		log.Error(err)
 	}
 
-	return d.GetDb().Table(d.tableName)
+	return db.Table(d.tableName)
 }
 
 func (d *dbService) Insert(doc map[string]interface{}) error {
-	c, err := d.GetTable().Insert(doc).Run(d.GetSession())
-	defer c.Close()
+	if doc["id"] == nil {
+		doc["id"] = utils.GetCleanUUID()
+	}
 
+	_, err := d.GetTable().Insert(doc).RunWrite(d.GetSession())
 	return err
 }
 
 func (d *dbService) Update(q, u map[string]interface{}) error {
-	c, err := d.GetTable().Filter(q).Update(u).Run(d.GetSession())
-	defer c.Close()
+	_, err := d.GetTable().Filter(q).Update(u).RunWrite(d.GetSession())
 
 	return err
 }
@@ -118,7 +124,7 @@ func (d *dbService) FindId(id interface{}) (map[string]interface{}, error) {
 	}
 
 	var result map[string]interface{}
-	err = c.All(&result)
+	err = c.One(&result)
 	if err != nil {
 		return nil, err
 	}
@@ -159,13 +165,16 @@ func (d *dbService) FindOne(query interface{}) (map[string]interface{}, error) {
 }
 
 func (d *dbService) RemoveId(id interface{}) error {
-	c, err := d.GetTable().Get(id).Delete().Run(d.GetSession())
-	defer c.Close()
+	_, err := d.GetTable().Get(id).Delete().RunWrite(d.GetSession())
 	return err
 }
 
 func (d *dbService) UpdateId(id, u interface{}) error {
-	c, err := d.GetTable().Get(id).Update(u).Run(d.GetSession())
-	defer c.Close()
+	_, err := d.GetTable().Get(id).Update(u).RunWrite(d.GetSession())
+	return err
+}
+
+func (d *dbService) ReplaceId(id, u interface{}) error {
+	_, err := d.GetTable().Get(id).Replace(u).RunWrite(d.GetSession())
 	return err
 }

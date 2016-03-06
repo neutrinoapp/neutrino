@@ -78,7 +78,7 @@ func TestDbServicGetCollection(t *testing.T) {
 
 func TestDbServiceInsertAndFindId(t *testing.T) {
 	d := getDefaultDbService()
-	doc := bson.M{"_id": "pesho", "number": 5}
+	doc := bson.M{"id": "pesho", "number": 5}
 	d.Insert(doc)
 
 	res, err := d.FindId("pesho", nil)

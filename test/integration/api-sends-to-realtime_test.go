@@ -84,7 +84,7 @@ func TestUpdateItem(t *testing.T) {
 		t.Error(err)
 	}
 
-	id := res["_id"].(string)
+	id := res["id"].(string)
 
 	ApiClient.UpdateItem("test", id, models.JSON{
 		"name": "updated-test",
@@ -104,7 +104,7 @@ func TestDeleteItem(t *testing.T) {
 		t.Error(err)
 	}
 
-	id := res["_id"].(string)
+	id := res["id"].(string)
 
 	ApiClient.DeleteItem("test", id)
 
