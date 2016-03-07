@@ -16,8 +16,10 @@ func init() {
 }
 
 func Notify(m messaging.Message) {
-	topic := messaging.BuildTopic(m)
-	m.Topic = topic
+	if m.Topic == "" {
+		topic := messaging.BuildTopic(m)
+		m.Topic = topic
+	}
 
 	log.Info("Publishing to nats topic: "+config.CONST_REALTIME_JOBS_SUBJ+" data:", m)
 	publishErr := natsClient.Publish(config.CONST_REALTIME_JOBS_SUBJ, m)

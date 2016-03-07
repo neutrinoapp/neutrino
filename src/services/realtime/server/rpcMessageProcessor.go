@@ -57,7 +57,7 @@ func (p RpcMessageProcessor) handleDataRead(args []interface{}, kwargs map[strin
 	}
 
 	var clientResult interface{}
-	if id, ok := m.Payload["_id"].(string); ok {
+	if id, ok := m.Payload["id"].(string); ok {
 		clientResult, err = c.GetItem(m.Type, id)
 	} else {
 		clientResult, err = c.GetItems(m.Type)
@@ -90,7 +90,7 @@ func (p RpcMessageProcessor) handleDataCreate(args []interface{}, kwargs map[str
 	})
 
 	log.Info(resp)
-	return &turnpike.CallResult{Args: []interface{}{resp["_id"]}}
+	return &turnpike.CallResult{Args: []interface{}{resp["id"]}}
 }
 
 func (p RpcMessageProcessor) handleDataRemove(args []interface{}, kwargs map[string]interface{}) *turnpike.CallResult {
@@ -100,7 +100,7 @@ func (p RpcMessageProcessor) handleDataRemove(args []interface{}, kwargs map[str
 		return &turnpike.CallResult{Err: turnpike.URI(err.Error())}
 	}
 
-	id, ok := m.Payload["_id"].(string)
+	id, ok := m.Payload["id"].(string)
 	if !ok {
 		return &turnpike.CallResult{Err: turnpike.URI(fmt.Sprintf("Incorrect payload, %v", m.Payload))}
 	}
@@ -121,7 +121,7 @@ func (p RpcMessageProcessor) handleDataUpdate(args []interface{}, kwargs map[str
 		return &turnpike.CallResult{Err: turnpike.URI(err.Error())}
 	}
 
-	id, ok := m.Payload["_id"].(string)
+	id, ok := m.Payload["id"].(string)
 	if !ok {
 		return &turnpike.CallResult{Err: turnpike.URI(fmt.Sprintf("Incorrect payload, %v", m.Payload))}
 	}

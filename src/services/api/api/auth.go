@@ -14,7 +14,7 @@ import (
 )
 
 type UserModel struct {
-	Id       string `json: "_id"`
+	Id       string `json: "id"`
 	Email    string `json: "email"`
 	Password string `json: "password"`
 }
@@ -37,7 +37,7 @@ func registerUser(c *gin.Context, d db.DbService) {
 	}
 
 	doc := models.JSON{
-		"_id":       u["email"].(string),
+		"id":        u["email"].(string),
 		"password":  hashedPassword,
 		"createdAt": time.Now(),
 	}
@@ -59,8 +59,7 @@ func loginUser(c *gin.Context, d db.DbService, isApp bool) {
 		return
 	}
 
-	existingUser, err := d.FindId(u["email"].(string), nil)
-
+	existingUser, err := d.FindId(u["email"])
 	if err != nil {
 		log.Error(RestError(c, err))
 		return

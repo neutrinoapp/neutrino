@@ -14,7 +14,7 @@ import (
 )
 
 type ApplicationModel struct {
-	Id   string `json: _id`
+	Id   string `json: id`
 	Name string `json: "name"`
 }
 
@@ -50,7 +50,7 @@ func (a *ApplicationController) CreateApplicationHandler(c *gin.Context) {
 		return
 	}
 
-	appId := doc["_id"]
+	appId := doc["id"]
 	appsMapDb := db.NewAppsMapDbService()
 	err := appsMapDb.Insert(models.JSON{
 		"appId":     appId,
@@ -73,9 +73,6 @@ func (a *ApplicationController) GetApplicationsHandler(c *gin.Context) {
 	res, err := d.Find(
 		models.JSON{
 			"owner": user,
-		},
-		models.JSON{
-			"name": 1,
 		},
 	)
 
@@ -112,7 +109,7 @@ func (a *ApplicationController) UpdateApplicationHandler(c *gin.Context) {
 	doc := utils.WhitelistFields([]string{"name"}, webUtils.GetBody(c))
 
 	err := d.Update(models.JSON{
-		"_id": appId,
+		"id": appId,
 	}, models.JSON{
 		"$set": doc,
 	})

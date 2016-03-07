@@ -42,7 +42,7 @@ func Application(c *gin.Context, appId string) models.JSON {
 		d := db.NewAppsMapDbService()
 		appMapDoc, err := d.FindOne(models.JSON{
 			"appId": appId,
-		}, nil)
+		})
 
 		if err != nil || appMapDoc["user"] == nil {
 			log.Error(RestError(c, err))
@@ -53,7 +53,7 @@ func Application(c *gin.Context, appId string) models.JSON {
 	}
 
 	d := db.NewAppsDbService(u.Name)
-	app, err := d.FindId(appId, nil)
+	app, err := d.FindId(appId)
 	if err != nil {
 		log.Error(RestErrorAppNotFound(c))
 		return nil

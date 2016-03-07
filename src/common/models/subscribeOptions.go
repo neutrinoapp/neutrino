@@ -8,6 +8,8 @@ type SubscribeOptions struct {
 	Topic     string      `json:"topic"`
 	ClientId  turnpike.ID `json:"clientId"`
 	TopicId   string      `json:"topicId"`
+	Type      string      `json:"type"`
+	AppId     string      `json:"appId"`
 }
 
 func (opts SubscribeOptions) IsSpecial() bool {

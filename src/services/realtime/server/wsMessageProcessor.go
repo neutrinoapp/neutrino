@@ -2,12 +2,14 @@ package server
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
+	"github.com/neutrinoapp/neutrino/src/common/client"
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/messaging"
 	"github.com/neutrinoapp/neutrino/src/common/models"
+	"github.com/neutrinoapp/neutrino/src/services/api/db"
+	"github.com/neutrinoapp/neutrino/src/services/api/notification"
 	"gopkg.in/jcelliott/turnpike.v2"
 	"gopkg.in/redis.v3"
 )
@@ -17,6 +19,7 @@ type WsMessageProcessor struct {
 	RedisClient     *redis.Client
 	ClientProcessor messaging.MessageProcessor
 	WsClient        *turnpike.Client
+	NatsClient      *client.NatsClient
 }
 
 func (p WsMessageProcessor) Process() {
@@ -63,47 +66,47 @@ func (p WsMessageProcessor) HandlePublish(msg *turnpike.Publish) {
 		log.Error(apiError)
 	}
 
-	topic := string(msg.Topic)
-	log.Info("Sending out special messages:", topic)
-	msgRaw := models.JSON{}
-	err := msgRaw.FromString([]byte(m))
-	if err != nil {
-		log.Error(err, m)
-		return
-	}
-
-	log.Info(msgRaw)
-	if payload, ok := msgRaw["pld"].(map[string]interface{}); ok {
-		clientIds := p.RedisClient.SMembers(topic).Val()
-		log.Info(clientIds)
-		for _, clientId := range clientIds {
-			filterString := p.RedisClient.HGet(clientId, "filter").Val()
-			filter := models.JSON{}
-			filter.FromString([]byte(filterString))
-			log.Info(filter)
-
-			passes := true
-			for k, v := range filter {
-				log.Info(payload, k, v)
-				if payload[k] != v {
-					passes = false
-					break
-				}
-			}
-
-			if passes {
-				topic := p.RedisClient.HGet(clientId, "topic").Val()
-				log.Info("Publishing to special topic: ", topic, m)
-				err := p.WsClient.Publish(topic, []interface{}{msgRaw}, nil)
-				if err != nil {
-					log.Error(err)
-					continue
-				}
-			}
-
-			log.Info(filter)
-		}
-	}
+	//topic := string(msg.Topic)
+	//log.Info("Sending out special messages:", topic)
+	//msgRaw := models.JSON{}
+	//err := msgRaw.FromString([]byte(m))
+	//if err != nil {
+	//	log.Error(err, m)
+	//	return
+	//}
+	//
+	//log.Info(msgRaw)
+	//if payload, ok := msgRaw["pld"].(map[string]interface{}); ok {
+	//	clientIds := p.RedisClient.SMembers(topic).Val()
+	//	log.Info(clientIds)
+	//	for _, clientId := range clientIds {
+	//		filterString := p.RedisClient.HGet(clientId, "filter").Val()
+	//		filter := models.JSON{}
+	//		filter.FromString([]byte(filterString))
+	//		log.Info(filter)
+	//
+	//		passes := true
+	//		for k, v := range filter {
+	//			log.Info(payload, k, v)
+	//			if payload[k] != v {
+	//				passes = false
+	//				break
+	//			}
+	//		}
+	//
+	//		if passes {
+	//			topic := p.RedisClient.HGet(clientId, "topic").Val()
+	//			log.Info("Publishing to special topic: ", topic, m)
+	//			err := p.WsClient.Publish(topic, []interface{}{msgRaw}, nil)
+	//			if err != nil {
+	//				log.Error(err)
+	//				continue
+	//			}
+	//		}
+	//
+	//		log.Info(filter)
+	//	}
+	//}
 }
 
 func (p WsMessageProcessor) HandleSubscribe(msg *turnpike.Subscribe) {
@@ -120,7 +123,7 @@ func (p WsMessageProcessor) HandleSubscribe(msg *turnpike.Subscribe) {
 		topic := fmt.Sprintf("%v", msg.Topic)
 		topicArguments := strings.Split(topic, ".")
 		uniqueTopicId := topicArguments[len(topicArguments)-1]
-		clientId := strconv.FormatUint(uint64(msg.Request), 10)
+		//clientId := strconv.FormatUint(uint64(msg.Request), 10)
 
 		baseTopic := messaging.BuildTopicArbitrary(topicArguments[:len(topicArguments)-1]...)
 		opts.BaseTopic = baseTopic
@@ -128,12 +131,47 @@ func (p WsMessageProcessor) HandleSubscribe(msg *turnpike.Subscribe) {
 		opts.ClientId = msg.Request
 		opts.TopicId = uniqueTopicId
 
-		p.RedisClient.SAdd(baseTopic, clientId)
+		d := db.NewTypeDbService(opts.AppId, opts.Type)
 
-		p.RedisClient.HSet(clientId, "baseTopic", opts.BaseTopic)
-		p.RedisClient.HSet(clientId, "topic", opts.Topic)
-		p.RedisClient.HSet(clientId, "clientId", clientId)
-		p.RedisClient.HSet(clientId, "topicId", opts.TopicId)
-		p.RedisClient.HSet(clientId, "filter", models.String(opts.Filter))
+		newValuesChan := make(chan map[string]interface{})
+		err := d.Changes(opts.Filter, newValuesChan)
+		if err != nil {
+			log.Error(err)
+			return
+		}
+
+		messageBuilder := messaging.GetMessageBuilder()
+		go func() {
+			for {
+				select {
+				case val := <-newValuesChan:
+					pld := models.JSON{}
+					pld = pld.FromMap(val["new_val"].(map[string]interface{}))
+					notify := false
+					msg := messageBuilder.Build(
+						messaging.OP_CREATE,
+						messaging.ORIGIN_API,
+						pld,
+						models.Options{
+							Notify: &notify,
+						},
+						opts.Type,
+						opts.AppId,
+						"",
+					)
+					msg.Topic = topic
+
+					log.Info("Publishing filtered data: ", val, opts.Topic, msg)
+					notification.Notify(msg)
+				}
+			}
+		}()
+
+		//p.RedisClient.SAdd(baseTopic, clientId)
+		//p.RedisClient.HSet(clientId, "baseTopic", opts.BaseTopic)
+		//p.RedisClient.HSet(clientId, "topic", opts.Topic)
+		//p.RedisClient.HSet(clientId, "clientId", clientId)
+		//p.RedisClient.HSet(clientId, "topicId", opts.TopicId)
+		//p.RedisClient.HSet(clientId, "filter", models.String(opts.Filter))
 	}
 }

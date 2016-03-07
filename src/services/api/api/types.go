@@ -10,6 +10,8 @@ import (
 	"github.com/neutrinoapp/neutrino/src/common/utils/webUtils"
 	"github.com/neutrinoapp/neutrino/src/services/api/db"
 	"github.com/neutrinoapp/neutrino/src/services/api/notification"
+
+	r "github.com/dancannon/gorethink"
 )
 
 type TypesController struct {
@@ -19,17 +21,20 @@ func (t *TypesController) ensureType(typeName string, c *gin.Context) {
 	appId := c.Param("appId")
 	user := ApiUser(c).Name
 
-	go func() {
-		//we do not need to wait for this op
-		d := db.NewAppsDbService(user)
-		d.UpdateId(appId,
+	//we do not need to wait for this op
+	d := db.NewAppsDbService(user)
+	err := d.GetTable().Get(appId).Update(func(row r.Term) interface{} {
+		return r.Branch(
+			row.Field("types").Contains(typeName),
+			nil,
 			models.JSON{
-				"$addToSet": models.JSON{
-					"types": typeName,
-				},
+				"types": row.Field("types").Append(typeName),
 			},
 		)
-	}()
+	}).Exec(d.GetSession(), r.ExecOpts{NoReply: true})
+	if err != nil {
+		log.Error(err)
+	}
 }
 
 func (t *TypesController) GetTypesHandler(c *gin.Context) {
@@ -44,22 +49,23 @@ func (t *TypesController) DeleteType(c *gin.Context) {
 	typeName := c.Param("typeName")
 
 	d := db.NewAppsDbService(ApiUser(c).Name)
-	d.UpdateId(appId,
-		models.JSON{
-			"$pull": models.JSON{
-				"types": typeName,
-			},
-		},
-	)
+	_, err := d.GetTable().Get(appId).Update(func(row r.Term) interface{} {
+		return models.JSON{
+			"types": row.Field("types").Filter(func(item r.Term) interface{} {
+				return item.Ne(typeName)
+			}),
+		}
+	}).RunWrite(d.GetSession())
+
+	if err != nil {
+		log.Error(RestError(c, err))
+		return
+	}
 
 	database := db.NewTypeDbService(appId, typeName)
-	session, collection := database.GetCollection()
-	defer session.Close()
+	_, dropError := database.GetTable().TableDrop().RunWrite(database.GetSession())
 
-	dropError := collection.DropCollection()
-
-	//if the collection is already dropped do not send back the error
-	if dropError != nil && dropError.Error() != "ns not found" {
+	if dropError != nil {
 		log.Error(RestError(c, dropError))
 		return
 	}
@@ -78,14 +84,12 @@ func (t *TypesController) InsertInTypeHandler(c *gin.Context) {
 	}
 
 	err := d.Insert(body)
-
 	if err != nil {
 		log.Error(RestError(c, err))
 		return
 	}
 
 	opts := GetHeaderOptions(c)
-
 	if *opts.Notify {
 		messageBuilder := messaging.GetMessageBuilder()
 		token := ApiUser(c).Key
@@ -100,7 +104,7 @@ func (t *TypesController) InsertInTypeHandler(c *gin.Context) {
 		))
 	}
 
-	RespondId(body["_id"], c)
+	RespondId(body["id"], c)
 }
 
 func (t *TypesController) GetTypeDataHandler(c *gin.Context) {
@@ -118,11 +122,14 @@ func (t *TypesController) GetTypeDataHandler(c *gin.Context) {
 
 	log.Info("Filter: ", query)
 
-	typeData, err := d.Find(query, nil)
-
+	typeData, err := d.Find(query)
 	if err != nil {
 		log.Error(RestError(c, err))
 		return
+	}
+
+	if typeData == nil {
+		typeData = make([]map[string]interface{}, 0)
 	}
 
 	c.JSON(http.StatusOK, typeData)
@@ -137,7 +144,7 @@ func (t *TypesController) GetTypeItemById(c *gin.Context) {
 
 	d := db.NewTypeDbService(appId, typeName)
 
-	item, err := d.FindId(itemId, nil)
+	item, err := d.FindId(itemId)
 
 	if err != nil {
 		log.Error(RestError(c, err))
@@ -156,19 +163,14 @@ func (t *TypesController) UpdateTypeItemById(c *gin.Context) {
 
 	d := db.NewTypeDbService(appId, typeName)
 	body := webUtils.GetBody(c)
+	body["id"] = itemId
 
-	err := d.UpdateId(itemId, models.JSON{
-		"$set": body,
-	})
+	err := d.ReplaceId(itemId, body)
 
 	if err != nil {
 		log.Error(RestError(c, err))
 		return
 	}
-
-	payload := models.JSON{}
-	payload.FromMap(body)
-	payload["_id"] = itemId
 
 	opts := GetHeaderOptions(c)
 
@@ -178,7 +180,7 @@ func (t *TypesController) UpdateTypeItemById(c *gin.Context) {
 		notification.Notify(messageBuilder.Build(
 			messaging.OP_UPDATE,
 			messaging.ORIGIN_API,
-			payload,
+			body,
 			opts,
 			typeName,
 			appId,
@@ -211,7 +213,7 @@ func (t *TypesController) DeleteTypeItemById(c *gin.Context) {
 		notification.Notify(messageBuilder.Build(
 			messaging.OP_DELETE,
 			messaging.ORIGIN_API,
-			models.JSON{"_id": itemId},
+			models.JSON{"id": itemId},
 			opts,
 			typeName,
 			appId,

@@ -49,12 +49,12 @@ func opCreate(m messaging.Message, c *client.ApiClient) error {
 }
 
 func opUpdate(m messaging.Message, c *client.ApiClient) error {
-	_, err := c.UpdateItem(m.Type, m.Payload["_id"].(string), m.Payload)
+	_, err := c.UpdateItem(m.Type, m.Payload["id"].(string), m.Payload)
 	return err
 }
 
 func opDelete(m messaging.Message, c *client.ApiClient) error {
-	_, err := c.DeleteItem(m.Type, m.Payload["_id"].(string))
+	_, err := c.DeleteItem(m.Type, m.Payload["id"].(string))
 	return err
 }
 

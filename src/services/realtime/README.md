@@ -9,7 +9,7 @@ A neutrino microservice responsible for the realtime websocket updates
     origin: 'api|client', //the origin of the operation
     options: {}, //additional options
     pld: { //the payload to apply
-        _id: '{{id}}'
+        id: '{{id}}'
         prop1: 'v',
         prop2: 'c'
     },

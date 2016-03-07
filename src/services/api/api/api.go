@@ -73,9 +73,9 @@ func RespondId(id interface{}, c *gin.Context) {
 
 	switch t := id.(type) {
 	case models.JSON:
-		i["_id"] = t["_id"]
+		i["id"] = t["id"]
 	default:
-		i["_id"] = t
+		i["id"] = t
 	}
 
 	c.JSON(http.StatusOK, i)

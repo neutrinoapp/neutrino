@@ -2,16 +2,16 @@
 
 docker -v
 
-docker inspect mongodb > /dev/null
-inspectMongoDbExitCode=$?
+docker inspect rethinkdb > /dev/null
+inspectRethinkdbExitCode=$?
 
-if [ $inspectMongoDbExitCode != 0 ]; then
-    echo "Creating new mongodb container"
-    docker pull mongo:latest
-    docker run --name mongodb -p 27017:27017 -v /data/mongo:/data/db -d mongo:latest --storageEngine wiredTiger
+if [ $inspectRethinkdbExitCode != 0 ]; then
+    echo "Creating new rethinkdb container"
+    docker pull rethinkdb:latest
+	docker run --name rethinkdb -v "/data/rethink" -p 8080:8080 -p 28015:28015 -d rethinkdb
 else
-    echo "Starting mongodb"
-    docker start mongodb
+    echo "Starting rethinkdb"
+    docker start rethinkdb
 fi
 
 docker inspect redis-cache > /dev/null

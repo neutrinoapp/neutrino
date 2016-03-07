@@ -13,7 +13,7 @@ func createApp(t *testing.T) *ApplicationModel {
 	rec.CodeIs(200)
 
 	res := rec.BodyJSON()
-	app.Id = res["_id"].(string)
+	app.Id = res["id"].(string)
 
 	return app
 }
