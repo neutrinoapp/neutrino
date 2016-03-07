@@ -14,6 +14,7 @@ import (
 type ApiClient struct {
 	BaseUrl, Token, ClientId, AppId string
 	NotifyRealTime                  bool
+	Filter                          models.JSON
 }
 
 var clientCache map[string]*ApiClient
@@ -82,6 +83,7 @@ func (c *ApiClient) SendRequest(url, method string, body interface{}, isArray bo
 	}
 
 	opts.Notify = &c.NotifyRealTime
+	opts.Filter = c.Filter
 
 	optsS, err := opts.String()
 	if err != nil {

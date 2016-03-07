@@ -114,22 +114,17 @@ func (t *TypesController) GetTypeDataHandler(c *gin.Context) {
 	t.ensureType(typeName, c)
 	d := db.NewTypeDbService(appId, typeName)
 
-	_, query, err := GetExpression(c)
-	if err != nil {
-		log.Error(err)
-		query = models.JSON{}
-	}
+	opts := GetHeaderOptions(c)
+	log.Info("Filter: ", opts.Filter)
 
-	log.Info("Filter: ", query)
-
-	typeData, err := d.Find(query)
+	typeData, err := d.Find(opts.Filter)
 	if err != nil {
 		log.Error(RestError(c, err))
 		return
 	}
 
 	if typeData == nil {
-		typeData = make([]map[string]interface{}, 0)
+		typeData = make([]models.JSON, 0)
 	}
 
 	c.JSON(http.StatusOK, typeData)

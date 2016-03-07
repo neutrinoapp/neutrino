@@ -1,12 +1,9 @@
 package expression
 
 import (
-	"strings"
-
-	"github.com/neutrinoapp/neutrino/src/common/models"
-
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -27,25 +24,6 @@ type Expression struct {
 //TODO: sort, group etc.
 type ExpressionGroup struct {
 	Filter Expression
-}
-
-func (e ExpressionGroup) ToMongo() (models.JSON, error) {
-	query := models.JSON{}
-	and := make([]models.JSON, 0)
-
-	for _, p := range e.Filter.Params {
-		if p.Op == EXPRESSION_OP_EQUALS {
-			query := models.JSON{}
-			query[p.Left] = p.Right
-			and = append(and, query)
-		}
-	}
-
-	if len(and) > 0 {
-		query["$and"] = and
-	}
-
-	return query, nil
 }
 
 func ParseExpressionGroup(query url.Values) (ExpressionGroup, error) {

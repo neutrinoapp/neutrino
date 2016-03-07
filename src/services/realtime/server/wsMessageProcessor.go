@@ -41,13 +41,11 @@ func (p WsMessageProcessor) Process() {
 }
 
 func (p WsMessageProcessor) HandleGoodbye(msg *turnpike.Goodbye) {
-	log.Info("Handling goodbye message:", msg)
 	clientId := string(msg.Request)
 	p.RedisClient.Del(clientId)
 }
 
 func (p WsMessageProcessor) HandlePublish(msg *turnpike.Publish) {
-	log.Info("Handling publish message:", msg)
 	if string(msg.Topic) == "wamp.session.on_join" {
 		return
 	}
@@ -65,52 +63,9 @@ func (p WsMessageProcessor) HandlePublish(msg *turnpike.Publish) {
 	if apiError != nil {
 		log.Error(apiError)
 	}
-
-	//topic := string(msg.Topic)
-	//log.Info("Sending out special messages:", topic)
-	//msgRaw := models.JSON{}
-	//err := msgRaw.FromString([]byte(m))
-	//if err != nil {
-	//	log.Error(err, m)
-	//	return
-	//}
-	//
-	//log.Info(msgRaw)
-	//if payload, ok := msgRaw["pld"].(map[string]interface{}); ok {
-	//	clientIds := p.RedisClient.SMembers(topic).Val()
-	//	log.Info(clientIds)
-	//	for _, clientId := range clientIds {
-	//		filterString := p.RedisClient.HGet(clientId, "filter").Val()
-	//		filter := models.JSON{}
-	//		filter.FromString([]byte(filterString))
-	//		log.Info(filter)
-	//
-	//		passes := true
-	//		for k, v := range filter {
-	//			log.Info(payload, k, v)
-	//			if payload[k] != v {
-	//				passes = false
-	//				break
-	//			}
-	//		}
-	//
-	//		if passes {
-	//			topic := p.RedisClient.HGet(clientId, "topic").Val()
-	//			log.Info("Publishing to special topic: ", topic, m)
-	//			err := p.WsClient.Publish(topic, []interface{}{msgRaw}, nil)
-	//			if err != nil {
-	//				log.Error(err)
-	//				continue
-	//			}
-	//		}
-	//
-	//		log.Info(filter)
-	//	}
-	//}
 }
 
 func (p WsMessageProcessor) HandleSubscribe(msg *turnpike.Subscribe) {
-	log.Info("Handling subscribe msg:", msg)
 	opts := models.SubscribeOptions{}
 	err := models.Convert(msg.Options, &opts)
 	if err != nil {
@@ -146,10 +101,35 @@ func (p WsMessageProcessor) HandleSubscribe(msg *turnpike.Subscribe) {
 				select {
 				case val := <-newValuesChan:
 					pld := models.JSON{}
-					pld = pld.FromMap(val["new_val"].(map[string]interface{}))
+					var dbOp string
+					newVal := val["new_val"]
+					oldVal := val["old_val"]
+					if newVal != nil && oldVal == nil {
+						dbOp = messaging.OP_CREATE
+					} else if newVal == nil && oldVal != nil {
+						dbOp = messaging.OP_DELETE
+					} else {
+						dbOp = messaging.OP_UPDATE
+					}
+
+					if dbOp != opts.Operation {
+						//only emit messages with the same operation as the subscriber
+						continue
+					}
+
+					var dbVal map[string]interface{}
+					if dbOp == messaging.OP_CREATE {
+						dbVal = newVal.(map[string]interface{})
+					} else if dbOp == messaging.OP_DELETE {
+						dbVal = oldVal.(map[string]interface{})
+					} else {
+						dbVal = newVal.(map[string]interface{})
+					}
+
+					pld = pld.FromMap(dbVal)
 					notify := false
 					msg := messageBuilder.Build(
-						messaging.OP_CREATE,
+						dbOp,
 						messaging.ORIGIN_API,
 						pld,
 						models.Options{
@@ -166,12 +146,5 @@ func (p WsMessageProcessor) HandleSubscribe(msg *turnpike.Subscribe) {
 				}
 			}
 		}()
-
-		//p.RedisClient.SAdd(baseTopic, clientId)
-		//p.RedisClient.HSet(clientId, "baseTopic", opts.BaseTopic)
-		//p.RedisClient.HSet(clientId, "topic", opts.Topic)
-		//p.RedisClient.HSet(clientId, "clientId", clientId)
-		//p.RedisClient.HSet(clientId, "topicId", opts.TopicId)
-		//p.RedisClient.HSet(clientId, "filter", models.String(opts.Filter))
 	}
 }

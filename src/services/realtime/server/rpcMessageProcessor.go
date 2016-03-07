@@ -46,6 +46,8 @@ func (p RpcMessageProcessor) getArgs(args []interface{}) (messaging.Message, *cl
 		c.NotifyRealTime = false
 	}
 
+	c.Filter = m.Options.Filter
+
 	return m, c, nil
 }
 

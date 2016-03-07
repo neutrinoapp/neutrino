@@ -1,10 +1,13 @@
 package models
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 type Options struct {
 	ClientId *string `json:"clientId"`
 	Notify   *bool   `json:"notify"`
+	Filter   JSON    `json:"filter"`
 }
 
 func (m Options) ToJson() (JSON, error) {

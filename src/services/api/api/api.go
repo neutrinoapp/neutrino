@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/neutrinoapp/neutrino/src/common/expression"
 	"github.com/neutrinoapp/neutrino/src/common/models"
 )
 
@@ -88,15 +87,4 @@ func GetHeaderOptions(c *gin.Context) models.Options {
 	}
 
 	return v.(models.Options)
-}
-
-func GetExpression(c *gin.Context) (expression.ExpressionGroup, models.JSON, error) {
-	v, exists := c.Get(CONTEXT_EXPRESSION)
-	if !exists {
-		return expression.ExpressionGroup{}, models.JSON{}, nil
-	}
-
-	exp := v.(expression.ExpressionGroup)
-	query, err := exp.ToMongo()
-	return exp, query, err
 }
