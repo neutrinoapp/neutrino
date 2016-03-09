@@ -12,9 +12,9 @@ import (
 )
 
 type ApiClient struct {
-	BaseUrl, Token, ClientId, AppId string
-	NotifyRealTime                  bool
-	Filter                          models.JSON
+	BaseUrl, Token, ClientId, AppId, Origin string
+	NotifyRealTime                          bool
+	Filter                                  models.JSON
 }
 
 var clientCache map[string]*ApiClient
@@ -40,6 +40,7 @@ func NewApiClient(appId string) *ApiClient {
 		ClientId:       "",
 		NotifyRealTime: false,
 		AppId:          appId,
+		Origin:         "api",
 	}
 }
 
@@ -84,6 +85,7 @@ func (c *ApiClient) SendRequest(url, method string, body interface{}, isArray bo
 
 	opts.Notify = &c.NotifyRealTime
 	opts.Filter = c.Filter
+	//opts.Origin = c.Origin
 
 	optsS, err := opts.String()
 	if err != nil {

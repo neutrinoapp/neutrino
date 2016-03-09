@@ -8,6 +8,7 @@ type Options struct {
 	ClientId *string `json:"clientId"`
 	Notify   *bool   `json:"notify"`
 	Filter   JSON    `json:"filter"`
+	Origin   string  `json:"origin"`
 }
 
 func (m Options) ToJson() (JSON, error) {

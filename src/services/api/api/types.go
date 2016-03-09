@@ -124,7 +124,7 @@ func (t *TypesController) GetTypeDataHandler(c *gin.Context) {
 	}
 
 	if typeData == nil {
-		typeData = make([]models.JSON, 0)
+		typeData = make([]map[string]interface{}, 0)
 	}
 
 	c.JSON(http.StatusOK, typeData)

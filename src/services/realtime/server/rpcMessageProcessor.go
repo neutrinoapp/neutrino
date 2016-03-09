@@ -43,10 +43,11 @@ func (p RpcMessageProcessor) getArgs(args []interface{}) (messaging.Message, *cl
 	if m.Options.Notify != nil {
 		c.NotifyRealTime = *m.Options.Notify
 	} else {
-		c.NotifyRealTime = false
+		c.NotifyRealTime = true
 	}
 
 	c.Filter = m.Options.Filter
+	c.Origin = m.Options.Origin
 
 	return m, c, nil
 }
@@ -80,19 +81,29 @@ func (p RpcMessageProcessor) handleDataCreate(args []interface{}, kwargs map[str
 		return &turnpike.CallResult{Err: turnpike.URI(err.Error())}
 	}
 
-	resp, err := c.CreateItem(m.Type, m.Payload)
-	if err != nil {
-		log.Error(err)
-		return &turnpike.CallResult{Err: turnpike.URI(err.Error())}
+	resp, apiError := c.CreateItem(m.Type, m.Payload)
+	if apiError != nil {
+		log.Error(apiError)
+		return &turnpike.CallResult{Err: turnpike.URI(apiError.Error())}
 	}
 
-	p.WsProcessor.HandlePublish(&turnpike.Publish{
-		Topic:     turnpike.URI(m.Topic),
-		Arguments: args,
-	})
-
-	log.Info(resp)
 	return &turnpike.CallResult{Args: []interface{}{resp["id"]}}
+
+	//data, err := p.WsProcessor.HandlePublish(&turnpike.Publish{
+	//	Topic:     turnpike.URI(m.Topic),
+	//	Arguments: args,
+	//})
+	//
+	//if err != nil {
+	//	log.Error(err)
+	//}
+	//
+	//if resp, ok := data.(map[string]interface{}); ok {
+	//	log.Info(resp)
+	//	return &turnpike.CallResult{Args: []interface{}{resp["id"]}}
+	//}
+
+	return &turnpike.CallResult{Args: []interface{}{"An error has occured."}}
 }
 
 func (p RpcMessageProcessor) handleDataRemove(args []interface{}, kwargs map[string]interface{}) *turnpike.CallResult {

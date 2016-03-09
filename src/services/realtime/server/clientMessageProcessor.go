@@ -7,20 +7,20 @@ import (
 )
 
 type clientMessageProcessor struct {
-	OpProcessors map[string]func(messaging.Message, *client.ApiClient) error
+	OpProcessors map[string]func(messaging.Message, *client.ApiClient) (interface{}, error)
 }
 
-func (p *clientMessageProcessor) Process(m string) error {
+func (p *clientMessageProcessor) Process(m string) (interface{}, error) {
 	var msg messaging.Message
 	err := msg.FromString(m)
 	if err != nil {
 		log.Error(err)
-		return err
+		return nil, err
 	}
 
 	if msg.Origin == messaging.ORIGIN_API {
 		log.Info("Skipping processing message from API", m)
-		return nil
+		return nil, nil
 	}
 
 	log.Info("Got message from client....processing:", m)
@@ -32,7 +32,7 @@ func (p *clientMessageProcessor) Process(m string) error {
 	if msg.Options.Notify != nil {
 		c.NotifyRealTime = *msg.Options.Notify
 	} else {
-		c.NotifyRealTime = false
+		c.NotifyRealTime = true
 	}
 
 	opts := msg.Options
@@ -40,26 +40,25 @@ func (p *clientMessageProcessor) Process(m string) error {
 		c.ClientId = *opts.ClientId
 	}
 
-	return opProcessor(msg, c)
+	resp, err := opProcessor(msg, c)
+	log.Info("Api response: ", resp, err)
+	return resp, err
 }
 
-func opCreate(m messaging.Message, c *client.ApiClient) error {
-	_, err := c.CreateItem(m.Type, m.Payload)
-	return err
+func opCreate(m messaging.Message, c *client.ApiClient) (interface{}, error) {
+	return c.CreateItem(m.Type, m.Payload)
 }
 
-func opUpdate(m messaging.Message, c *client.ApiClient) error {
-	_, err := c.UpdateItem(m.Type, m.Payload["id"].(string), m.Payload)
-	return err
+func opUpdate(m messaging.Message, c *client.ApiClient) (interface{}, error) {
+	return c.UpdateItem(m.Type, m.Payload["id"].(string), m.Payload)
 }
 
-func opDelete(m messaging.Message, c *client.ApiClient) error {
-	_, err := c.DeleteItem(m.Type, m.Payload["id"].(string))
-	return err
+func opDelete(m messaging.Message, c *client.ApiClient) (interface{}, error) {
+	return c.DeleteItem(m.Type, m.Payload["id"].(string))
 }
 
 func NewClientMessageProcessor() messaging.MessageProcessor {
-	opProcessors := make(map[string]func(messaging.Message, *client.ApiClient) error)
+	opProcessors := make(map[string]func(messaging.Message, *client.ApiClient) (interface{}, error))
 	opProcessors[messaging.OP_CREATE] = opCreate
 	opProcessors[messaging.OP_UPDATE] = opUpdate
 	opProcessors[messaging.OP_DELETE] = opDelete

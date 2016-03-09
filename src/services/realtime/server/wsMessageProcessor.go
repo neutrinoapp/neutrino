@@ -41,17 +41,18 @@ func (p WsMessageProcessor) Process() {
 }
 
 func (p WsMessageProcessor) HandleGoodbye(msg *turnpike.Goodbye) {
-	clientId := string(msg.Request)
-	p.RedisClient.Del(clientId)
+	log.Info("Handling goodbye")
+	//clientId := string(msg.Request)
+	//p.RedisClient.Del(clientId)
 }
 
-func (p WsMessageProcessor) HandlePublish(msg *turnpike.Publish) {
+func (p WsMessageProcessor) HandlePublish(msg *turnpike.Publish) (interface{}, error) {
 	if string(msg.Topic) == "wamp.session.on_join" {
-		return
+		return nil, nil
 	}
 
 	if len(msg.Arguments) == 0 {
-		return
+		return nil, nil
 	}
 
 	m, ok := msg.Arguments[0].(string)
@@ -59,10 +60,12 @@ func (p WsMessageProcessor) HandlePublish(msg *turnpike.Publish) {
 		m = models.String(msg.Arguments[0])
 	}
 
-	apiError := p.ClientProcessor.Process(m)
+	data, apiError := p.ClientProcessor.Process(m)
 	if apiError != nil {
 		log.Error(apiError)
 	}
+
+	return data, apiError
 }
 
 func (p WsMessageProcessor) HandleSubscribe(msg *turnpike.Subscribe) {
@@ -97,6 +100,7 @@ func (p WsMessageProcessor) HandleSubscribe(msg *turnpike.Subscribe) {
 
 		messageBuilder := messaging.GetMessageBuilder()
 		go func() {
+			//TODO: exit this goroutine when the respective client disconnects
 			for {
 				select {
 				case val := <-newValuesChan:

@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/neutrinoapp/neutrino/src/common/log"
+	"github.com/neutrinoapp/neutrino/src/common/messaging"
 	"github.com/neutrinoapp/neutrino/src/common/models"
 	"github.com/neutrinoapp/neutrino/src/services/api/db"
 	"gopkg.in/dgrijalva/jwt-go.v2"
@@ -197,6 +198,10 @@ func processHeadersMiddleware() gin.HandlerFunc {
 
 		if options.Filter == nil {
 			options.Filter = models.JSON{}
+		}
+
+		if options.Origin == "" {
+			options.Origin = messaging.ORIGIN_API
 		}
 
 		log.Info("Request options:", optionsHeader)
