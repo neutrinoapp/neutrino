@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/neutrinoapp/neutrino/src/common"
 	"github.com/neutrinoapp/neutrino/src/common/client"
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/messaging"
@@ -20,33 +21,49 @@ type WsMessageProcessor struct {
 	ClientProcessor messaging.MessageProcessor
 	WsClient        *turnpike.Client
 	NatsClient      *client.NatsClient
+	broadcaster     *common.Broadcaster
+}
+
+func NewWsMessageProcessor(
+	interceptor *wsInterceptor,
+	redisClient *redis.Client,
+	clientMessageProcessor messaging.MessageProcessor,
+	wsClient *turnpike.Client,
+	natsClient *client.NatsClient,
+) WsMessageProcessor {
+	broadcaster := common.NewBroadcaster()
+	p := WsMessageProcessor{interceptor, redisClient, clientMessageProcessor, wsClient, natsClient, broadcaster}
+	return p
 }
 
 func (p WsMessageProcessor) Process() {
 	go func() {
 		for {
 			select {
-			case m := <-p.Interceptor.m:
-				switch msg := m.(type) {
-				case *turnpike.Subscribe:
-					p.HandleSubscribe(msg)
-				case *turnpike.Publish:
-					p.HandlePublish(msg)
-				case *turnpike.Goodbye:
-					p.HandleGoodbye(msg)
+			case m := <-p.Interceptor.OnMessage:
+				msgType := m.messageType
+				if msgType == turnpike.SUBSCRIBE {
+					p.HandleSubscribe(m, m.msg.(*turnpike.Subscribe))
+				} else if msgType == turnpike.PUBLISH {
+					p.HandlePublish(m, m.msg.(*turnpike.Publish))
 				}
 			}
 		}
 	}()
 }
 
-func (p WsMessageProcessor) HandleGoodbye(msg *turnpike.Goodbye) {
-	log.Info("Handling goodbye")
-	//clientId := string(msg.Request)
-	//p.RedisClient.Del(clientId)
-}
+func (p WsMessageProcessor) HandlePublish(im interceptorMessage, msg *turnpike.Publish) (interface{}, error) {
+	if string(msg.Topic) == "wamp.session.on_leave" {
+		args := msg.Arguments
+		if len(args) > 0 {
+			leavingSessionId := args[0].(turnpike.ID)
+			log.Info("Emitting session leave:", leavingSessionId)
+			p.broadcaster.Broadcast(leavingSessionId)
+		}
 
-func (p WsMessageProcessor) HandlePublish(msg *turnpike.Publish) (interface{}, error) {
+		return nil, nil
+	}
+
 	if string(msg.Topic) == "wamp.session.on_join" {
 		return nil, nil
 	}
@@ -68,7 +85,7 @@ func (p WsMessageProcessor) HandlePublish(msg *turnpike.Publish) (interface{}, e
 	return data, apiError
 }
 
-func (p WsMessageProcessor) HandleSubscribe(msg *turnpike.Subscribe) {
+func (p WsMessageProcessor) HandleSubscribe(im interceptorMessage, msg *turnpike.Subscribe) {
 	opts := models.SubscribeOptions{}
 	err := models.Convert(msg.Options, &opts)
 	if err != nil {
@@ -76,79 +93,102 @@ func (p WsMessageProcessor) HandleSubscribe(msg *turnpike.Subscribe) {
 		return
 	}
 
-	if opts.IsSpecial() {
-		//remove the last part from 8139ed1ec39a467b96b0250dcf520749.todos.create.2882717310567
-		topic := fmt.Sprintf("%v", msg.Topic)
-		topicArguments := strings.Split(topic, ".")
-		uniqueTopicId := topicArguments[len(topicArguments)-1]
-		//clientId := strconv.FormatUint(uint64(msg.Request), 10)
+	if !opts.IsSpecial() {
+		return
+	}
 
-		baseTopic := messaging.BuildTopicArbitrary(topicArguments[:len(topicArguments)-1]...)
-		opts.BaseTopic = baseTopic
-		opts.Topic = topic
-		opts.ClientId = msg.Request
-		opts.TopicId = uniqueTopicId
+	//remove the last part from 8139ed1ec39a467b96b0250dcf520749.todos.create.2882717310567
+	topic := fmt.Sprintf("%v", msg.Topic)
+	topicArguments := strings.Split(topic, ".")
+	uniqueTopicId := topicArguments[len(topicArguments)-1]
+	//clientId := strconv.FormatUint(uint64(msg.Request), 10)
 
-		d := db.NewTypeDbService(opts.AppId, opts.Type)
+	baseTopic := messaging.BuildTopicArbitrary(topicArguments[:len(topicArguments)-1]...)
+	opts.BaseTopic = baseTopic
+	opts.Topic = topic
+	opts.ClientId = msg.Request
+	opts.TopicId = uniqueTopicId
 
-		newValuesChan := make(chan map[string]interface{})
-		err := d.Changes(opts.Filter, newValuesChan)
-		if err != nil {
-			log.Error(err)
-			return
-		}
+	d := db.NewTypeDbService(opts.AppId, opts.Type)
 
-		messageBuilder := messaging.GetMessageBuilder()
-		go func() {
-			//TODO: exit this goroutine when the respective client disconnects
-			for {
-				select {
-				case val := <-newValuesChan:
-					pld := models.JSON{}
-					var dbOp string
-					newVal := val["new_val"]
-					oldVal := val["old_val"]
-					if newVal != nil && oldVal == nil {
-						dbOp = messaging.OP_CREATE
-					} else if newVal == nil && oldVal != nil {
-						dbOp = messaging.OP_DELETE
-					} else {
-						dbOp = messaging.OP_UPDATE
-					}
+	newValuesChan := make(chan map[string]interface{})
+	err = d.Changes(opts.Filter, newValuesChan)
+	if err != nil {
+		log.Error(err)
+		return
+	}
 
-					if dbOp != opts.Operation {
-						//only emit messages with the same operation as the subscriber
-						continue
-					}
+	messageBuilder := messaging.GetMessageBuilder()
+	go func() {
+		leaveChan := make(chan interface{})
+		p.broadcaster.Subscribe(leaveChan)
 
-					var dbVal map[string]interface{}
-					if dbOp == messaging.OP_CREATE {
-						dbVal = newVal.(map[string]interface{})
-					} else if dbOp == messaging.OP_DELETE {
-						dbVal = oldVal.(map[string]interface{})
-					} else {
-						dbVal = newVal.(map[string]interface{})
-					}
-
-					pld = pld.FromMap(dbVal)
-					notify := false
-					msg := messageBuilder.Build(
-						dbOp,
-						messaging.ORIGIN_API,
-						pld,
-						models.Options{
-							Notify: &notify,
-						},
-						opts.Type,
-						opts.AppId,
-						"",
-					)
-					msg.Topic = topic
-
-					log.Info("Publishing filtered data: ", val, opts.Topic, msg)
-					notification.Notify(msg)
+		for {
+			select {
+			case val := <-newValuesChan:
+				p.processDatabaseUpdate(val, messageBuilder, opts, topic)
+			case leaveVal := <-leaveChan:
+				sessionId := leaveVal.(turnpike.ID)
+				if im.sess.Id == sessionId {
+					log.Info("Client leave for client:", sessionId, "exiting db listening goroutine")
+					close(newValuesChan)
+					close(leaveChan)
+					p.broadcaster.Remove(leaveChan)
+					return
 				}
 			}
-		}()
+		}
+	}()
+}
+
+func (p WsMessageProcessor) processDatabaseUpdate(
+	val map[string]interface{},
+	messageBuilder messaging.MessageBuilder,
+	opts models.SubscribeOptions,
+	topic string,
+) {
+
+	pld := models.JSON{}
+	var dbOp string
+	newVal := val["new_val"]
+	oldVal := val["old_val"]
+	if newVal != nil && oldVal == nil {
+		dbOp = messaging.OP_CREATE
+	} else if newVal == nil && oldVal != nil {
+		dbOp = messaging.OP_DELETE
+	} else {
+		dbOp = messaging.OP_UPDATE
 	}
+
+	if dbOp != opts.Operation {
+		return
+	}
+
+	//only emit messages with the same operation as the subscriber
+	var dbVal map[string]interface{}
+	if dbOp == messaging.OP_CREATE {
+		dbVal = newVal.(map[string]interface{})
+	} else if dbOp == messaging.OP_DELETE {
+		dbVal = oldVal.(map[string]interface{})
+	} else {
+		dbVal = newVal.(map[string]interface{})
+	}
+
+	pld = pld.FromMap(dbVal)
+	notify := false
+	msg := messageBuilder.Build(
+		dbOp,
+		messaging.ORIGIN_API,
+		pld,
+		models.Options{
+			Notify: &notify,
+		},
+		opts.Type,
+		opts.AppId,
+		"",
+	)
+	msg.Topic = topic
+
+	log.Info("Publishing filtered data: ", val, opts.Topic, msg)
+	notification.Notify(msg)
 }

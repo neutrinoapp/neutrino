@@ -9,9 +9,7 @@ import (
 )
 
 func NewWebSocketServer() (*turnpike.WebsocketServer, *http.Server, *turnpike.Client, *wsInterceptor, error) {
-	interceptor := &wsInterceptor{
-		m: make(chan turnpike.Message),
-	}
+	interceptor := NewWsInterceptor()
 
 	r := turnpike.Realm{}
 	r.Interceptor = interceptor

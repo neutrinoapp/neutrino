@@ -7,10 +7,6 @@ import (
 	"github.com/neutrinoapp/neutrino/src/common/config"
 )
 
-func init() {
-
-}
-
 func Initialize() (*http.Server, error) {
 	redisClient := client.GetNewRedisClient()
 	clientMessageProcessor := NewClientMessageProcessor()
@@ -24,7 +20,7 @@ func Initialize() (*http.Server, error) {
 	natsProcessor := NatsMessageProcessor{natsClient, wsClient}
 	natsProcessor.Process()
 
-	wsProcessor := WsMessageProcessor{interceptor, redisClient, clientMessageProcessor, wsClient, natsClient}
+	wsProcessor := NewWsMessageProcessor(interceptor, redisClient, clientMessageProcessor, wsClient, natsClient)
 	wsProcessor.Process()
 
 	rpcProcessor := RpcMessageProcessor{wsClient, wsProcessor}
