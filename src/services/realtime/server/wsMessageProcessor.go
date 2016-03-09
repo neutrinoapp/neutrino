@@ -55,8 +55,11 @@ func (p WsMessageProcessor) Process() {
 func (p WsMessageProcessor) HandlePublish(im interceptorMessage, msg *turnpike.Publish) (interface{}, error) {
 	if string(msg.Topic) == "wamp.session.on_leave" {
 		args := msg.Arguments
-		if len(args) > 0 {
-			leavingSessionId := args[0].(turnpike.ID)
+		if len(args) == 0 {
+			return nil, nil
+		}
+
+		if leavingSessionId, ok := args[0].(turnpike.ID); ok {
 			log.Info("Emitting session leave:", leavingSessionId)
 			p.broadcaster.Broadcast(leavingSessionId)
 		}
@@ -130,7 +133,6 @@ func (p WsMessageProcessor) HandleSubscribe(im interceptorMessage, msg *turnpike
 			case leaveVal := <-leaveChan:
 				sessionId := leaveVal.(turnpike.ID)
 				if im.sess.Id == sessionId {
-					log.Info("Client leave for client:", sessionId, "exiting db listening goroutine")
 					close(newValuesChan)
 					close(leaveChan)
 					p.broadcaster.Remove(leaveChan)
