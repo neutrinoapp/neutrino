@@ -60,7 +60,7 @@ func (p WsMessageProcessor) HandlePublish(im interceptorMessage, msg *turnpike.P
 		}
 
 		if leavingSessionId, ok := args[0].(turnpike.ID); ok {
-			log.Info("Emitting session leave:", leavingSessionId)
+			log.Info("Broadcasting session leave:", leavingSessionId)
 			p.broadcaster.Broadcast(leavingSessionId)
 		}
 
