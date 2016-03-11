@@ -51,6 +51,18 @@ func (a *ApplicationController) CreateApplicationHandler(c *gin.Context) {
 		return
 	}
 
+	dataDb := db.NewDbService(db.DATABASE_NAME, db.DATA_TABLE)
+	_, err := dataDb.Query().Insert(models.JSON{
+		"id":    appId,
+		"types": make([]interface{}, 0),
+		"users": make([]interface{}, 0),
+	}).RunWrite(dataDb.GetSession())
+	if err != nil {
+		//TODO: rollback
+		log.Error(RestError(c, err))
+		return
+	}
+
 	RespondId(appId, c)
 }
 

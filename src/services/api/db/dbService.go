@@ -1,7 +1,6 @@
 package db
 
 import (
-	"github.com/neutrinoapp/neutrino/src/common/config"
 	"github.com/neutrinoapp/neutrino/src/common/log"
 
 	r "github.com/dancannon/gorethink"
@@ -32,14 +31,6 @@ type dbService struct {
 	query                      r.Term
 }
 
-func NewDbService(dbName, tableName string) DbService {
-	address := config.Get(config.KEY_REDIS_ADDR)
-	d := &dbService{address, dbName, tableName, r.Term{}}
-	d.query = d.GetTable()
-
-	return d
-}
-
 func (d *dbService) Path(path ...string) DbService {
 	t := d.Query()
 
@@ -57,6 +48,8 @@ func (d *dbService) GetSession() *r.Session {
 			Address: d.address,
 		})
 
+		log.Info("Connected to rethinkdb:", d.address)
+
 		if err != nil {
 			log.Error(err)
 			panic(err)
@@ -73,7 +66,7 @@ func (d *dbService) GetDb() r.Term {
 }
 
 func (d *dbService) GetTable() r.Term {
-	return d.GetDb()
+	return d.GetDb().Table(d.tableName)
 }
 
 func (d *dbService) Query() r.Term {

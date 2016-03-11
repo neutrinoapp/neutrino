@@ -23,6 +23,7 @@ type UserModel struct {
 type AuthController struct {
 }
 
+//TODO: refactor
 func registerUser(c *gin.Context, t r.Term, s *r.Session, isApp bool) {
 	var u models.JSON
 
@@ -43,11 +44,18 @@ func registerUser(c *gin.Context, t r.Term, s *r.Session, isApp bool) {
 		"createdAt": time.Now(),
 	}
 
-	if !isApp {
+	var query r.Term
+	if isApp {
+		query = t.Update(func(row r.Term) interface{} {
+			return models.JSON{
+				db.USERS_FIELD: row.Field(db.USERS_FIELD).Append(user),
+			}
+		})
+	} else {
 		user["apps"] = make([]models.JSON, 0)
+		query = t.Insert(user)
 	}
-
-	_, err = t.Insert(user).RunWrite(s)
+	_, err = query.RunWrite(s)
 
 	if err != nil {
 		//TODO: user exists
@@ -66,13 +74,22 @@ func loginUser(c *gin.Context, t r.Term, s *r.Session, isApp bool) {
 		return
 	}
 
-	cu, err := t.Get(u.Email).Run(s)
-	var existingUser models.JSON
+	var cu *r.Cursor
+	var err error
+	if isApp {
+		cu, err = t.Filter(models.JSON{
+			db.ID_FIELD: u.Email,
+		}).Run(s)
+	} else {
+		cu, err = t.Get(u.Email).Run(s)
+	}
+
 	if err != nil {
 		log.Error(RestError(c, err))
 		return
 	}
 
+	var existingUser models.JSON
 	err = cu.One(&existingUser)
 	if err != nil {
 		log.Error(RestError(c, err))
@@ -104,7 +121,6 @@ func loginUser(c *gin.Context, t r.Term, s *r.Session, isApp bool) {
 
 func (a *AuthController) RegisterUserHandler(c *gin.Context) {
 	d := db.NewDbService(db.DATABASE_NAME, db.USERS_TABLE)
-
 	registerUser(c, d.Query(), d.GetSession(), false)
 }
 
@@ -112,7 +128,7 @@ func (a *AuthController) AppRegisterUserHandler(c *gin.Context) {
 	appId := c.Param("appId")
 	d := db.NewDbService(db.DATABASE_NAME, db.DATA_TABLE)
 
-	registerUser(c, d.Query().Get(appId).Field(db.USERS_FIELD), d.GetSession(), true)
+	registerUser(c, d.Query().Get(appId), d.GetSession(), true)
 }
 
 func (a *AuthController) LoginUserHandler(c *gin.Context) {
