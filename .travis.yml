@@ -6,6 +6,7 @@ services:
 before_install:
   - make dev
   - make get
+  - make prep
   - make api &
   - make realtime &
   - sleep 5
