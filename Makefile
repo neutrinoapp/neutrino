@@ -1,10 +1,10 @@
 default: get integration
 
 integration:
-	go test -v ./test/
+	go test -v ./src/tests/
 
 get:
-	go get -t -v ./...
+	go get -t -v -d ./src/...
 
 killapi:
 	-fuser -k 5000/tcp

@@ -1,9 +1,9 @@
-package test
+package tests
 
 import (
 	"testing"
 
-	"github.com/neutrinoapp/neutrino/test/common"
+	"github.com/neutrinoapp/neutrino/src/tests/common"
 	"github.com/stretchr/testify/assert"
 )
 
