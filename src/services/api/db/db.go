@@ -6,6 +6,7 @@ const (
 	DATA_TABLE    = "data"
 	TYPES_FIELD   = "types"
 	APPS_FIELD    = "apps"
+	USERS_FIELD   = "users'"
 	ID_FIELD      = "id"
 )
 

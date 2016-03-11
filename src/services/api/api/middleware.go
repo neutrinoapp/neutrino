@@ -7,7 +7,6 @@ import (
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/messaging"
 	"github.com/neutrinoapp/neutrino/src/common/models"
-	"github.com/neutrinoapp/neutrino/src/services/api/db"
 	"gopkg.in/dgrijalva/jwt-go.v2"
 )
 
@@ -29,39 +28,40 @@ func authWithToken(c *gin.Context, userToken string) (*jwt.Token, error) {
 		}
 
 		//TODO: cache this
-		tokenSecretRecord, accountSecretError := db.NewSystemDbService().FindId("accountSecret")
+		//tokenSecretRecord, accountSecretError := db.NewSystemDbService().FindId("accountSecret")
+		//
+		//if accountSecretError != nil {
+		//	//we probably do not have such collection. Use a default secret and warn.
+		//	log.Info("Account secret error: ", accountSecretError)
+		//	tokenSecretRecord = models.JSON{
+		//		"value": "",
+		//	}
+		//}
 
-		if accountSecretError != nil {
-			//we probably do not have such collection. Use a default secret and warn.
-			log.Info("Account secret error: ", accountSecretError)
-			tokenSecretRecord = models.JSON{
-				"value": "",
-			}
-		}
+		//tokenSecret := tokenSecretRecord["value"].(string)
 
-		tokenSecret := tokenSecretRecord["value"].(string)
-
-		return []byte(tokenSecret), nil
+		return []byte(""), nil
 	})
 
 	return token, err
 }
 
 func authWithMaster(c *gin.Context, key string) (string, error) {
-	d := db.NewAppsMapDbService()
-	res, err := d.FindOne(models.JSON{
-		"masterKey": key,
-	})
-
-	if err != nil {
-		return "", err
-	}
-
-	if res == nil || res["user"] == nil {
-		return "", BuildError("Invalid master key")
-	}
-
-	return res["user"].(string), nil
+	//d := db.NewDbService(db.DATABASE_NAME, db.USERS_TABLE)
+	//res, err := d.Query().Filter(models.JSON{
+	//	"masterKey": key,
+	//}).Nth(0).Run(d.GetSession())
+	//if err != nil {
+	//	return "", err
+	//}
+	//
+	//if res == nil || res["user"] == nil {
+	//	return "", BuildError("Invalid master key")
+	//}
+	//
+	//return res["user"].(string), nil
+	//TODO:
+	return "", nil
 }
 
 func authorizeMiddleware(stop bool) gin.HandlerFunc {

@@ -10,10 +10,15 @@ type UserDbService interface {
 
 	AppTerm() r.Term
 	App() (interface{}, error)
+	CreateApp(app interface{}) error
+	GetApps() ([]interface{}, error)
+	DeleteApp() error
+	UpdateApp(interface{}) error
+	GetUser(interface{}) (interface{}, error)
 }
 
 type userDbService struct {
-	*dbService
+	DbService
 	user, appId string
 }
 
@@ -34,5 +39,37 @@ func (u *userDbService) App() (app interface{}, err error) {
 	}
 
 	err = c.One(&app)
+	return
+}
+
+func (u *userDbService) CreateApp(app interface{}) (err error) {
+	_, err = u.Query().Get(u.user).Update(func(user r.Term) interface{} {
+		return models.JSON{
+			APPS_FIELD: user.Field(APPS_FIELD).Append(app),
+		}
+	}).RunWrite(u.GetSession())
+
+	return
+}
+
+func (u *userDbService) GetApps() (apps []interface{}, err error) {
+	c, err := u.Query().Get(u.user).Field(APPS_FIELD).Run(u.GetSession())
+	err = c.All(&apps)
+	return
+}
+
+func (u *userDbService) DeleteApp() (err error) {
+	_, err = u.AppTerm().Delete().RunWrite(u.GetSession())
+	return
+}
+
+func (u *userDbService) UpdateApp(v interface{}) (err error) {
+	_, err = u.AppTerm().Update(v).RunWrite(u.GetSession())
+	return
+}
+
+func (u *userDbService) GetUser(id interface{}) (user interface{}, err error) {
+	c, err := u.Query().Get(u.user).Run(u.GetSession())
+	err = c.One(&user)
 	return
 }

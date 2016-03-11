@@ -16,7 +16,7 @@ type TypeDbService interface {
 }
 
 type typeDbService struct {
-	*dbService
+	DbService
 	t     string
 	appId string
 }
@@ -32,7 +32,7 @@ func (t *typeDbService) InsertData(v interface{}) (key string, err error) {
 			},
 			models.JSON{
 				TYPES_FIELD: models.JSON{
-					t.t: make([]models.JSON, 0),
+					t.t: []interface{}{v},
 				},
 			},
 		)

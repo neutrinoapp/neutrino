@@ -1,11 +1,12 @@
 package api
 
-import "github.com/neutrinoapp/neutrino/src/common/models"
-
 type baseController struct {
-
 }
 
-func (b *baseController) getOptions() models.Options {
-
-}
+//func (b *baseController) Options(c *gin.Context) models.Options {
+//	return nil
+//}
+//
+//func (b *baseController) Application(c *gin.Context) models.JSON {
+//	return nil
+//}

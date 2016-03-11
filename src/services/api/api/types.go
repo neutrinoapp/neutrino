@@ -17,34 +17,24 @@ import (
 type TypesController struct {
 }
 
-//
-//func (t *TypesController) ensureType(typeName string, c *gin.Context) {
-//	appId := c.Param("appId")
-//	user := ApiUser(c).Name
-//
-//	//we do not need to wait for this op
-//	d := db.NewUserDbService(user)
-//
-//	err := d.App(appId).
-//		Update(func(row r.Term) interface{} {
-//			return r.Branch(
-//				row.Field("types").Contains(typeName),
-//				nil,
-//				models.JSON{
-//					"types": row.Field("types").Append(typeName),
-//				},
-//			)
-//		}).Exec(d.GetSession(), r.ExecOpts{NoReply: true})
-//	if err != nil {
-//		log.Error(err)
-//	}
-//}
-
 func (t *TypesController) GetTypesHandler(c *gin.Context) {
-	app := Application(c, c.Param("appId"))
-	if app != nil {
-		c.JSON(http.StatusOK, app["types"])
+	appId := c.Param("appId")
+
+	d := db.NewDbService(db.DATABASE_NAME, db.DATA_TABLE)
+	cu, err := d.Query().Get(appId).Field(db.TYPES_FIELD).Keys().Run(d.GetSession())
+	if err != nil {
+		log.Error(RestError(c, err))
+		return
 	}
+
+	var types []interface{}
+	err = cu.All(&types)
+	if err != nil {
+		log.Error(RestError(c, err))
+		return
+	}
+
+	c.JSON(http.StatusOK, types)
 }
 
 func (t *TypesController) DeleteType(c *gin.Context) {
@@ -67,9 +57,8 @@ func (t *TypesController) DeleteType(c *gin.Context) {
 		return
 	}
 
-	typeDb := db.NewTypeDbService(typeName, appId)
-	typeDb
-
+	//typeDb := db.NewTypeDbService(typeName, appId)
+	//typeDb
 }
 
 func (t *TypesController) InsertInTypeHandler(c *gin.Context) {

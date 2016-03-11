@@ -34,7 +34,7 @@ type dbService struct {
 
 func NewDbService(dbName, tableName string) DbService {
 	address := config.Get(config.KEY_REDIS_ADDR)
-	d := &dbService{address, dbName, tableName}
+	d := &dbService{address, dbName, tableName, r.Term{}}
 	d.query = d.GetTable()
 
 	return d
