@@ -23,6 +23,10 @@ func init() {
 	clientCache = make(map[string]*ApiClient)
 }
 
+func NewApiClientClean() *ApiClient {
+	return NewApiClientCached("")
+}
+
 func NewApiClientCached(appId string) *ApiClient {
 	if clientCache[appId] == nil {
 		clientCache[appId] = NewApiClient(appId)
@@ -75,6 +79,7 @@ func (c *ApiClient) SendRequest(url, method string, body interface{}, isArray bo
 
 	opts := models.Options{}
 
+	//todo: in app and not in app token
 	if c.Token != "" {
 		req.Header.Set("Authorization", "Bearer "+c.Token)
 	}
@@ -151,6 +156,15 @@ func (c *ApiClient) CreateApp(name string) (string, error) {
 	return res.(models.JSON)["id"].(string), nil
 }
 
+func (c *ApiClient) AppRegister(email, password string) error {
+	_, err := c.SendRequest("app/"+c.AppId+"/register", "POST", models.JSON{
+		"email":    email,
+		"password": password,
+	}, false)
+
+	return err
+}
+
 func (c *ApiClient) Register(email, password string) error {
 	_, err := c.SendRequest("register", "POST", models.JSON{
 		"email":    email,
@@ -158,6 +172,21 @@ func (c *ApiClient) Register(email, password string) error {
 	}, false)
 
 	return err
+}
+
+func (c *ApiClient) AppLogin(email, password string) (string, error) {
+	res, err := c.SendRequest("app/"+c.AppId+"/login", "POST", models.JSON{
+		"email":    email,
+		"password": password,
+	}, false)
+
+	if res == nil {
+		return "", err
+	}
+
+	c.Token = res.(models.JSON)["token"].(string)
+
+	return c.Token, nil
 }
 
 func (c *ApiClient) Login(email, password string) (string, error) {

@@ -127,19 +127,16 @@ func (a *AuthController) RegisterUserHandler(c *gin.Context) {
 func (a *AuthController) AppRegisterUserHandler(c *gin.Context) {
 	appId := c.Param("appId")
 	d := db.NewDbService(db.DATABASE_NAME, db.DATA_TABLE)
-
 	registerUser(c, d.Query().Get(appId), d.GetSession(), true)
 }
 
 func (a *AuthController) LoginUserHandler(c *gin.Context) {
 	d := db.NewDbService(db.DATABASE_NAME, db.USERS_TABLE)
-
 	loginUser(c, d.Query(), d.GetSession(), false)
 }
 
 func (a *AuthController) AppLoginUserHandler(c *gin.Context) {
 	appId := c.Param("appId")
 	d := db.NewDbService(db.DATABASE_NAME, db.DATA_TABLE)
-
 	loginUser(c, d.Query().Get(appId).Field(db.USERS_FIELD), d.GetSession(), true)
 }

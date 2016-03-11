@@ -29,7 +29,7 @@ func NewUserDbService(u, appId string) UserDbService {
 	return &userDbService{d, u, appId}
 }
 
-func NewTypeDbService(t, appId string) TypeDbService {
+func NewDataDbService(appId, t string) DataDbService {
 	d := NewDbService(DATABASE_NAME, DATA_TABLE)
-	return &typeDbService{d, appId, t}
+	return &dataDbService{d, t, appId}
 }

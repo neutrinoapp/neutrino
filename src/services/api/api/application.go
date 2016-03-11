@@ -104,6 +104,13 @@ func (a *ApplicationController) DeleteApplicationHandler(c *gin.Context) {
 		return
 	}
 
+	dataDb := db.NewDataDbService(appId, "")
+	err = dataDb.RemoveApp()
+	if err != nil {
+		log.Error(RestError(c, err))
+		return
+	}
+
 	c.Status(http.StatusOK)
 }
 

@@ -1,10 +1,7 @@
-default: get test
-
-test:
-	go test -v services/api/... services/realtime/...
+default: get integration
 
 integration:
-	go test -v test/integration/
+	go test -v ./test/
 
 get:
 	go get -t -v ./...

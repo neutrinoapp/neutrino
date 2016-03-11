@@ -10,8 +10,6 @@ import (
 	"github.com/neutrinoapp/neutrino/src/common/utils/webUtils"
 	"github.com/neutrinoapp/neutrino/src/services/api/db"
 	"github.com/neutrinoapp/neutrino/src/services/api/notification"
-
-	r "github.com/dancannon/gorethink"
 )
 
 type TypesController struct {
@@ -40,25 +38,13 @@ func (t *TypesController) GetTypesHandler(c *gin.Context) {
 func (t *TypesController) DeleteType(c *gin.Context) {
 	appId := c.Param("appId")
 	typeName := c.Param("typeName")
-	user := ApiUser(c).Name
 
-	//TODO: move this to the userdb service
-	d := db.NewUserDbService(user, appId)
-	_, err := d.AppTerm().Update(func(row r.Term) interface{} {
-		return models.JSON{
-			"types": row.Field("types").Filter(func(item r.Term) interface{} {
-				return item.Ne(typeName)
-			}),
-		}
-	}).RunWrite(d.GetSession())
-
+	dataDb := db.NewDataDbService(appId, typeName)
+	err := dataDb.RemoveType()
 	if err != nil {
 		log.Error(RestError(c, err))
 		return
 	}
-
-	//typeDb := db.NewTypeDbService(typeName, appId)
-	//typeDb
 }
 
 func (t *TypesController) InsertInTypeHandler(c *gin.Context) {
@@ -66,7 +52,7 @@ func (t *TypesController) InsertInTypeHandler(c *gin.Context) {
 	typeName := c.Param("typeName")
 	body := webUtils.GetBody(c)
 
-	d := db.NewTypeDbService(appId, typeName)
+	d := db.NewDataDbService(appId, typeName)
 	if body == nil {
 		body = make(map[string]interface{})
 	}
@@ -99,7 +85,7 @@ func (t *TypesController) GetTypeDataHandler(c *gin.Context) {
 	appId := c.Param("appId")
 	typeName := c.Param("typeName")
 
-	d := db.NewTypeDbService(appId, typeName)
+	d := db.NewDataDbService(appId, typeName)
 
 	opts := GetHeaderOptions(c)
 	log.Info("Filter: ", opts.Filter)
@@ -122,7 +108,7 @@ func (t *TypesController) GetTypeItemById(c *gin.Context) {
 	typeName := c.Param("typeName")
 	itemId := c.Param("itemId")
 
-	d := db.NewTypeDbService(appId, typeName)
+	d := db.NewDataDbService(appId, typeName)
 
 	item, err := d.GetDataId(itemId)
 	if err != nil {
@@ -138,11 +124,11 @@ func (t *TypesController) UpdateTypeItemById(c *gin.Context) {
 	typeName := c.Param("typeName")
 	itemId := c.Param("itemId")
 
-	d := db.NewTypeDbService(appId, typeName)
+	d := db.NewDataDbService(appId, typeName)
 	body := webUtils.GetBody(c)
-	body["id"] = itemId
+	body[db.ID_FIELD] = itemId
 
-	err := d.ReplaceId(itemId, body)
+	err := d.ReplaceId(body)
 	if err != nil {
 		log.Error(RestError(c, err))
 		return
@@ -169,7 +155,7 @@ func (t *TypesController) DeleteTypeItemById(c *gin.Context) {
 	typeName := c.Param("typeName")
 	itemId := c.Param("itemId")
 
-	d := db.NewTypeDbService(appId, typeName)
+	d := db.NewDataDbService(appId, typeName)
 
 	err := d.RemoveId(itemId)
 	if err != nil {
