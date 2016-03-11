@@ -112,7 +112,7 @@ func (p WsMessageProcessor) HandleSubscribe(im interceptorMessage, msg *turnpike
 	opts.ClientId = msg.Request
 	opts.TopicId = uniqueTopicId
 
-	d := db.NewTypeDbService(opts.AppId, opts.Type)
+	d := db.NewDataDbService(opts.AppId, opts.Type)
 
 	newValuesChan := make(chan map[string]interface{})
 	err = d.Changes(opts.Filter, newValuesChan)
@@ -133,8 +133,14 @@ func (p WsMessageProcessor) HandleSubscribe(im interceptorMessage, msg *turnpike
 			case leaveVal := <-leaveChan:
 				sessionId := leaveVal.(turnpike.ID)
 				if im.sess.Id == sessionId {
-					close(newValuesChan)
-					close(leaveChan)
+					//TODO: newValuesChan seems to be automatically closed by the rethinkdb driver
+					//investigate whether we need to do something else
+
+					_, leaveChanOpened := <-leaveChan
+					if leaveChanOpened {
+						close(leaveChan)
+					}
+
 					p.broadcaster.Remove(leaveChan)
 					return
 				}

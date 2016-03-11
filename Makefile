@@ -1,13 +1,13 @@
-default: get test
-
-test:
-	go test -v services/api/... services/realtime/...
+default: get integration
 
 integration:
-	go test -v test/integration/
+	go test -v ./src/tests/
+
+prep:
+	go run scripts/prepareRethinkDb/main.go
 
 get:
-	go get -t -v ./...
+	go get -t -v -d ./src/...
 
 killapi:
 	-fuser -k 5000/tcp
