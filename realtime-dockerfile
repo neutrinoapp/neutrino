@@ -1,0 +1,7 @@
+FROM busybox
+
+WORKDIR /app
+
+COPY build/realtime /app/
+
+ENTRYPOINT ["./realtime"]

@@ -21,7 +21,7 @@ killrealtime:
 realtime: killrealtime
 	go run src/services/realtime/main.go
 
-build:
+build-services:
 	bash scripts/build.sh
 
 dev:
