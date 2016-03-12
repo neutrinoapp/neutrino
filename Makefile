@@ -21,6 +21,14 @@ killrealtime:
 realtime: killrealtime
 	go run src/services/realtime/main.go
 
+build-docker-api:
+	docker build -f api-dockerfile -t api-service .
+
+build-docker-realtime:
+	docker build -f realtime-dockerfile -t realtime-service .
+
+build-docker: build-services build-docker-api build-docker-realtime
+
 build-services:
 	bash scripts/build.sh
 
