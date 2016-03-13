@@ -1,30 +1,24 @@
 package server
 
-import (
-	"net/http"
+import "github.com/neutrinoapp/neutrino/src/common/client"
 
-	"github.com/neutrinoapp/neutrino/src/common/client"
-	"github.com/neutrinoapp/neutrino/src/common/config"
-)
-
-func Initialize() (*http.Server, error) {
+func Initialize() error {
 	redisClient := client.GetNewRedisClient()
 	clientMessageProcessor := NewClientMessageProcessor()
-	natsClient := client.NewNatsClient(config.Get(config.KEY_QUEUE_ADDR))
 
-	_, server, wsClient, interceptor, err := NewWebSocketServer()
+	_, wsClient, interceptor, err := NewWebSocketServer()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	natsProcessor := NatsMessageProcessor{natsClient, wsClient}
+	natsProcessor := JobsMessageProcessor{redisClient, wsClient}
 	natsProcessor.Process()
 
-	wsProcessor := NewWsMessageProcessor(interceptor, redisClient, clientMessageProcessor, wsClient, natsClient)
+	wsProcessor := NewWsMessageProcessor(interceptor, redisClient, clientMessageProcessor, wsClient)
 	wsProcessor.Process()
 
 	rpcProcessor := RpcMessageProcessor{wsClient, wsProcessor}
 	rpcProcessor.Process()
 
-	return server, nil
+	return nil
 }

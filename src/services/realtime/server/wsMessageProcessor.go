@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/neutrinoapp/neutrino/src/common"
-	"github.com/neutrinoapp/neutrino/src/common/client"
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/messaging"
 	"github.com/neutrinoapp/neutrino/src/common/models"
@@ -20,7 +19,6 @@ type WsMessageProcessor struct {
 	RedisClient     *redis.Client
 	ClientProcessor messaging.MessageProcessor
 	WsClient        *turnpike.Client
-	NatsClient      *client.NatsClient
 	broadcaster     *common.Broadcaster
 }
 
@@ -29,10 +27,9 @@ func NewWsMessageProcessor(
 	redisClient *redis.Client,
 	clientMessageProcessor messaging.MessageProcessor,
 	wsClient *turnpike.Client,
-	natsClient *client.NatsClient,
 ) WsMessageProcessor {
 	broadcaster := common.NewBroadcaster()
-	p := WsMessageProcessor{interceptor, redisClient, clientMessageProcessor, wsClient, natsClient, broadcaster}
+	p := WsMessageProcessor{interceptor, redisClient, clientMessageProcessor, wsClient, broadcaster}
 	return p
 }
 

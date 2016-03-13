@@ -8,7 +8,7 @@ import (
 	"gopkg.in/jcelliott/turnpike.v2"
 )
 
-func NewWebSocketServer() (*turnpike.WebsocketServer, *http.Server, *turnpike.Client, *wsInterceptor, error) {
+func NewWebSocketServer() (*turnpike.WebsocketServer, *turnpike.Client, *wsInterceptor, error) {
 	interceptor := NewWsInterceptor()
 
 	r := turnpike.Realm{}
@@ -18,7 +18,7 @@ func NewWebSocketServer() (*turnpike.WebsocketServer, *http.Server, *turnpike.Cl
 	realms[config.CONST_DEFAULT_REALM] = r
 	wsServer, err := turnpike.NewWebsocketServer(realms)
 	if err != nil {
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	wsServer.Upgrader.CheckOrigin = func(r *http.Request) bool {
@@ -29,13 +29,13 @@ func NewWebSocketServer() (*turnpike.WebsocketServer, *http.Server, *turnpike.Cl
 	c, err := wsServer.GetLocalClient(config.CONST_DEFAULT_REALM, nil)
 	if err != nil {
 		log.Error(err)
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, err
 	}
 
-	server := &http.Server{
-		Handler: wsServer,
-		Addr:    config.Get(config.KEY_REALTIME_PORT),
-	}
+	http.Handle("/", wsServer)
+	http.HandleFunc("/_status", func(w http.ResponseWriter, r *http.Request) {
+		//we are fine
+	})
 
-	return wsServer, server, c, interceptor, nil
+	return wsServer, c, interceptor, nil
 }
