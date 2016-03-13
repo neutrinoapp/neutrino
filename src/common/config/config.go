@@ -1,6 +1,8 @@
 package config
 
 import (
+	"os"
+
 	"github.com/spf13/viper"
 )
 
@@ -23,17 +25,27 @@ const (
 var c *viper.Viper
 
 func setDefaults(v *viper.Viper) {
-	v.SetDefault(KEY_RETHINK_ADDR, "localhost:28015")
-	v.SetDefault(KEY_REDIS_ADDR, "localhost:6379")
-	v.SetDefault(KEY_QUEUE_ADDR, "nats://localhost:4222")
+	if os.Getenv("DEBUG") != "" {
+		v.SetDefault(KEY_RETHINK_ADDR, "localhost:28015")
+		v.SetDefault(KEY_REDIS_ADDR, "localhost:6379")
+		v.SetDefault(KEY_QUEUE_ADDR, "nats://localhost:4222")
 
-	v.SetDefault(KEY_API_PORT, ":5000")
-	v.SetDefault(KEY_API_ADDR, "http://localhost"+v.GetString(KEY_API_PORT)+"/v1/")
+		v.SetDefault(KEY_API_PORT, ":5000")
+		v.SetDefault(KEY_API_ADDR, "http://localhost"+v.GetString(KEY_API_PORT)+"/v1/")
 
-	v.SetDefault(KEY_REALTIME_PORT, ":6000")
-	v.SetDefault(KEY_REALTIME_ADDR, "ws://localhost"+v.GetString(KEY_REALTIME_PORT))
+		v.SetDefault(KEY_REALTIME_PORT, ":6000")
+		v.SetDefault(KEY_REALTIME_ADDR, "ws://localhost"+v.GetString(KEY_REALTIME_PORT))
 
-	v.SetDefault(CONST_REALTIME_JOBS_SUBJ, "realtime-jobs")
+		v.SetDefault(CONST_REALTIME_JOBS_SUBJ, "realtime-jobs")
+	} else {
+		//TODO: rework the whole config to use BindEnv
+		//v.BindEnv()
+		//TODO: make the whole thing work with dns instead of env variable
+
+		v.SetDefault(KEY_RETHINK_ADDR, os.Getenv("RETHINKDB_SERVICE_HOST")+os.Getenv("RETHINKDB_SERVICE_PORT"))
+		v.SetDefault(KEY_REDIS_ADDR, os.Getenv("REDIS_SERVICE_HOST")+os.Getenv("REDIS_SERVICE_PORT"))
+		v.SetDefault(KEY_QUEUE_ADDR, "nats://"+os.Getenv("NATS_SERVICE_HOST")+os.Getenv("NATS_SERVICE_PORT"))
+	}
 }
 
 func load() *viper.Viper {
@@ -48,10 +60,6 @@ func load() *viper.Viper {
 
 func init() {
 	c = load()
-}
-
-func Raw() *viper.Viper {
-	return c
 }
 
 func Get(k string) string {

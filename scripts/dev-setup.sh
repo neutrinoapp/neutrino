@@ -32,7 +32,7 @@ inspectNatsExitCode=$?
 if [ $inspectNatsExitCode != 0 ]; then
     echo "Creating new nats container"
     docker pull apcera/gnatsd:latest
-    docker run --name nats -p 4222:4222 -p 8333:8333 -d apcera/gnatsd:latest -m 8333
+    docker run --name nats -p 4222:4222 -p 8222:8222 -d nats:latest
 else
     echo "Starting nats"
     docker start nats

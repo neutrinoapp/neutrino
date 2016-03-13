@@ -13,19 +13,19 @@ killapi:
 	-fuser -k 5000/tcp
 
 api: killapi
-	go run src/services/api/main.go
+	DEBUG=true go run src/services/api/main.go
 
 killrealtime:
 	-fuser -k 6000/tcp
 
 realtime: killrealtime
-	go run src/services/realtime/main.go
+	DEBUG=true go run src/services/realtime/main.go
 
 build-docker-api:
-	docker build -f api-dockerfile -t api-service .
+	docker build -f api-dockerfile -t gcr.io/neutrino-1073/api-service:v1 .
 
 build-docker-realtime:
-	docker build -f realtime-dockerfile -t realtime-service .
+	docker build -f realtime-dockerfile -t gcr.io/neutrino-1073/realtime-service:v1 .
 
 build-docker: build-services build-docker-api build-docker-realtime
 
