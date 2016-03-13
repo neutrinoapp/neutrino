@@ -25,7 +25,7 @@ const (
 var c *viper.Viper
 
 func setDefaults(v *viper.Viper) {
-	if os.Getenv("DEBUG") != "" {
+	if os.Getenv("DEBUG_N") != "" {
 		v.SetDefault(KEY_RETHINK_ADDR, "localhost:28015")
 		v.SetDefault(KEY_REDIS_ADDR, "localhost:6379")
 		v.SetDefault(KEY_QUEUE_ADDR, "nats://localhost:4222")
@@ -42,9 +42,9 @@ func setDefaults(v *viper.Viper) {
 		//v.BindEnv()
 		//TODO: make the whole thing work with dns instead of env variable
 
-		v.SetDefault(KEY_RETHINK_ADDR, os.Getenv("RETHINKDB_SERVICE_HOST")+os.Getenv("RETHINKDB_SERVICE_PORT"))
-		v.SetDefault(KEY_REDIS_ADDR, os.Getenv("REDIS_SERVICE_HOST")+os.Getenv("REDIS_SERVICE_PORT"))
-		v.SetDefault(KEY_QUEUE_ADDR, "nats://"+os.Getenv("NATS_SERVICE_HOST")+os.Getenv("NATS_SERVICE_PORT"))
+		v.SetDefault(KEY_RETHINK_ADDR, os.Getenv("RETHINKDB_SERVICE_HOST")+":"+os.Getenv("RETHINKDB_SERVICE_PORT"))
+		v.SetDefault(KEY_REDIS_ADDR, os.Getenv("REDIS_SERVICE_HOST")+":"+os.Getenv("REDIS_SERVICE_PORT"))
+		v.SetDefault(KEY_QUEUE_ADDR, "nats://"+os.Getenv("NATS_SERVICE_HOST")+":"+os.Getenv("NATS_SERVICE_PORT"))
 	}
 }
 

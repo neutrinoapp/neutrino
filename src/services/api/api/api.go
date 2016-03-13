@@ -18,6 +18,10 @@ func initRoutes(e *gin.Engine) {
 	appController := &ApplicationController{}
 	typesController := &TypesController{}
 
+	e.GET("/_status", func(c *gin.Context) {
+		c.Status(http.StatusOK)
+	})
+
 	v1 := e.Group("/v1", processHeadersMiddleware())
 	{
 		v1.POST("/login", authController.LoginUserHandler)

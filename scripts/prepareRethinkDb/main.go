@@ -16,7 +16,7 @@ func main() {
 	fmt.Println("Preparing rethinkdb")
 
 	if connectErr != nil {
-		panic(connectErr)
+		fmt.Println(connectErr)
 	}
 
 	dbname := db.DATABASE_NAME
@@ -24,19 +24,19 @@ func main() {
 	fmt.Println("Creating database " + dbname)
 	_, dbErr := r.DBCreate(dbname).RunWrite(s)
 	if dbErr != nil {
-		panic(dbErr)
+		fmt.Println(dbErr)
 	}
 
 	fmt.Println("Creating table " + db.USERS_TABLE)
 	_, usersTableError := r.DB(dbname).TableCreate(db.USERS_TABLE).RunWrite(s)
 	if usersTableError != nil {
-		panic(usersTableError)
+		fmt.Println(usersTableError)
 	}
 
 	fmt.Println("Creating table " + db.DATA_TABLE)
 	_, dataTableError := r.DB(dbname).TableCreate(db.DATA_TABLE).RunWrite(s)
 	if dataTableError != nil {
-		panic(dataTableError)
+		fmt.Println(dataTableError)
 	}
 
 	fmt.Println("Done preparing rethinkdb")
