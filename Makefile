@@ -4,7 +4,7 @@ integration:
 	go test -v ./src/tests/
 
 prep:
-	go run scripts/prepareRethinkDb/main.go
+	DEBUG_N=true go run scripts/prepareRethinkDb/main.go
 
 get:
 	go get -t -v -d ./src/...

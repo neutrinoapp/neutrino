@@ -114,7 +114,7 @@ func (c *ApiClient) SendRequest(url, method string, body interface{}, isArray bo
 
 	if res.StatusCode != http.StatusOK {
 		log.Info(res, err)
-		return res, err
+		return nil, err
 	}
 
 	defer res.Body.Close()
