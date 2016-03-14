@@ -37,7 +37,8 @@ func (p JobsMessageProcessor) Process() {
 				return
 			}
 
-			publishErr := p.WsClient.Publish(m.Topic, []interface{}{msg.Payload}, nil)
+			m.Origin = messaging.ORIGIN_API
+			publishErr := p.WsClient.Publish(m.Topic, []interface{}{m}, nil)
 
 			if publishErr != nil {
 				log.Error(publishErr)
