@@ -102,6 +102,16 @@ func (c *ApiClient) SendRequest(url, method string, body interface{}, isArray bo
 
 	client := http.Client{}
 	res, err := client.Do(req)
+	if err != nil {
+		log.Info(err)
+		return nil, err
+	}
+
+	if res == nil {
+		log.Error("Unknown error")
+		return nil, nil
+	}
+
 	if res.StatusCode != http.StatusOK {
 		log.Info(res, err)
 		return res, err
