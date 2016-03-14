@@ -19,7 +19,6 @@ func (p *clientMessageProcessor) Process(m string) (interface{}, error) {
 	}
 
 	if msg.Origin == messaging.ORIGIN_API {
-		log.Info("Skipping processing message from API", m)
 		return nil, nil
 	}
 
@@ -41,7 +40,6 @@ func (p *clientMessageProcessor) Process(m string) (interface{}, error) {
 	}
 
 	resp, err := opProcessor(msg, c)
-	log.Info("Api response: ", resp, err)
 	return resp, err
 }
 

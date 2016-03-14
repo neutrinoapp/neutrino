@@ -9,7 +9,6 @@ import (
 	"github.com/neutrinoapp/neutrino/src/common/messaging"
 	"github.com/neutrinoapp/neutrino/src/common/models"
 	"github.com/neutrinoapp/neutrino/src/services/api/db"
-	"github.com/neutrinoapp/neutrino/src/services/api/notification"
 	"gopkg.in/jcelliott/turnpike.v2"
 	"gopkg.in/redis.v3"
 )
@@ -93,21 +92,17 @@ func (p WsMessageProcessor) HandleSubscribe(im interceptorMessage, msg *turnpike
 		return
 	}
 
-	if !opts.IsSpecial() {
-		return
-	}
-
 	//remove the last part from 8139ed1ec39a467b96b0250dcf520749.todos.create.2882717310567
 	topic := fmt.Sprintf("%v", msg.Topic)
 	topicArguments := strings.Split(topic, ".")
-	uniqueTopicId := topicArguments[len(topicArguments)-1]
-	//clientId := strconv.FormatUint(uint64(msg.Request), 10)
+	//uniqueTopicId := topicArguments[len(topicArguments)-1]
 
 	baseTopic := messaging.BuildTopicArbitrary(topicArguments[:len(topicArguments)-1]...)
-	opts.BaseTopic = baseTopic
+	//opts.BaseTopic = baseTopic
 	opts.Topic = topic
-	opts.ClientId = msg.Request
-	opts.TopicId = uniqueTopicId
+	opts.BaseTopic = baseTopic
+	//opts.ClientId = msg.Request
+	//opts.TopicId = uniqueTopicId
 
 	d := db.NewDataDbService(opts.AppId, opts.Type)
 
@@ -126,7 +121,7 @@ func (p WsMessageProcessor) HandleSubscribe(im interceptorMessage, msg *turnpike
 		for {
 			select {
 			case val := <-newValuesChan:
-				p.processDatabaseUpdate(val, messageBuilder, opts, topic)
+				p.processDatabaseUpdate(val, messageBuilder, opts)
 			case leaveVal := <-leaveChan:
 				sessionId := leaveVal.(turnpike.ID)
 				if im.sess.Id == sessionId {
@@ -150,7 +145,6 @@ func (p WsMessageProcessor) processDatabaseUpdate(
 	val map[string]interface{},
 	messageBuilder messaging.MessageBuilder,
 	opts models.SubscribeOptions,
-	topic string,
 ) {
 
 	pld := models.JSON{}
@@ -165,11 +159,11 @@ func (p WsMessageProcessor) processDatabaseUpdate(
 		dbOp = messaging.OP_UPDATE
 	}
 
+	//only emit messages with the same operation as the subscriber
 	if dbOp != opts.Operation {
 		return
 	}
 
-	//only emit messages with the same operation as the subscriber
 	var dbVal map[string]interface{}
 	if dbOp == messaging.OP_CREATE {
 		dbVal = newVal.(map[string]interface{})
@@ -179,21 +173,27 @@ func (p WsMessageProcessor) processDatabaseUpdate(
 		dbVal = newVal.(map[string]interface{})
 	}
 
+	log.Info("new_val:", newVal, "old_val:", oldVal, "db_val:", dbVal, "dbOp:", dbOp, "op:", opts.Operation)
+
 	pld = pld.FromMap(dbVal)
-	notify := false
 	msg := messageBuilder.Build(
 		dbOp,
 		messaging.ORIGIN_API,
 		pld,
-		models.Options{
-			Notify: &notify,
-		},
+		models.Options{},
 		opts.Type,
 		opts.AppId,
 		"",
 	)
-	msg.Topic = topic
+	msg.Topic = opts.Topic
 
-	log.Info("Publishing filtered data: ", val, opts.Topic, msg)
-	notification.Notify(msg)
+	log.Info("Publishing realtime data: ", val, opts.Topic, opts.BaseTopic, msg)
+
+	publishArgs := []interface{}{msg}
+	if opts.Topic != opts.BaseTopic {
+		p.WsClient.Publish(opts.BaseTopic, publishArgs, nil)
+	}
+
+	p.WsClient.Publish(opts.Topic, publishArgs, nil)
+
 }

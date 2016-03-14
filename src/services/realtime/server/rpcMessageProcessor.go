@@ -88,22 +88,6 @@ func (p RpcMessageProcessor) handleDataCreate(args []interface{}, kwargs map[str
 	}
 
 	return &turnpike.CallResult{Args: []interface{}{resp["id"]}}
-
-	//data, err := p.WsProcessor.HandlePublish(&turnpike.Publish{
-	//	Topic:     turnpike.URI(m.Topic),
-	//	Arguments: args,
-	//})
-	//
-	//if err != nil {
-	//	log.Error(err)
-	//}
-	//
-	//if resp, ok := data.(map[string]interface{}); ok {
-	//	log.Info(resp)
-	//	return &turnpike.CallResult{Args: []interface{}{resp["id"]}}
-	//}
-
-	return &turnpike.CallResult{Args: []interface{}{"An error has occured."}}
 }
 
 func (p RpcMessageProcessor) handleDataRemove(args []interface{}, kwargs map[string]interface{}) *turnpike.CallResult {

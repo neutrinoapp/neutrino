@@ -14,7 +14,7 @@ type DataDbService interface {
 	InsertData(v map[string]interface{}) (string, error)
 	GetData(filter interface{}) ([]interface{}, error)
 	GetDataId(filter interface{}) (interface{}, error)
-	ReplaceId(data map[string]interface{}) error
+	UpdateId(data map[string]interface{}) error
 	RemoveId(id interface{}) error
 	RemoveType() error
 	RemoveApp() error
@@ -85,14 +85,18 @@ func (t *dataDbService) GetDataId(id interface{}) (data interface{}, err error) 
 	return
 }
 
-func (t *dataDbService) ReplaceId(data map[string]interface{}) (err error) {
+func (t *dataDbService) UpdateId(data map[string]interface{}) (err error) {
 	id := data[ID_FIELD]
 	_, err = t.Query().Get(t.appId).Update(func(app r.Term) interface{} {
 		return models.JSON{
 			TYPES_FIELD: models.JSON{
-				t.t: app.Field(TYPES_FIELD).Field(t.t).Filter(func(row r.Term) interface{} {
-					return row.Field(ID_FIELD).Ne(id)
-				}).Append(data),
+				t.t: app.Field(TYPES_FIELD).Field(t.t).Map(func(row r.Term) interface{} {
+					return r.Branch(
+						row.Field(ID_FIELD).Eq(id),
+						row.Merge(data),
+						row,
+					)
+				}),
 			},
 		}
 	}).RunWrite(t.GetSession())

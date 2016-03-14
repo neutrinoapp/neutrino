@@ -11,9 +11,6 @@ func Initialize() error {
 		return err
 	}
 
-	natsProcessor := JobsMessageProcessor{redisClient, wsClient}
-	natsProcessor.Process()
-
 	wsProcessor := NewWsMessageProcessor(interceptor, redisClient, clientMessageProcessor, wsClient)
 	wsProcessor.Process()
 
