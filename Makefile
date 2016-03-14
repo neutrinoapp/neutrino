@@ -1,7 +1,7 @@
 default: get integration
 
 integration:
-	go test -v ./src/tests/
+	DEBUG_N=true go test -v ./src/tests/
 
 prep:
 	DEBUG_N=true go run scripts/prepareRethinkDb/main.go
