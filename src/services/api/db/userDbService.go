@@ -26,7 +26,7 @@ func (u *userDbService) AppTerm() r.Term {
 	return u.Query().
 		Get(u.user).
 		Field(APPS_FIELD).
-		Filter(models.JSON{
+		Filter(models.JSON{USERS_TABLE
 			ID_FIELD: u.appId,
 		}).
 		Nth(0)

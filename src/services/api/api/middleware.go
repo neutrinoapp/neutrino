@@ -16,7 +16,7 @@ const (
 )
 
 type apiUser struct {
-	Name, Key     string
+	Email, Key    string
 	Master, InApp bool
 }
 
@@ -85,15 +85,15 @@ func authorizeMiddleware(stop bool) gin.HandlerFunc {
 			if authType == "bearer" {
 				token, err = authWithToken(c, authValue)
 				if err == nil {
-					user.Name = token.Claims["user"].(string)
+					user.Email = token.Claims["user"].(string)
 					user.InApp = token.Claims["inApp"].(bool)
 					user.Master = !user.InApp //we can use the token instead of a master key
 					user.Key = authValue
 				}
 			} else if authType == "masterkey" {
-				userName, err := authWithMaster(c, authValue)
+				email, err := authWithMaster(c, authValue)
 				if err == nil {
-					user.Name = userName
+					user.Email = email
 					user.InApp = false
 					user.Master = true
 					user.Key = authValue

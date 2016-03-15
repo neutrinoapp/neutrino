@@ -21,6 +21,11 @@ type UserModel struct {
 }
 
 type AuthController struct {
+	BaseController
+}
+
+func NewAuthController() *AuthController {
+	return &AuthController{NewBaseController()}
 }
 
 //TODO: refactor

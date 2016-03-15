@@ -14,9 +14,9 @@ func initMiddleware(e *gin.Engine) {
 }
 
 func initRoutes(e *gin.Engine) {
-	authController := &AuthController{}
-	appController := &ApplicationController{}
-	typesController := &TypesController{}
+	authController := NewAuthController()
+	appController := NewApplicationController()
+	typesController := NewTypesController()
 
 	e.GET("/_status", func(c *gin.Context) {
 		c.Status(http.StatusOK)

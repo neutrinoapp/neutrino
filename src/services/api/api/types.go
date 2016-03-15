@@ -10,6 +10,11 @@ import (
 )
 
 type TypesController struct {
+	BaseController
+}
+
+func NewTypesController() *TypesController {
+	return &TypesController{NewBaseController()}
 }
 
 func (t *TypesController) GetTypesHandler(c *gin.Context) {
