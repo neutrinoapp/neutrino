@@ -32,16 +32,16 @@ func registerUser(c *gin.Context, t r.Term, s *r.Session, isApp bool) {
 		return
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u["password"].(string)), 10)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u[db.PASSWORD_FIELD].(string)), 10)
 	if err != nil {
 		log.Error(RestError(c, err))
 		return
 	}
 
 	user := models.JSON{
-		"id":        u["email"].(string),
-		"password":  hashedPassword,
-		"createdAt": time.Now(),
+		db.EMAIL_FIELD:         u[db.EMAIL_FIELD],
+		db.PASSWORD_FIELD:      hashedPassword,
+		db.REGISTERED_AT_FIELD: time.Now(),
 	}
 
 	var query r.Term
@@ -52,7 +52,7 @@ func registerUser(c *gin.Context, t r.Term, s *r.Session, isApp bool) {
 			}
 		})
 	} else {
-		user["apps"] = make([]models.JSON, 0)
+		user[db.APPS_FIELD] = make([]models.JSON, 0)
 		query = t.Insert(user)
 	}
 	_, err = query.RunWrite(s)
@@ -81,7 +81,7 @@ func loginUser(c *gin.Context, t r.Term, s *r.Session, isApp bool) {
 			db.ID_FIELD: u.Email,
 		}).Run(s)
 	} else {
-		cu, err = t.Get(u.Email).Run(s)
+		cu, err = t.GetAllByIndex(db.EMAIL_INDEX, u.Email).Run(s)
 	}
 
 	if err != nil {
@@ -96,7 +96,7 @@ func loginUser(c *gin.Context, t r.Term, s *r.Session, isApp bool) {
 		return
 	}
 
-	err = bcrypt.CompareHashAndPassword(existingUser["password"].([]byte), []byte(u.Password))
+	err = bcrypt.CompareHashAndPassword(existingUser[db.PASSWORD_FIELD].([]byte), []byte(u.Password))
 	if err != nil {
 		log.Error(RestError(c, err))
 		return

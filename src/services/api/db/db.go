@@ -6,13 +6,18 @@ import (
 )
 
 const (
-	DATABASE_NAME = "neutrino"
-	USERS_TABLE   = "users"
-	DATA_TABLE    = "data"
-	TYPES_FIELD   = "types"
-	APPS_FIELD    = "apps"
-	USERS_FIELD   = "users"
-	ID_FIELD      = "id"
+	DATABASE_NAME       = "neutrino"
+	USERS_TABLE         = "users"
+	DATA_TABLE          = "data"
+	TYPES_FIELD         = "types"
+	APPS_FIELD          = "apps"
+	USERS_FIELD         = "users"
+	ID_FIELD            = "id"
+	PASSWORD_FIELD      = "password"
+	EMAIL_FIELD         = "email"
+	REGISTERED_AT_FIELD = "registeredAt"
+
+	EMAIL_INDEX = "email"
 )
 
 //TODO: indexes
