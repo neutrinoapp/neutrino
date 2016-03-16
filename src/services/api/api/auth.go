@@ -47,7 +47,7 @@ func (a *AuthController) registerUser(c *gin.Context, isApp bool) {
 	}
 
 	if isApp {
-		user[db.APP_ID_FIELD] = c.Param(db.APP_ID_FIELD)
+		user[db.APP_ID_FIELD] = c.Param(APP_ID_PARAM)
 	}
 
 	err = a.DbService.CreateUser(user, isApp)
@@ -66,7 +66,7 @@ func (a *AuthController) loginUser(c *gin.Context, isApp bool) {
 
 	appId := ""
 	if isApp {
-		appId = c.Param(db.APP_ID_FIELD)
+		appId = c.Param(APP_ID_PARAM)
 	}
 
 	user, err := a.DbService.GetUser(u.Email, isApp, appId)

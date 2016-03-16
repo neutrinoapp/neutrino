@@ -33,8 +33,8 @@ func main() {
 		fmt.Println(usersTableError)
 	}
 
-	fmt.Println("Ensuring indexes for " + db.USERS_TABLE)
-	_, createEmailIndexError := r.DB(dbname).Table(db.USERS_TABLE).IndexCreate(db.EMAIL_INDEX).RunWrite(s)
+	fmt.Println("Creating indexes for " + db.USERS_TABLE)
+	_, createEmailIndexError := r.DB(dbname).Table(db.USERS_TABLE).IndexCreate(db.USERS_TABLE_EMAIL_INDEX).RunWrite(s)
 	if createEmailIndexError != nil {
 		fmt.Println(createEmailIndexError)
 	}
@@ -46,7 +46,10 @@ func main() {
 	}
 
 	fmt.Println("Creating index for table " + db.DATA_TABLE)
-	_, createDataEmailAppidIndexError := r.DB(dbname).Table(db.DATA_TABLE).IndexCreate(db.ITEMS_FOR_APP_INDEX).RunWrite(s)
+	_, createDataEmailAppidIndexError := r.DB(dbname).Table(db.DATA_TABLE).
+		IndexCreateFunc(db.DATA_TABLE_APPIDTYPE_INDEX, func(row r.Term) interface{} {
+			return []interface{}{row.Field(db.APP_ID_FIELD), row.Field(db.TYPE_FIELD)}
+		}).RunWrite(s)
 	if createDataEmailAppidIndexError != nil {
 		fmt.Println(createDataEmailAppidIndexError)
 	}
@@ -64,7 +67,10 @@ func main() {
 	}
 
 	fmt.Println("Creating index for table " + db.APPS_USERS_TABLE)
-	_, createAppsUsersTableIndexError := r.DB(dbname).Table(db.APPS_USERS_TABLE).IndexCreate(db.EMAIL_APPID_USER_INDEX).RunWrite(s)
+	_, createAppsUsersTableIndexError := r.DB(dbname).Table(db.APPS_USERS_TABLE).
+		IndexCreateFunc(db.APPS_USERS_TABLE_EMAILAPPID_INDEX, func(row r.Term) interface{} {
+			return []interface{}{row.Field(db.EMAIL_FIELD), row.Field(db.APP_ID_FIELD)}
+		}).RunWrite(s)
 	if createAppsUsersTableIndexError != nil {
 		fmt.Println(createAppsUsersTableIndexError)
 	}

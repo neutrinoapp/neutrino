@@ -23,9 +23,9 @@ const (
 	OWNER_FIELD         = "owner"
 	MASTER_KEY_FIELD    = "masterKey"
 
-	EMAIL_INDEX            = "email"
-	ITEMS_FOR_APP_INDEX    = "items_for_app_by_type"
-	EMAIL_APPID_USER_INDEX = "email_appId_user"
+	USERS_TABLE_EMAIL_INDEX = "email"
+	DATA_TABLE_APPIDTYPE_INDEX = "items_for_app_by_type"
+	APPS_USERS_TABLE_EMAILAPPID_INDEX = "email_appId_user"
 )
 
 func NewDbService() DbService {

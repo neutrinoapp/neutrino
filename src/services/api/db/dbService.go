@@ -45,7 +45,7 @@ func (d *dbService) setId(item models.JSON) string {
 }
 
 func (d *dbService) getUser(email string) r.Term {
-	return d.Db().Table(USERS_TABLE).GetAllByIndex(EMAIL_INDEX, email).Nth(0)
+	return d.Db().Table(USERS_TABLE).GetAllByIndex(USERS_TABLE_EMAIL_INDEX, email).Nth(0)
 }
 
 func (d *dbService) Db() r.Term {
@@ -129,7 +129,7 @@ func (d *dbService) GetApp(appId string) (app models.JSON, err error) {
 func (d *dbService) CreateItem(appId, t string, data models.JSON) (id string, err error) {
 	id = d.setId(data)
 	data[APP_ID_FIELD] = appId
-	data[TYPES_FIELD] = t
+	data[TYPE_FIELD] = t
 
 	err = d.Exec(
 		d.Db().Table(DATA_TABLE).Insert(data),
@@ -139,7 +139,7 @@ func (d *dbService) CreateItem(appId, t string, data models.JSON) (id string, er
 
 func (d *dbService) GetItems(appId, t string, filter interface{}) (data []models.JSON, err error) {
 	c, err := d.Run(
-		d.Db().Table(DATA_TABLE).GetAllByIndex(ITEMS_FOR_APP_INDEX, appId, t).Filter(filter),
+		d.Db().Table(DATA_TABLE).GetAllByIndex(DATA_TABLE_APPIDTYPE_INDEX, []interface{}{appId, t}).Filter(filter),
 	)
 	if err != nil {
 		return
@@ -177,7 +177,7 @@ func (d *dbService) DeleteItemById(id string) (err error) {
 
 func (d *dbService) DeleteAllItems(appId, t string) (err error) {
 	err = d.Exec(
-		d.Db().Table(DATA_TABLE).GetAllByIndex(ITEMS_FOR_APP_INDEX, appId, t).Delete(),
+		d.Db().Table(DATA_TABLE).GetAllByIndex(DATA_TABLE_APPIDTYPE_INDEX, []interface{}{appId, t}).Delete(),
 	)
 	return
 }
@@ -198,11 +198,11 @@ func (d *dbService) GetUser(email string, isApp bool, appId string) (user models
 	var c *r.Cursor
 	if isApp {
 		c, err = d.Run(
-			d.Db().Table(APPS_USERS_TABLE).GetAllByIndex(EMAIL_APPID_USER_INDEX, appId, email).Nth(0),
+			d.Db().Table(APPS_USERS_TABLE).GetAllByIndex(APPS_USERS_TABLE_EMAILAPPID_INDEX, []interface{}{email, appId}).Nth(0),
 		)
 	} else {
 		c, err = d.Run(
-			d.Db().Table(USERS_TABLE).GetAllByIndex(EMAIL_INDEX, email).Nth(0),
+			d.Db().Table(USERS_TABLE).GetAllByIndex(USERS_TABLE_EMAIL_INDEX, email).Nth(0),
 		)
 	}
 

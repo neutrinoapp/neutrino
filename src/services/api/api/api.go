@@ -7,6 +7,10 @@ import (
 	"github.com/neutrinoapp/neutrino/src/common/models"
 )
 
+const (
+	APP_ID_PARAM = "appId"
+)
+
 var initialized bool
 
 func initMiddleware(e *gin.Engine) {
