@@ -1,12 +1,14 @@
 package webUtils
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/neutrinoapp/neutrino/src/common/models"
 )
 
-func GetBody(c *gin.Context) map[string]interface{} {
-	var res map[string]interface{}
+func GetBody(c *gin.Context) models.JSON {
+	var res models.JSON
 	c.Bind(&res)
 	return res
 }

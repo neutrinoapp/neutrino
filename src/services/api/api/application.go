@@ -17,7 +17,7 @@ type ApplicationModel struct {
 }
 
 type ApplicationController struct {
-	BaseController
+	*BaseController
 }
 
 func NewApplicationController() *ApplicationController {
