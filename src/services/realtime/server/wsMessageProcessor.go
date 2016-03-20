@@ -104,10 +104,10 @@ func (p WsMessageProcessor) HandleSubscribe(im interceptorMessage, msg *turnpike
 	//opts.ClientId = msg.Request
 	//opts.TopicId = uniqueTopicId
 
-	d := db.NewDataDbService(opts.AppId, opts.Type)
+	d := db.NewDbService()
 
 	newValuesChan := make(chan map[string]interface{})
-	err = d.Changes(opts.Filter, newValuesChan)
+	err = d.Changes(opts.AppId, opts.Type, opts.Filter, newValuesChan)
 	if err != nil {
 		log.Error(err)
 		return

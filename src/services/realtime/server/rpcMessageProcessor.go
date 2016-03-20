@@ -4,15 +4,20 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/neutrinoapp/neutrino/src/common/client"
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/messaging"
+	"github.com/neutrinoapp/neutrino/src/services/api/db"
 	"gopkg.in/jcelliott/turnpike.v2"
 )
 
 type RpcMessageProcessor struct {
 	WsClient    *turnpike.Client
 	WsProcessor WsMessageProcessor
+	DbService   db.DbService
+}
+
+func NewRpcMessageProcessor(wsClient *turnpike.Client, wsProcessor WsMessageProcessor) RpcMessageProcessor {
+	return RpcMessageProcessor{wsClient, wsProcessor, db.NewDbService()}
 }
 
 func (p RpcMessageProcessor) Process() {
@@ -22,7 +27,7 @@ func (p RpcMessageProcessor) Process() {
 	p.WsClient.BasicRegister("data.update", p.handleDataUpdate)
 }
 
-func (p RpcMessageProcessor) getArgs(args []interface{}) (messaging.Message, *client.ApiClient, error) {
+func (p RpcMessageProcessor) getArgs(args []interface{}) (messaging.Message, error) {
 	var m messaging.Message
 
 	incomingMsg := args[0]
@@ -30,40 +35,28 @@ func (p RpcMessageProcessor) getArgs(args []interface{}) (messaging.Message, *cl
 
 	b, err := json.Marshal(incomingMsg)
 	if err != nil {
-		return m, nil, err
+		return m, err
 	}
 
 	err = json.Unmarshal(b, &m)
 	if err != nil {
-		return m, nil, err
+		return m, err
 	}
-
-	c := client.NewApiClientCached(m.App)
-	c.Token = m.Token
-	if m.Options.Notify != nil {
-		c.NotifyRealTime = *m.Options.Notify
-	} else {
-		c.NotifyRealTime = true
-	}
-
-	c.Filter = m.Options.Filter
-	c.Origin = m.Options.Origin
-
-	return m, c, nil
+	return m, nil
 }
 
 func (p RpcMessageProcessor) handleDataRead(args []interface{}, kwargs map[string]interface{}) *turnpike.CallResult {
-	m, c, err := p.getArgs(args)
+	m, err := p.getArgs(args)
 	if err != nil {
 		log.Error(err)
 		return &turnpike.CallResult{Err: turnpike.URI(err.Error())}
 	}
 
-	var clientResult interface{}
+	var item interface{}
 	if id, ok := m.Payload["id"].(string); ok {
-		clientResult, err = c.GetItem(m.Type, id)
+		item, err = p.DbService.GetItemById(id)
 	} else {
-		clientResult, err = c.GetItems(m.Type)
+		item, err = p.DbService.GetItems(m.Type, m.App, m.Options.Filter)
 	}
 
 	if err != nil {
@@ -71,27 +64,26 @@ func (p RpcMessageProcessor) handleDataRead(args []interface{}, kwargs map[strin
 		return &turnpike.CallResult{Err: turnpike.URI(err.Error())}
 	}
 
-	return &turnpike.CallResult{Args: []interface{}{clientResult}}
+	return &turnpike.CallResult{Args: []interface{}{item}}
 }
 
 func (p RpcMessageProcessor) handleDataCreate(args []interface{}, kwargs map[string]interface{}) *turnpike.CallResult {
-	m, c, err := p.getArgs(args)
+	m, err := p.getArgs(args)
 	if err != nil {
 		log.Error(err)
 		return &turnpike.CallResult{Err: turnpike.URI(err.Error())}
 	}
 
-	resp, apiError := c.CreateItem(m.Type, m.Payload)
-	if apiError != nil {
-		log.Error(apiError)
-		return &turnpike.CallResult{Err: turnpike.URI(apiError.Error())}
+	id, err := p.DbService.CreateItem(m.App, m.Type, m.Payload)
+	if err != nil {
+		return &turnpike.CallResult{Err: turnpike.URI(err.Error())}
 	}
 
-	return &turnpike.CallResult{Args: []interface{}{resp["id"]}}
+	return &turnpike.CallResult{Args: []interface{}{id}}
 }
 
 func (p RpcMessageProcessor) handleDataRemove(args []interface{}, kwargs map[string]interface{}) *turnpike.CallResult {
-	m, c, err := p.getArgs(args)
+	m, err := p.getArgs(args)
 	if err != nil {
 		log.Error(err)
 		return &turnpike.CallResult{Err: turnpike.URI(err.Error())}
@@ -102,7 +94,7 @@ func (p RpcMessageProcessor) handleDataRemove(args []interface{}, kwargs map[str
 		return &turnpike.CallResult{Err: turnpike.URI(fmt.Sprintf("Incorrect payload, %v", m.Payload))}
 	}
 
-	_, err = c.DeleteItem(m.Type, id)
+	err = p.DbService.DeleteItemById(id)
 	if err != nil {
 		log.Error(err)
 		return &turnpike.CallResult{Err: turnpike.URI(err.Error())}
@@ -112,7 +104,7 @@ func (p RpcMessageProcessor) handleDataRemove(args []interface{}, kwargs map[str
 }
 
 func (p RpcMessageProcessor) handleDataUpdate(args []interface{}, kwargs map[string]interface{}) *turnpike.CallResult {
-	m, c, err := p.getArgs(args)
+	m, err := p.getArgs(args)
 	if err != nil {
 		log.Error(err)
 		return &turnpike.CallResult{Err: turnpike.URI(err.Error())}
@@ -123,7 +115,7 @@ func (p RpcMessageProcessor) handleDataUpdate(args []interface{}, kwargs map[str
 		return &turnpike.CallResult{Err: turnpike.URI(fmt.Sprintf("Incorrect payload, %v", m.Payload))}
 	}
 
-	_, err = c.UpdateItem(m.Type, id, m.Payload)
+	err = p.DbService.UpdateItemById(id, m.Payload)
 	if err != nil {
 		log.Error(err)
 		return &turnpike.CallResult{Err: turnpike.URI(err.Error())}

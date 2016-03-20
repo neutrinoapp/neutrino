@@ -14,7 +14,7 @@ func Initialize() error {
 	wsProcessor := NewWsMessageProcessor(interceptor, redisClient, clientMessageProcessor, wsClient)
 	wsProcessor.Process()
 
-	rpcProcessor := RpcMessageProcessor{wsClient, wsProcessor}
+	rpcProcessor := NewRpcMessageProcessor(wsClient, wsProcessor)
 	rpcProcessor.Process()
 
 	return nil

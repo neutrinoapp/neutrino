@@ -34,6 +34,15 @@ func (j JSON) FromMap(m map[string]interface{}) JSON {
 	return j
 }
 
+func (j JSON) ToMap() map[string]interface{} {
+	m := make(map[string]interface{})
+	for k, v := range j {
+		m[k] = v
+	}
+
+	return m
+}
+
 func (j *JSON) FromObject(o interface{}) error {
 	data, err := json.Marshal(o)
 	if err != nil {

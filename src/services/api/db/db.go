@@ -4,14 +4,14 @@ const (
 	DATABASE_NAME = "neutrino"
 
 	USERS_TABLE      = "users"
-	DATA_TABLE       = "data_0"
+	DATA_TABLE       = "data0"
 	APPS_TABLE       = "apps"
 	APPS_USERS_TABLE = "apps_users"
 
 	USERS_TYPE = "users"
 
-	APP_ID_FIELD        = "_appId"
-	TYPE_FIELD          = "_type"
+	APP_ID_FIELD        = "appId"
+	TYPE_FIELD          = "type"
 	TYPES_FIELD         = "types"
 	APPS_FIELD          = "apps"
 	USERS_FIELD         = "users"
@@ -23,22 +23,15 @@ const (
 	OWNER_FIELD         = "owner"
 	MASTER_KEY_FIELD    = "masterKey"
 
-	USERS_TABLE_EMAIL_INDEX = "email"
-	DATA_TABLE_APPIDTYPE_INDEX = "items_for_app_by_type"
+	USERS_TABLE_EMAIL_INDEX           = "email"
+	DATA_TABLE_APPIDTYPE_INDEX        = "items_for_app_by_type"
 	APPS_USERS_TABLE_EMAILAPPID_INDEX = "email_appId_user"
+)
+
+var (
+	DB_FIELDS = []string{TYPE_FIELD, APP_ID_FIELD}
 )
 
 func NewDbService() DbService {
 	return &dbService{}
 }
-
-//
-//func NewUserDbService(u, appId string) UserDbService {
-//	d := NewDbService(DATABASE_NAME, USERS_TABLE)
-//	return &userDbService{d, u, appId}
-//}
-//
-//func NewDataDbService(appId, t string) DataDbService {
-//	d := NewDbService(DATABASE_NAME, DATA_TABLE)
-//	return &dataDbService{d, t, appId}
-//}

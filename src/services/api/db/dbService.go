@@ -31,6 +31,8 @@ type DbService interface {
 
 	GetUser(email string, isApp bool, appId string) (user models.JSON, err error)
 	CreateUser(user models.JSON, isApp bool) (err error)
+
+	Changes(appId, t string, filter, channel interface{}) (err error)
 }
 
 type dbService struct {
@@ -131,9 +133,23 @@ func (d *dbService) CreateItem(appId, t string, data models.JSON) (id string, er
 	data[APP_ID_FIELD] = appId
 	data[TYPE_FIELD] = t
 
+	log.Info(appId)
+	log.Info(t)
+	log.Info(data)
+
+	//dataMap := data.ToMap()
+
 	err = d.Exec(
+		//d.Db().Table(DATA_TABLE).Insert(models.JSON{
+		//	"text":     "teST",
+		//	"id":       utils.GetCleanUUID(),
+		//	"complete": true,
+		//	"appId":    appId,
+		//	"type":     t,
+		//}),
 		d.Db().Table(DATA_TABLE).Insert(data),
 	)
+
 	return
 }
 
@@ -146,6 +162,12 @@ func (d *dbService) GetItems(appId, t string, filter interface{}) (data []models
 	}
 
 	err = c.All(&data)
+	if err == nil {
+		for i, v := range data {
+			data[i] = utils.BlacklistFields(DB_FIELDS, v)
+		}
+	}
+
 	return
 }
 
@@ -158,6 +180,10 @@ func (d *dbService) GetItemById(id string) (item models.JSON, err error) {
 	}
 
 	err = c.One(&item)
+	if err == nil {
+		item = utils.BlacklistFields(DB_FIELDS, item)
+	}
+
 	return
 }
 
@@ -225,5 +251,18 @@ func (d *dbService) CreateUser(user models.JSON, isApp bool) (err error) {
 	err = d.Exec(
 		d.Db().Table(table).Insert(user),
 	)
+	return
+}
+
+func (d *dbService) Changes(appId, t string, filter, channel interface{}) (err error) {
+	c, err := d.Run(
+		d.Db().Table(DATA_TABLE).GetAllByIndex(DATA_TABLE_APPIDTYPE_INDEX, []interface{}{appId, t}).
+			Filter(filter).Changes(),
+	)
+	if err != nil {
+		return nil
+	}
+
+	c.Listen(channel)
 	return
 }

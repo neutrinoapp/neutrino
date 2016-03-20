@@ -1,8 +1,10 @@
 package utils
 
 import (
-	"github.com/twinj/uuid"
 	"strings"
+
+	"github.com/neutrinoapp/neutrino/src/common/models"
+	"github.com/twinj/uuid"
 )
 
 func GetUUID() string {
@@ -13,17 +15,10 @@ func GetCleanUUID() string {
 	return strings.Replace(GetUUID(), "-", "", -1)
 }
 
-func WhitelistFields(fields []string, obj map[string]interface{}) map[string]interface{} {
-	result := make(map[string]interface{})
-
+func BlacklistFields(fields []string, obj models.JSON) models.JSON {
 	for _, k := range fields {
-		result[k] = obj[k]
+		delete(obj, k)
 	}
 
-	return result
-}
-
-func PathOfUrl(p string) string {
-	split := strings.Split(p, "/")
-	return split[len(split)-1]
+	return obj
 }

@@ -1,13 +1,13 @@
 package server
 
 import (
-	"github.com/neutrinoapp/neutrino/src/common/client"
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/messaging"
+	"github.com/neutrinoapp/neutrino/src/services/api/db"
 )
 
 type clientMessageProcessor struct {
-	OpProcessors map[string]func(messaging.Message, *client.ApiClient) (interface{}, error)
+	DbService db.DbService
 }
 
 func (p *clientMessageProcessor) Process(m string) (interface{}, error) {
@@ -24,42 +24,21 @@ func (p *clientMessageProcessor) Process(m string) (interface{}, error) {
 
 	log.Info("Got message from client....processing:", m)
 
-	opProcessor := p.OpProcessors[msg.Operation]
-
-	c := client.NewApiClientCached(msg.App)
-	c.Token = msg.Token
-	if msg.Options.Notify != nil {
-		c.NotifyRealTime = *msg.Options.Notify
-	} else {
-		c.NotifyRealTime = true
+	//TODO: this  should not be repeated
+	var resp interface{}
+	var opErr error
+	if msg.Type == messaging.OP_CREATE {
+		resp, opErr = p.DbService.CreateItem(msg.App, msg.Type, msg.Payload)
+	} else if msg.Type == messaging.OP_DELETE {
+		//TODO: handle delete all
+		opErr = p.DbService.DeleteItemById(msg.Payload[db.ID_FIELD].(string))
+	} else if msg.Type == messaging.OP_UPDATE {
+		opErr = p.DbService.UpdateItemById(msg.Payload[db.ID_FIELD].(string), msg.Payload)
 	}
 
-	opts := msg.Options
-	if *opts.ClientId != "" {
-		c.ClientId = *opts.ClientId
-	}
-
-	resp, err := opProcessor(msg, c)
-	return resp, err
-}
-
-func opCreate(m messaging.Message, c *client.ApiClient) (interface{}, error) {
-	return c.CreateItem(m.Type, m.Payload)
-}
-
-func opUpdate(m messaging.Message, c *client.ApiClient) (interface{}, error) {
-	return c.UpdateItem(m.Type, m.Payload["id"].(string), m.Payload)
-}
-
-func opDelete(m messaging.Message, c *client.ApiClient) (interface{}, error) {
-	return c.DeleteItem(m.Type, m.Payload["id"].(string))
+	return resp, opErr
 }
 
 func NewClientMessageProcessor() messaging.MessageProcessor {
-	opProcessors := make(map[string]func(messaging.Message, *client.ApiClient) (interface{}, error))
-	opProcessors[messaging.OP_CREATE] = opCreate
-	opProcessors[messaging.OP_UPDATE] = opUpdate
-	opProcessors[messaging.OP_DELETE] = opDelete
-
-	return &clientMessageProcessor{opProcessors}
+	return &clientMessageProcessor{db.NewDbService()}
 }
