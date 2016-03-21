@@ -9,8 +9,6 @@ import (
 	"github.com/neutrinoapp/neutrino/src/common/utils"
 )
 
-var session *r.Session
-
 type DbService interface {
 	GetSession() *r.Session
 	Run(r.Term) (*r.Cursor, error)
@@ -55,19 +53,16 @@ func (d *dbService) Db() r.Term {
 }
 
 func (d *dbService) GetSession() *r.Session {
-	if session == nil {
-		addr := config.Get(config.KEY_RETHINK_ADDR)
+	addr := config.Get(config.KEY_RETHINK_ADDR)
 
-		s, err := r.Connect(r.ConnectOpts{
-			Address: addr,
-		})
+	session, err := r.Connect(r.ConnectOpts{
+		Address: addr,
+		MaxIdle: 10,
+		MaxOpen: 20,
+	})
 
-		if err != nil {
-			log.Error(err)
-		}
-
-		//TODO: retry until connected
-		session = s
+	if err != nil {
+		log.Info(err)
 	}
 
 	return session
@@ -255,6 +250,10 @@ func (d *dbService) CreateUser(user models.JSON, isApp bool) (err error) {
 }
 
 func (d *dbService) Changes(appId, t string, filter, channel interface{}) (err error) {
+	if filter == nil {
+		filter = models.JSON{}
+	}
+
 	c, err := d.Run(
 		d.Db().Table(DATA_TABLE).GetAllByIndex(DATA_TABLE_APPIDTYPE_INDEX, []interface{}{appId, t}).
 			Filter(filter).Changes(),

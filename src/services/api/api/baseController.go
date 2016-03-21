@@ -1,6 +1,6 @@
 package api
 
-import "github.com/neutrinoapp/neutrino/src/services/api/db"
+import "github.com/neutrinoapp/neutrino/src/common/db"
 
 type BaseController struct {
 	DbService db.DbService

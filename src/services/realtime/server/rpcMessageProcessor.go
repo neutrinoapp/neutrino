@@ -56,7 +56,7 @@ func (p RpcMessageProcessor) handleDataRead(args []interface{}, kwargs map[strin
 	if id, ok := m.Payload["id"].(string); ok {
 		item, err = p.DbService.GetItemById(id)
 	} else {
-		item, err = p.DbService.GetItems(m.Type, m.App, m.Options.Filter)
+		item, err = p.DbService.GetItems(m.App, m.Type, m.Options.Filter)
 	}
 
 	if err != nil {
