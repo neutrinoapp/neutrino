@@ -8,7 +8,7 @@ import (
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/models"
 	"github.com/neutrinoapp/neutrino/src/common/utils"
-	"github.com/neutrinoapp/neutrino/src/services/api/db"
+	"github.com/neutrinoapp/neutrino/src/common/db"
 )
 
 type ApplicationModel struct {

@@ -20,7 +20,7 @@ type DbService interface {
 	GetApp(appId string) (app models.JSON, err error)
 
 	CreateItem(appId, t string, data models.JSON) (id string, err error)
-	GetItems(appId, t string, filter interface{}) (data []models.JSON, err error)
+	GetItems(appId, t string, filter models.JSON) (data []models.JSON, err error)
 	GetItemById(id string) (item models.JSON, err error)
 	UpdateItemById(id string, data interface{}) (err error)
 	DeleteItemById(id string) (err error)
@@ -30,7 +30,7 @@ type DbService interface {
 	GetUser(email string, isApp bool, appId string) (user models.JSON, err error)
 	CreateUser(user models.JSON, isApp bool) (err error)
 
-	Changes(appId, t string, filter, channel interface{}) (err error)
+	Changes(appId, t string, filter models.JSON, channel interface{}) (err error)
 }
 
 type dbService struct {
@@ -75,7 +75,7 @@ func (d *dbService) Run(t r.Term) (*r.Cursor, error) {
 func (d *dbService) Exec(terms ...r.Term) (err error) {
 	s := d.GetSession()
 	for _, t := range terms {
-		err = t.Exec(s)
+		_, err = t.RunWrite(s)
 		if err != nil {
 			return
 		}
@@ -128,30 +128,20 @@ func (d *dbService) CreateItem(appId, t string, data models.JSON) (id string, er
 	data[APP_ID_FIELD] = appId
 	data[TYPE_FIELD] = t
 
-	log.Info(appId)
-	log.Info(t)
-	log.Info(data)
-
-	//dataMap := data.ToMap()
-
 	err = d.Exec(
-		//d.Db().Table(DATA_TABLE).Insert(models.JSON{
-		//	"text":     "teST",
-		//	"id":       utils.GetCleanUUID(),
-		//	"complete": true,
-		//	"appId":    appId,
-		//	"type":     t,
-		//}),
 		d.Db().Table(DATA_TABLE).Insert(data),
 	)
 
 	return
 }
 
-func (d *dbService) GetItems(appId, t string, filter interface{}) (data []models.JSON, err error) {
-	c, err := d.Run(
-		d.Db().Table(DATA_TABLE).GetAllByIndex(DATA_TABLE_APPIDTYPE_INDEX, []interface{}{appId, t}).Filter(filter),
-	)
+func (d *dbService) GetItems(appId, t string, filter models.JSON) (data []models.JSON, err error) {
+	query := d.Db().Table(DATA_TABLE).GetAllByIndex(DATA_TABLE_APPIDTYPE_INDEX, []interface{}{appId, t})
+	if filter != nil || len(filter) > 0 {
+		query = query.Filter(filter)
+	}
+
+	c, err := d.Run(query)
 	if err != nil {
 		return
 	}
@@ -183,8 +173,10 @@ func (d *dbService) GetItemById(id string) (item models.JSON, err error) {
 }
 
 func (d *dbService) UpdateItemById(id string, data interface{}) (err error) {
+	updateData := utils.BlacklistFields([]string{ID_FIELD}, data)
+
 	err = d.Exec(
-		d.Db().Table(DATA_TABLE).Get(id).Update(data),
+		d.Db().Table(DATA_TABLE).Get(id).Update(updateData),
 	)
 	return
 }
@@ -249,15 +241,16 @@ func (d *dbService) CreateUser(user models.JSON, isApp bool) (err error) {
 	return
 }
 
-func (d *dbService) Changes(appId, t string, filter, channel interface{}) (err error) {
-	if filter == nil {
-		filter = models.JSON{}
+func (d *dbService) Changes(appId, t string, filter models.JSON, channel interface{}) (err error) {
+	query := d.Db().Table(DATA_TABLE).GetAllByIndex(DATA_TABLE_APPIDTYPE_INDEX, []interface{}{appId, t})
+
+	if filter != nil || len(filter) > 0 {
+		query = query.Filter(filter)
 	}
 
-	c, err := d.Run(
-		d.Db().Table(DATA_TABLE).GetAllByIndex(DATA_TABLE_APPIDTYPE_INDEX, []interface{}{appId, t}).
-			Filter(filter).Changes(),
-	)
+	query = query.Changes(r.ChangesOpts{Squash: true})
+
+	c, err := d.Run(query)
 	if err != nil {
 		return nil
 	}

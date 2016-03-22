@@ -5,7 +5,7 @@ import (
 
 	r "github.com/dancannon/gorethink"
 	"github.com/neutrinoapp/neutrino/src/common/config"
-	"github.com/neutrinoapp/neutrino/src/services/api/db"
+	"github.com/neutrinoapp/neutrino/src/common/db"
 )
 
 func main() {

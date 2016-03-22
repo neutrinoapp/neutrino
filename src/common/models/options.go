@@ -7,7 +7,7 @@ import (
 type Options struct {
 	ClientId *string `json:"clientId"`
 	Notify   *bool   `json:"notify"`
-	Filter   JSON    `json:"filter"`
+	Filter   JSON    `json:"filter,omitempty"`
 	Origin   string  `json:"origin"`
 }
 
