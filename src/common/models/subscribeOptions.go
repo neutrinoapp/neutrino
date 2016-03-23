@@ -11,6 +11,7 @@ type SubscribeOptions struct {
 	Type      string      `json:"type"`
 	AppId     string      `json:"appId"`
 	Operation string      `json:"op"`
+	ItemId    string      `json:"itemId"`
 }
 
 func (opts SubscribeOptions) IsSpecial() bool {

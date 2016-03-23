@@ -52,7 +52,6 @@ func (p RpcMessageReceiver) handleRpc(args []interface{}, kwargs map[string]inte
 	}
 
 	log.Info("RPC message received:", msg)
-
 	res, err := p.MessageProcessor.Process(msg)
 	if err != nil {
 		return p.makeErrorResult(err)

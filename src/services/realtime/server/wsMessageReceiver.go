@@ -9,6 +9,7 @@ import (
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/messaging"
 	"github.com/neutrinoapp/neutrino/src/common/models"
+	"github.com/neutrinoapp/neutrino/src/common/utils"
 	"gopkg.in/jcelliott/turnpike.v2"
 	"gopkg.in/redis.v3"
 )
@@ -49,6 +50,7 @@ func (p WsMessageReceiver) Receive() {
 }
 
 func (p WsMessageReceiver) handlePublish(im interceptorMessage, msg *turnpike.Publish) (interface{}, error) {
+
 	if string(msg.Topic) == "wamp.session.on_leave" {
 		args := msg.Arguments
 		if len(args) == 0 {
@@ -89,6 +91,7 @@ func (p WsMessageReceiver) handlePublish(im interceptorMessage, msg *turnpike.Pu
 		return nil, nil
 	}
 
+	log.Info("Websocket message received:", clientMessage)
 	data, apiError := p.ClientProcessor.Process(clientMessage)
 	if apiError != nil {
 		log.Error(apiError)
@@ -108,13 +111,26 @@ func (p WsMessageReceiver) handleSubscribe(im interceptorMessage, msg *turnpike.
 	topic := fmt.Sprintf("%v", msg.Topic)
 	topicArguments := strings.Split(topic, ".")
 
-	baseTopic := messaging.BuildTopicArbitrary(topicArguments[:len(topicArguments)-1]...)
 	opts.Topic = topic
-	opts.BaseTopic = baseTopic
+	if opts.IsSpecial() {
+		baseTopic := messaging.BuildTopicArbitrary(topicArguments[:len(topicArguments)-1]...)
+		opts.BaseTopic = baseTopic
+	} else {
+		opts.BaseTopic = topic
+	}
 
+	log.Info("Listening for changefeed:", opts)
 	d := db.NewDbService()
 	newValuesChan := make(chan map[string]interface{})
-	err = d.Changes(opts.AppId, opts.Type, opts.Filter, newValuesChan)
+
+	//for create and delete we want to listen for changes for the whole collection, for update only for the specific item
+	if opts.Operation == messaging.OP_CREATE || opts.Operation == messaging.OP_DELETE {
+		err = d.Changes(opts.AppId, opts.Type, opts.Filter, newValuesChan)
+	} else if opts.Operation == messaging.OP_UPDATE {
+		opts.ItemId = topicArguments[len(topicArguments)-1]
+		err = d.ChangesId(opts.ItemId, newValuesChan)
+	}
+
 	if err != nil {
 		log.Error(err)
 		return
@@ -128,7 +144,7 @@ func (p WsMessageReceiver) handleSubscribe(im interceptorMessage, msg *turnpike.
 		for {
 			select {
 			case val := <-newValuesChan:
-				p.processDatabaseUpdate(val, messageBuilder, opts)
+				p.processDatabaseUpdate(val, &messageBuilder, opts)
 			case leaveVal := <-leaveChan:
 				sessionId := leaveVal.(turnpike.ID)
 				if im.sess.Id == sessionId {
@@ -150,9 +166,10 @@ func (p WsMessageReceiver) handleSubscribe(im interceptorMessage, msg *turnpike.
 
 func (p WsMessageReceiver) processDatabaseUpdate(
 	val map[string]interface{},
-	messageBuilder messaging.MessageBuilder,
+	builder *messaging.MessageBuilder,
 	opts models.SubscribeOptions,
 ) {
+	messageBuilder := *builder
 
 	pld := models.JSON{}
 	var dbOp string
@@ -180,9 +197,9 @@ func (p WsMessageReceiver) processDatabaseUpdate(
 		dbVal = newVal.(map[string]interface{})
 	}
 
-	log.Info("new_val:", newVal, "old_val:", oldVal, "db_val:", dbVal, "dbOp:", dbOp, "op:", opts.Operation)
-
 	pld = pld.FromMap(dbVal)
+	pld = utils.BlacklistFields([]string{db.TYPE_FIELD, db.APP_ID_FIELD}, pld)
+
 	msg := messageBuilder.Build(
 		dbOp,
 		messaging.ORIGIN_API,
@@ -190,17 +207,12 @@ func (p WsMessageReceiver) processDatabaseUpdate(
 		models.Options{},
 		opts.Type,
 		opts.AppId,
-		"",
+		"", //TODO: token?
 	)
 	msg.Topic = opts.Topic
 
-	log.Info("Publishing realtime data: ", val, opts.Topic, opts.BaseTopic, msg)
+	log.Info("Publishing database feed: ", strings.ToUpper(msg.Operation), opts, val, msg)
 
 	publishArgs := []interface{}{msg}
-	if opts.Topic != opts.BaseTopic {
-		p.WsClient.Publish(opts.BaseTopic, publishArgs, nil)
-	}
-
 	p.WsClient.Publish(opts.Topic, publishArgs, nil)
-
 }

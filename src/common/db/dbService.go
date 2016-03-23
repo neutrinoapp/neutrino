@@ -31,6 +31,7 @@ type DbService interface {
 	CreateUser(user models.JSON, isApp bool) (err error)
 
 	Changes(appId, t string, filter models.JSON, channel interface{}) (err error)
+	ChangesId(id string, channel interface{}) (err error)
 }
 
 type dbService struct {
@@ -252,7 +253,18 @@ func (d *dbService) Changes(appId, t string, filter models.JSON, channel interfa
 
 	c, err := d.Run(query)
 	if err != nil {
-		return nil
+		return err
+	}
+
+	c.Listen(channel)
+	return
+}
+
+func (d *dbService) ChangesId(id string, channel interface{}) (err error) {
+	query := d.Db().Table(DATA_TABLE).Get(id).Changes(r.ChangesOpts{Squash: true, IncludeInitial: true})
+	c, err := d.Run(query)
+	if err != nil {
+		return err
 	}
 
 	c.Listen(channel)
