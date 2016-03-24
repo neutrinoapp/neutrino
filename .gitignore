@@ -2,3 +2,4 @@ neutrino
 nohup.out
 .idea
 build
+rethinkdb_data

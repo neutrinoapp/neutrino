@@ -5,13 +5,11 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/neutrinoapp/neutrino/src/common/db"
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/models"
-	"github.com/neutrinoapp/neutrino/src/services/api/db"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/dgrijalva/jwt-go.v2"
-
-	r "github.com/dancannon/gorethink"
 )
 
 type UserModel struct {
@@ -21,10 +19,14 @@ type UserModel struct {
 }
 
 type AuthController struct {
+	*BaseController
 }
 
-//TODO: refactor
-func registerUser(c *gin.Context, t r.Term, s *r.Session, isApp bool) {
+func NewAuthController() *AuthController {
+	return &AuthController{NewBaseController()}
+}
+
+func (a *AuthController) registerUser(c *gin.Context, isApp bool) {
 	var u models.JSON
 
 	if err := c.Bind(&u); err != nil {
@@ -32,41 +34,31 @@ func registerUser(c *gin.Context, t r.Term, s *r.Session, isApp bool) {
 		return
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u["password"].(string)), 10)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u[db.PASSWORD_FIELD].(string)), 10)
 	if err != nil {
 		log.Error(RestError(c, err))
 		return
 	}
 
 	user := models.JSON{
-		"id":        u["email"].(string),
-		"password":  hashedPassword,
-		"createdAt": time.Now(),
+		db.EMAIL_FIELD:         u[db.EMAIL_FIELD],
+		db.PASSWORD_FIELD:      hashedPassword,
+		db.REGISTERED_AT_FIELD: time.Now(),
 	}
 
-	var query r.Term
 	if isApp {
-		query = t.Update(func(row r.Term) interface{} {
-			return models.JSON{
-				db.USERS_FIELD: row.Field(db.USERS_FIELD).Append(user),
-			}
-		})
+		user[db.APP_ID_FIELD] = c.Param(APP_ID_PARAM)
 	} else {
-		user["apps"] = make([]models.JSON, 0)
-		query = t.Insert(user)
+		user[db.APPS_FIELD] = []interface{}{}
 	}
-	_, err = query.RunWrite(s)
 
+	err = a.DbService.CreateUser(user, isApp)
 	if err != nil {
-		//TODO: user exists
 		log.Error(RestError(c, err))
-		return
 	}
-
-	c.Status(http.StatusOK)
 }
 
-func loginUser(c *gin.Context, t r.Term, s *r.Session, isApp bool) {
+func (a *AuthController) loginUser(c *gin.Context, isApp bool) {
 	var u UserModel
 
 	if err := c.Bind(&u); err != nil {
@@ -74,29 +66,18 @@ func loginUser(c *gin.Context, t r.Term, s *r.Session, isApp bool) {
 		return
 	}
 
-	var cu *r.Cursor
-	var err error
+	appId := ""
 	if isApp {
-		cu, err = t.Filter(models.JSON{
-			db.ID_FIELD: u.Email,
-		}).Run(s)
-	} else {
-		cu, err = t.Get(u.Email).Run(s)
+		appId = c.Param(APP_ID_PARAM)
 	}
 
+	user, err := a.DbService.GetUser(u.Email, isApp, appId)
 	if err != nil {
 		log.Error(RestError(c, err))
 		return
 	}
 
-	var existingUser models.JSON
-	err = cu.One(&existingUser)
-	if err != nil {
-		log.Error(RestError(c, err))
-		return
-	}
-
-	err = bcrypt.CompareHashAndPassword(existingUser["password"].([]byte), []byte(u.Password))
+	err = bcrypt.CompareHashAndPassword(user[db.PASSWORD_FIELD].([]byte), []byte(u.Password))
 	if err != nil {
 		log.Error(RestError(c, err))
 		return
@@ -120,23 +101,17 @@ func loginUser(c *gin.Context, t r.Term, s *r.Session, isApp bool) {
 }
 
 func (a *AuthController) RegisterUserHandler(c *gin.Context) {
-	d := db.NewDbService(db.DATABASE_NAME, db.USERS_TABLE)
-	registerUser(c, d.Query(), d.GetSession(), false)
+	a.registerUser(c, false)
 }
 
 func (a *AuthController) AppRegisterUserHandler(c *gin.Context) {
-	appId := c.Param("appId")
-	d := db.NewDbService(db.DATABASE_NAME, db.DATA_TABLE)
-	registerUser(c, d.Query().Get(appId), d.GetSession(), true)
+	a.registerUser(c, true)
 }
 
 func (a *AuthController) LoginUserHandler(c *gin.Context) {
-	d := db.NewDbService(db.DATABASE_NAME, db.USERS_TABLE)
-	loginUser(c, d.Query(), d.GetSession(), false)
+	a.loginUser(c, false)
 }
 
 func (a *AuthController) AppLoginUserHandler(c *gin.Context) {
-	appId := c.Param("appId")
-	d := db.NewDbService(db.DATABASE_NAME, db.DATA_TABLE)
-	loginUser(c, d.Query().Get(appId).Field(db.USERS_FIELD), d.GetSession(), true)
+	a.loginUser(c, true)
 }

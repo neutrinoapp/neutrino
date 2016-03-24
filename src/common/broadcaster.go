@@ -14,6 +14,12 @@ func NewBroadcaster() *Broadcaster {
 }
 
 func (b *Broadcaster) Broadcast(v interface{}) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Error(err)
+		}
+	}()
+
 	log.Info(b.listeners)
 	for _, ch := range b.listeners {
 		ch <- v
