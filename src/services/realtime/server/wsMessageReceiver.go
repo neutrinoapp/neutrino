@@ -194,6 +194,11 @@ func (p WsMessageReceiver) processDatabaseUpdate(
 	} else if dbOp == messaging.OP_DELETE {
 		dbVal = oldVal.(map[string]interface{})
 	} else {
+		if newVal == nil {
+			log.Error("Invalid message:", val)
+			return
+		}
+
 		dbVal = newVal.(map[string]interface{})
 	}
 
