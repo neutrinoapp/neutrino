@@ -2,13 +2,13 @@
 
 docker -v
 
-docker inspect rethinkdb1 > /dev/null
+docker inspect rethinkdb > /dev/null
 inspectRethinkdbExitCode=$?
 
 if [ $inspectRethinkdbExitCode != 0 ]; then
     echo "Creating new rethinkdb container"
     docker pull rethinkdb:latest
-	docker run --name rethinkdb1 -v "/data/rethink" -p 8080:8080 -p 28015:28015 -d rethinkdb
+	docker run --name rethinkdb -v "/data/rethink" -p 8080:8080 -p 28015:28015 -d rethinkdb
 else
     echo "Starting rethinkdb"
     docker start rethinkdb
