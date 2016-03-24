@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/neutrinoapp/neutrino/src/common/db"
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/models"
-	"github.com/neutrinoapp/neutrino/src/common/db"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/dgrijalva/jwt-go.v2"
 )
@@ -48,6 +48,8 @@ func (a *AuthController) registerUser(c *gin.Context, isApp bool) {
 
 	if isApp {
 		user[db.APP_ID_FIELD] = c.Param(APP_ID_PARAM)
+	} else {
+		user[db.APPS_FIELD] = []interface{}{}
 	}
 
 	err = a.DbService.CreateUser(user, isApp)
