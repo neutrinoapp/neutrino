@@ -1,19 +1,19 @@
 package server
 
 import (
+	"github.com/gngeorgiev/gowamp"
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/messaging"
 	"github.com/neutrinoapp/neutrino/src/common/models"
-	"gopkg.in/jcelliott/turnpike.v2"
 )
 
 type RpcMessageReceiver struct {
-	WsClient         *turnpike.Client
+	WsClient         *gowamp.Client
 	WsReceiver       WsMessageReceiver
 	MessageProcessor messaging.MessageProcessor
 }
 
-func NewRpcMessageReceiver(wsClient *turnpike.Client, wsProcessor WsMessageReceiver) RpcMessageReceiver {
+func NewRpcMessageReceiver(wsClient *gowamp.Client, wsProcessor WsMessageReceiver) RpcMessageReceiver {
 	return RpcMessageReceiver{wsClient, wsProcessor, messaging.NewMessageProcessor()}
 }
 
@@ -24,19 +24,19 @@ func (p RpcMessageReceiver) Receive() {
 	p.WsClient.BasicRegister("data.update", p.handleRpc)
 }
 
-func (p RpcMessageReceiver) makeResult(data interface{}) *turnpike.CallResult {
-	return &turnpike.CallResult{Args: []interface{}{data}}
+func (p RpcMessageReceiver) makeResult(data interface{}) *gowamp.CallResult {
+	return &gowamp.CallResult{Args: []interface{}{data}}
 }
 
-func (p RpcMessageReceiver) makeErrorResult(err error) *turnpike.CallResult {
+func (p RpcMessageReceiver) makeErrorResult(err error) *gowamp.CallResult {
 	log.Error(err)
-	return &turnpike.CallResult{
-		Err:  turnpike.URI(err.Error()),
+	return &gowamp.CallResult{
+		Err:  gowamp.URI(err.Error()),
 		Args: []interface{}{err},
 	}
 }
 
-func (p RpcMessageReceiver) handleRpc(args []interface{}, kwargs map[string]interface{}) *turnpike.CallResult {
+func (p RpcMessageReceiver) handleRpc(args []interface{}, kwargs map[string]interface{}) *gowamp.CallResult {
 	var msg messaging.Message
 
 	if msgStr, ok := args[0].(string); ok {

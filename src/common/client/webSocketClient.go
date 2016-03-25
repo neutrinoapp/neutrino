@@ -1,8 +1,8 @@
 package client
 
 import (
+	"github.com/gngeorgiev/gowamp"
 	"github.com/neutrinoapp/neutrino/src/common/config"
-	"gopkg.in/jcelliott/turnpike.v2"
 )
 
 type WebSocketClient struct {
@@ -11,7 +11,7 @@ type WebSocketClient struct {
 
 func NewWebsocketClient(realms []string) *WebSocketClient {
 	connect := func() (interface{}, error) {
-		c, err := turnpike.NewWebsocketClient(turnpike.JSON, config.Get(config.KEY_REALTIME_ADDR))
+		c, err := gowamp.NewWebsocketClient(gowamp.JSON, config.Get(config.KEY_REALTIME_ADDR))
 		if err != nil {
 			return nil, err
 		}
@@ -28,9 +28,9 @@ func NewWebsocketClient(realms []string) *WebSocketClient {
 	return &WebSocketClient{baseClient}
 }
 
-func (w *WebSocketClient) GetConnection() *turnpike.Client {
+func (w *WebSocketClient) GetConnection() *gowamp.Client {
 	if w.connection != nil {
-		return w.connection.(*turnpike.Client)
+		return w.connection.(*gowamp.Client)
 	}
 
 	return nil

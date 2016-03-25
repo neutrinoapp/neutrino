@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/gngeorgiev/gowamp"
 	"github.com/neutrinoapp/neutrino/src/common"
 	"github.com/neutrinoapp/neutrino/src/common/db"
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/messaging"
 	"github.com/neutrinoapp/neutrino/src/common/models"
 	"github.com/neutrinoapp/neutrino/src/common/utils"
-	"gopkg.in/jcelliott/turnpike.v2"
 	"gopkg.in/redis.v3"
 )
 
@@ -18,14 +18,14 @@ type WsMessageReceiver struct {
 	Interceptor     *wsInterceptor
 	RedisClient     *redis.Client
 	ClientProcessor messaging.MessageProcessor
-	WsClient        *turnpike.Client
+	WsClient        *gowamp.Client
 	broadcaster     *common.Broadcaster
 }
 
 func NewWsMessageReceiver(
 	interceptor *wsInterceptor,
 	redisClient *redis.Client,
-	wsClient *turnpike.Client,
+	wsClient *gowamp.Client,
 ) WsMessageReceiver {
 	broadcaster := common.NewBroadcaster()
 	clientMessageProcessor := messaging.NewMessageProcessor()
@@ -39,17 +39,17 @@ func (p WsMessageReceiver) Receive() {
 			select {
 			case m := <-p.Interceptor.OnMessage:
 				msgType := m.messageType
-				if msgType == turnpike.SUBSCRIBE {
-					p.handleSubscribe(m, m.msg.(*turnpike.Subscribe))
-				} else if msgType == turnpike.PUBLISH {
-					p.handlePublish(m, m.msg.(*turnpike.Publish))
+				if msgType == gowamp.SUBSCRIBE {
+					p.handleSubscribe(m, m.msg.(*gowamp.Subscribe))
+				} else if msgType == gowamp.PUBLISH {
+					p.handlePublish(m, m.msg.(*gowamp.Publish))
 				}
 			}
 		}
 	}()
 }
 
-func (p WsMessageReceiver) handlePublish(im interceptorMessage, msg *turnpike.Publish) (interface{}, error) {
+func (p WsMessageReceiver) handlePublish(im interceptorMessage, msg *gowamp.Publish) (interface{}, error) {
 
 	if string(msg.Topic) == "wamp.session.on_leave" {
 		args := msg.Arguments
@@ -57,7 +57,7 @@ func (p WsMessageReceiver) handlePublish(im interceptorMessage, msg *turnpike.Pu
 			return nil, nil
 		}
 
-		if leavingSessionId, ok := args[0].(turnpike.ID); ok {
+		if leavingSessionId, ok := args[0].(gowamp.ID); ok {
 			log.Info("Broadcasting session leave:", leavingSessionId)
 			p.broadcaster.Broadcast(leavingSessionId)
 			return nil, nil
@@ -100,7 +100,7 @@ func (p WsMessageReceiver) handlePublish(im interceptorMessage, msg *turnpike.Pu
 	return data, apiError
 }
 
-func (p WsMessageReceiver) handleSubscribe(im interceptorMessage, msg *turnpike.Subscribe) {
+func (p WsMessageReceiver) handleSubscribe(im interceptorMessage, msg *gowamp.Subscribe) {
 	opts := models.SubscribeOptions{}
 	err := models.Convert(msg.Options, &opts)
 	if err != nil {
@@ -146,7 +146,7 @@ func (p WsMessageReceiver) handleSubscribe(im interceptorMessage, msg *turnpike.
 			case val := <-newValuesChan:
 				p.processDatabaseUpdate(val, &messageBuilder, opts)
 			case leaveVal := <-leaveChan:
-				sessionId := leaveVal.(turnpike.ID)
+				sessionId := leaveVal.(gowamp.ID)
 				if im.sess.Id == sessionId {
 					//TODO: newValuesChan seems to be automatically closed by the rethinkdb driver
 					//investigate whether we need to do something else

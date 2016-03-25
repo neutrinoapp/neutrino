@@ -1,15 +1,15 @@
 package server
 
-import "gopkg.in/jcelliott/turnpike.v2"
+import "github.com/gngeorgiev/gowamp"
 
 type wsInterceptor struct {
 	OnMessage chan interceptorMessage
 }
 
 type interceptorMessage struct {
-	msg         turnpike.Message
-	sess        turnpike.Session
-	messageType turnpike.MessageType
+	msg         gowamp.Message
+	sess        gowamp.Session
+	messageType gowamp.MessageType
 }
 
 func NewWsInterceptor() *wsInterceptor {
@@ -18,7 +18,7 @@ func NewWsInterceptor() *wsInterceptor {
 	}
 }
 
-func (i *wsInterceptor) Intercept(session turnpike.Session, msg *turnpike.Message) {
+func (i *wsInterceptor) Intercept(session gowamp.Session, msg *gowamp.Message) {
 	innerMessage := *msg
 	m := interceptorMessage{
 		msg:         innerMessage,

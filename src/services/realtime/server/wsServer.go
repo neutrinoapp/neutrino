@@ -3,20 +3,20 @@ package server
 import (
 	"net/http"
 
+	"github.com/gngeorgiev/gowamp"
 	"github.com/neutrinoapp/neutrino/src/common/config"
 	"github.com/neutrinoapp/neutrino/src/common/log"
-	"gopkg.in/jcelliott/turnpike.v2"
 )
 
-func NewWebSocketServer() (*turnpike.WebsocketServer, *turnpike.Client, *wsInterceptor, error) {
+func NewWebSocketServer() (*gowamp.WebsocketServer, *gowamp.Client, *wsInterceptor, error) {
 	interceptor := NewWsInterceptor()
 
-	r := turnpike.Realm{}
+	r := gowamp.Realm{}
 	r.Interceptor = interceptor
 
-	realms := map[string]turnpike.Realm{}
+	realms := map[string]gowamp.Realm{}
 	realms[config.CONST_DEFAULT_REALM] = r
-	wsServer, err := turnpike.NewWebsocketServer(realms)
+	wsServer, err := gowamp.NewWebsocketServer(realms)
 	if err != nil {
 		return nil, nil, nil, err
 	}
