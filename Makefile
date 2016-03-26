@@ -45,3 +45,6 @@ build-rethink-prepare:
 
 build-rethink-prepare-docker: build-rethink-prepare
 	docker build -f scripts/prepareRethinkDb/Dockerfile -t gcr.io/neutrino-1073/prepare-rethinkdb:v1 .
+
+build-rethinkdb:
+	docker build -f scripts/rethinkdb-next/Dockerfile -t gcr.io/neutrino-1073/realtime-service/rethinkdb-next:v1 .

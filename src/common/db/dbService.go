@@ -1,8 +1,6 @@
 package db
 
 import (
-	"github.com/neutrinoapp/neutrino/src/common/log"
-
 	r "github.com/dancannon/gorethink"
 	"github.com/neutrinoapp/neutrino/src/common/config"
 	"github.com/neutrinoapp/neutrino/src/common/models"
@@ -10,7 +8,7 @@ import (
 )
 
 type DbService interface {
-	GetSession() *r.Session
+	GetSession() (*r.Session, error)
 	Run(r.Term) (*r.Cursor, error)
 	Exec(terms ...r.Term) error
 	Db() r.Term
@@ -53,7 +51,7 @@ func (d *dbService) Db() r.Term {
 	return r.DB(DATABASE_NAME)
 }
 
-func (d *dbService) GetSession() *r.Session {
+func (d *dbService) GetSession() (*r.Session, error) {
 	addr := config.Get(config.KEY_RETHINK_ADDR)
 
 	session, err := r.Connect(r.ConnectOpts{
@@ -63,18 +61,27 @@ func (d *dbService) GetSession() *r.Session {
 	})
 
 	if err != nil {
-		log.Info(err)
+		return nil, err
 	}
 
-	return session
+	return session, nil
 }
 
 func (d *dbService) Run(t r.Term) (*r.Cursor, error) {
-	return t.Run(d.GetSession())
+	s, err := d.GetSession()
+	if err != nil {
+		return nil, err
+	}
+
+	return t.Run(s)
 }
 
 func (d *dbService) Exec(terms ...r.Term) (err error) {
-	s := d.GetSession()
+	s, err := d.GetSession()
+	if err != nil {
+		return err
+	}
+
 	for _, t := range terms {
 		_, err = t.RunWrite(s)
 		if err != nil {

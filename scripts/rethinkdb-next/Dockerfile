@@ -2,7 +2,7 @@ FROM ubuntu:14.04
 
 WORKDIR /rethink
 
-COPY rethinkdb.deb rethinkdb.deb
+COPY scripts/rethinkdb-next/rethinkdb.deb rethinkdb.deb
 
 RUN apt-get update -y
 RUN apt-get install -y libcurl3 libprotobuf8
