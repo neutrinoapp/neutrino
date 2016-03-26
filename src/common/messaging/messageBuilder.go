@@ -1,6 +1,10 @@
 package messaging
 
-import "github.com/neutrinoapp/neutrino/src/common/models"
+import (
+	"time"
+
+	"github.com/neutrinoapp/neutrino/src/common/models"
+)
 
 type MessageBuilder interface {
 	Build(op string, origin string, payload models.JSON, options models.Options, t, app, token string) Message
@@ -29,6 +33,7 @@ func (b *messageBuilder) Build(op string, og string, pld models.JSON, opts model
 		Type:      t,
 		App:       app,
 		Token:     token,
+		Timestamp: time.Now().UTC().Format(time.RFC3339),
 	}
 }
 

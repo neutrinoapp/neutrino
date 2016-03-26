@@ -3,6 +3,8 @@ package messaging
 import (
 	"encoding/json"
 
+	"fmt"
+
 	"github.com/neutrinoapp/neutrino/src/common/models"
 )
 
@@ -25,6 +27,7 @@ type Message struct {
 	App       string         `json:"app"`
 	Token     string         `json:"token"`
 	Topic     string         `json:"topic"`
+	Timestamp string         `json:"timestamp"`
 }
 
 func (m *Message) FromString(s string) error {
@@ -52,4 +55,8 @@ func (m Message) String() (string, error) {
 	}
 
 	return string(b), nil
+}
+
+func (m Message) GetRedisKey() string {
+	return fmt.Sprintf("%s:%s:%s:%s", m.App, m.Type, m.Operation, m.Topic)
 }

@@ -4,18 +4,57 @@ import (
 	"errors"
 	"fmt"
 
+	"time"
+
+	"github.com/neutrinoapp/neutrino/src/common/client"
 	"github.com/neutrinoapp/neutrino/src/common/db"
+	"github.com/neutrinoapp/neutrino/src/common/log"
+	"gopkg.in/redis.v3"
 )
 
 type MessageProcessor struct {
-	dbService db.DbService
+	dbService   db.DbService
+	redisClient *redis.Client
 }
 
 func NewMessageProcessor() MessageProcessor {
-	return MessageProcessor{db.NewDbService()}
+	return MessageProcessor{
+		dbService:   db.NewDbService(),
+		redisClient: client.GetNewRedisClient(),
+	}
+}
+
+func (p MessageProcessor) shouldProcessMessage(m Message) bool {
+	key := m.GetRedisKey()
+	timestamp := p.redisClient.Get(key).Val()
+	if timestamp == "" {
+		return true
+	}
+
+	cachedTime, parseTimeError := time.Parse(time.RFC3339, timestamp)
+	if parseTimeError == nil {
+		log.Error("Error parsing message time:", parseTimeError)
+		return true
+	}
+
+	messageTime, parseTimeError := time.Parse(time.RFC3339, m.Timestamp)
+	if parseTimeError == nil {
+		log.Error("Error parsing message time:", parseTimeError)
+		return true
+	}
+
+	return cachedTime.Before(messageTime)
 }
 
 func (p MessageProcessor) Process(m Message) (res interface{}, err error) {
+	shouldProcess := p.shouldProcessMessage(m)
+	if !shouldProcess {
+		log.Info("Skipping old message:", m)
+		return nil, nil
+	}
+
+	p.redisClient.Set(m.GetRedisKey(), m.Timestamp, 0)
+
 	if m.Operation == OP_CREATE {
 		return p.handleCreateMessage(m)
 	} else if m.Operation == OP_READ {
