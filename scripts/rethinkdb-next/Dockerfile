@@ -8,4 +8,4 @@ RUN apt-get update -y
 RUN apt-get install -y libcurl3 libprotobuf8
 RUN dpkg -i rethinkdb.deb
 
-CMD rethinkdb --bind all
+CMD rethinkdb --bind all -d /data/rethinkdb_data
