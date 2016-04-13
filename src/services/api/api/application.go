@@ -5,10 +5,10 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/neutrinoapp/neutrino/src/common/db"
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/models"
 	"github.com/neutrinoapp/neutrino/src/common/utils"
-	"github.com/neutrinoapp/neutrino/src/common/db"
 )
 
 type ApplicationModel struct {
@@ -39,6 +39,7 @@ func (a *ApplicationController) CreateApplicationHandler(c *gin.Context) {
 
 	email := ApiUser(c).Email
 	app := models.JSON{
+		db.ID_FIELD:         body.Id,
 		db.NAME_FIELD:       body.Name,
 		db.OWNER_FIELD:      email,
 		db.MASTER_KEY_FIELD: strings.ToUpper(utils.GetCleanUUID()),
