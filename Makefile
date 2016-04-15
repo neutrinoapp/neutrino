@@ -28,10 +28,10 @@ build-realtime:
 	bash scripts/build.sh src/services/realtime/main.go build/realtime
 
 build-docker-api: build-api
-	docker build -f api-dockerfile -t gcr.io/neutrino-1073/api-service:v1 .
+	docker build -f api-dockerfile -t gcr.io/neutrino-1073/api-service:latest .
 
 build-docker-realtime: build-realtime
-	docker build -f realtime-dockerfile -t gcr.io/neutrino-1073/realtime-service:v1 .
+	docker build -f realtime-dockerfile -t gcr.io/neutrino-1073/realtime-service:latest .
 
 build-services: build-api build-realtime
 
