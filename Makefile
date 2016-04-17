@@ -7,7 +7,9 @@ prep:
 	DEBUG_N=true go run scripts/prepareRethinkDb/main.go
 
 get:
-	go get -t -v -d ./src/...
+	echo "Installing glide..."
+	go get github.com/Masterminds/glide
+	glide install
 
 killapi:
 	-fuser -k 5000/tcp
