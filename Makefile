@@ -1,6 +1,9 @@
 default: get integration
 
 integration:
+	cd ./src/tests
+	go get -t ./...
+	cd ../..
 	DEBUG_N=true go test -v ./src/tests/
 
 prep:
