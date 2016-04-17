@@ -2,7 +2,7 @@ default: get integration
 
 integration:
 	cd ./src/tests
-	go get -t ./...
+	go get -t -d ./...
 	cd ../..
 	DEBUG_N=true go test -v ./src/tests/
 
