@@ -1,8 +1,5 @@
-package: github.com/neutrinoapp/neutrino/src
+package: github.com/neutrinoapp/neutrino
 import:
-- package: github.com/GoogleCloudPlatform/gcloud-golang
-  subpackages:
-  - logging
 - package: github.com/dancannon/gorethink
 - package: github.com/gin-gonic/gin
 - package: github.com/gngeorgiev/gowamp
@@ -16,6 +13,8 @@ import:
   subpackages:
   - context
   - http2
+- package: google.golang.org/cloud
+  subpackages:
+  - logging
 - package: gopkg.in/dgrijalva/jwt-go.v2
 - package: gopkg.in/redis.v3
-- package: google.golang.org/grpc
