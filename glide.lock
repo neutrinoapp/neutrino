@@ -1,5 +1,5 @@
-hash: 0e2b14dc277a395e64ea8610f66d4ea008c5b82f462a4777c51fd34bed2353c2
-updated: 2016-04-18T20:17:45.541918064+03:00
+hash: 92b224c485da028e47d2ba047be822b090393575358d6e0c737f61a2ade920c0
+updated: 2016-04-19T01:10:55.71310414+03:00
 imports:
 - name: github.com/BurntSushi/toml
   version: bbd5bb678321a0d6e58f1099321dfa73391c1b6f
@@ -77,61 +77,10 @@ imports:
   version: f315505cf3349909cdf013ea56690da34e96a451
   subpackages:
   - context
-  - http2
-  - context/ctxhttp
-  - trace
-  - http2/hpack
-  - internal/timeseries
-- name: golang.org/x/oauth2
-  version: 7e9cd5d59563851383f8f81a7fbb01213709387c
-  subpackages:
-  - google
-  - internal
-  - jws
-  - jwt
 - name: golang.org/x/sys
   version: f64b50fbea64174967a8882830d621a18ee1548e
   subpackages:
   - unix
-- name: google.golang.org/api
-  version: 9737cc9e103c00d06a8f3993361dec083df3d252
-  subpackages:
-  - logging/v1beta3
-  - gensupport
-  - googleapi
-  - googleapi/internal/uritemplates
-- name: google.golang.org/appengine
-  version: e234e71924d4aa52444bc76f2f831f13fa1eca60
-  subpackages:
-  - urlfetch
-  - internal
-  - internal/urlfetch
-  - internal/app_identity
-  - internal/modules
-  - internal/base
-  - internal/datastore
-  - internal/log
-  - internal/remote_api
-- name: google.golang.org/cloud
-  version: bee6e2e3a93d0c3fd2873b127cf447f39ea655b8
-  subpackages:
-  - logging
-  - internal/transport
-  - internal
-  - internal/opts
-  - compute/metadata
-- name: google.golang.org/grpc
-  version: 8086cee0311d55d55d9da16f89421575b4054088
-  subpackages:
-  - credentials
-  - credentials/oauth
-  - codes
-  - grpclog
-  - internal
-  - metadata
-  - naming
-  - transport
-  - peer
 - name: gopkg.in/bsm/ratelimit.v1
   version: db14e161995a5177acef654cb0dd785e8ee8bc22
 - name: gopkg.in/dancannon/gorethink.v2

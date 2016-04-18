@@ -9,12 +9,5 @@ import:
 - package: golang.org/x/crypto
   subpackages:
   - bcrypt
-- package: golang.org/x/net
-  subpackages:
-  - context
-  - http2
-- package: google.golang.org/cloud
-  subpackages:
-  - logging
 - package: gopkg.in/dgrijalva/jwt-go.v2
 - package: gopkg.in/redis.v3
