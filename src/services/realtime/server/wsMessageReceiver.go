@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"gopkg.in/redis.v3"
+
 	"github.com/gngeorgiev/gowamp"
 	"github.com/neutrinoapp/neutrino/src/common"
 	"github.com/neutrinoapp/neutrino/src/common/db"
@@ -11,7 +13,6 @@ import (
 	"github.com/neutrinoapp/neutrino/src/common/messaging"
 	"github.com/neutrinoapp/neutrino/src/common/models"
 	"github.com/neutrinoapp/neutrino/src/common/utils"
-	"gopkg.in/redis.v3"
 )
 
 type WsMessageReceiver struct {
@@ -35,6 +36,8 @@ func NewWsMessageReceiver(
 
 func (p WsMessageReceiver) Receive() {
 	go func() {
+		defer utils.Recover()
+
 		for {
 			select {
 			case m := <-p.Interceptor.OnMessage:

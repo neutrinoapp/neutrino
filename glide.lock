@@ -1,5 +1,5 @@
 hash: 92b224c485da028e47d2ba047be822b090393575358d6e0c737f61a2ade920c0
-updated: 2016-04-18T11:19:19.420437991+03:00
+updated: 2016-04-19T01:10:55.71310414+03:00
 imports:
 - name: github.com/BurntSushi/toml
   version: bbd5bb678321a0d6e58f1099321dfa73391c1b6f
@@ -49,20 +49,6 @@ imports:
   - encoders/builtin
 - name: github.com/nats-io/nuid
   version: a5152d67cf63cbfb5d992a395458722a45194715
-- name: github.com/neutrinoapp/neutrino
-  version: 42731c884d195f3c7899446a6ac36749cc3df6ee
-  subpackages:
-  - src/common/config
-  - src/common/db
-  - src/common/log
-  - src/common/models
-  - src/common/utils
-  - src/common/client
-  - src/services/api/api
-  - src/common/messaging
-  - src/common/utils/webUtils
-  - src/services/realtime/server
-  - src/common
 - name: github.com/Sirupsen/logrus
   version: 081307d9bc1364753142d5962fc1d795c742baaf
 - name: github.com/spf13/cast

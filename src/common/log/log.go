@@ -49,7 +49,13 @@ func args(args []interface{}) []interface{} {
 }
 
 func Info(v ...interface{}) {
-	log.Println(args(v)...)
+	s := args(v)
+	log.Println(append([]interface{}{"INFO:"}, s...))
+}
+
+func Warn(v ...interface{}) {
+	s := args(v)
+	log.Println(append([]interface{}{"WARN:"}, s))
 }
 
 func Error(v ...interface{}) {
@@ -68,6 +74,6 @@ func Error(v ...interface{}) {
 	finalErrorArgs := make([]interface{}, 1)
 	finalErrorArgs[0] = "Error: "
 
-	log.Println(append(finalErrorArgs, errorArgs...))
-	log.Println("[Stack: " + stackBuf.String() + "]")
+	s := fmt.Sprintf("%v, %v", append(finalErrorArgs, errorArgs...), "[Stack: "+stackBuf.String()+"]")
+	log.Println(s)
 }

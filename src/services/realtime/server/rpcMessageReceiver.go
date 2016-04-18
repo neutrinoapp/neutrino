@@ -5,6 +5,7 @@ import (
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/messaging"
 	"github.com/neutrinoapp/neutrino/src/common/models"
+	"github.com/neutrinoapp/neutrino/src/common/utils"
 )
 
 type RpcMessageReceiver struct {
@@ -37,6 +38,8 @@ func (p RpcMessageReceiver) makeErrorResult(err error) *gowamp.CallResult {
 }
 
 func (p RpcMessageReceiver) handleRpc(args []interface{}, kwargs map[string]interface{}) *gowamp.CallResult {
+	defer utils.Recover()
+
 	var msg messaging.Message
 
 	if msgStr, ok := args[0].(string); ok {

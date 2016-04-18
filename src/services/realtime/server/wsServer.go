@@ -34,6 +34,7 @@ func NewWebSocketServer() (*gowamp.WebsocketServer, *gowamp.Client, *wsIntercept
 
 	http.Handle("/", wsServer)
 	http.HandleFunc("/_status", func(w http.ResponseWriter, r *http.Request) {
+		log.Info("_status check")
 		//we are fine
 	})
 

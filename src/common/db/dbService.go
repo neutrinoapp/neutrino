@@ -54,11 +54,7 @@ func (d *dbService) Db() r.Term {
 func (d *dbService) GetSession() (*r.Session, error) {
 	addr := config.Get(config.KEY_RETHINK_ADDR)
 
-	session, err := r.Connect(r.ConnectOpts{
-		Address: addr,
-		MaxIdle: 10,
-		MaxOpen: 20,
-	})
+	session, err := r.Connect(r.ConnectOpts{Address: addr})
 
 	if err != nil {
 		return nil, err
@@ -72,6 +68,7 @@ func (d *dbService) Run(t r.Term) (*r.Cursor, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer s.Close()
 
 	return t.Run(s)
 }
@@ -81,6 +78,7 @@ func (d *dbService) Exec(terms ...r.Term) (err error) {
 	if err != nil {
 		return err
 	}
+	defer s.Close()
 
 	for _, t := range terms {
 		_, err = t.RunWrite(s)
