@@ -7,10 +7,27 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+
+	"golang.org/x/net/context"
+
+	"time"
+
+	"google.golang.org/cloud/logging"
 )
+
+var c *logging.Client
 
 func init() {
 	log.SetFlags(log.LstdFlags)
+	client, err := logging.NewClient(context.Background(), "neutrino-1073", "services")
+	if err != nil {
+		panic(err)
+	}
+
+	c = client
+	c.CommonLabels = map[string]string{}
+	c.BufferInterval = 1 * time.Millisecond
+	c.FlushAfter = 100
 }
 
 func fileAndLineFromStack(frame int) string {
@@ -49,7 +66,9 @@ func args(args []interface{}) []interface{} {
 }
 
 func Info(v ...interface{}) {
-	log.Println(args(v)...)
+	s := args(v)
+	//log.Println(s...)
+	c.Logger(logging.Info).Println(s...)
 }
 
 func Error(v ...interface{}) {
@@ -68,6 +87,6 @@ func Error(v ...interface{}) {
 	finalErrorArgs := make([]interface{}, 1)
 	finalErrorArgs[0] = "Error: "
 
-	log.Println(append(finalErrorArgs, errorArgs...))
-	log.Println("[Stack: " + stackBuf.String() + "]")
+	s := fmt.Sprintf("%v, %v", append(finalErrorArgs, errorArgs...), "[Stack: "+stackBuf.String()+"]")
+	c.Logger(logging.Error).Println(s)
 }

@@ -1,26 +1,21 @@
-package: github.com/neutrinoapp/neutrino
+package: github.com/neutrinoapp/neutrino/src
 import:
+- package: github.com/GoogleCloudPlatform/gcloud-golang
+  subpackages:
+  - logging
 - package: github.com/dancannon/gorethink
 - package: github.com/gin-gonic/gin
 - package: github.com/gngeorgiev/gowamp
 - package: github.com/nats-io/nats
-- package: github.com/neutrinoapp/neutrino
-  subpackages:
-  - src/common
-  - src/common/client
-  - src/common/config
-  - src/common/db
-  - src/common/log
-  - src/common/messaging
-  - src/common/models
-  - src/common/utils
-  - src/common/utils/webUtils
-  - src/services/api/api
-  - src/services/realtime/server
 - package: github.com/spf13/viper
 - package: github.com/twinj/uuid
 - package: golang.org/x/crypto
   subpackages:
   - bcrypt
+- package: golang.org/x/net
+  subpackages:
+  - context
+  - http2
 - package: gopkg.in/dgrijalva/jwt-go.v2
 - package: gopkg.in/redis.v3
+- package: google.golang.org/grpc
