@@ -175,6 +175,7 @@ func (p WsMessageReceiver) processDatabaseUpdate(
 	var dbOp string
 	newVal := val["new_val"]
 	oldVal := val["old_val"]
+
 	if newVal != nil && oldVal == nil {
 		dbOp = messaging.OP_CREATE
 	} else if newVal == nil && oldVal != nil {
@@ -190,10 +191,21 @@ func (p WsMessageReceiver) processDatabaseUpdate(
 
 	var dbVal map[string]interface{}
 	if dbOp == messaging.OP_CREATE {
+		if newVal == nil {
+			log.Error("Invalid message:", val)
+			return
+		}
+
 		dbVal = newVal.(map[string]interface{})
-	} else if dbOp == messaging.OP_DELETE {
+	} else if dbOp == messaging.OP_DELETE && oldVal != nil {
+		if oldVal == nil {
+			log.Error("Invalid message:", val)
+			return
+		}
+
 		dbVal = oldVal.(map[string]interface{})
 	} else {
+		//update
 		if newVal == nil {
 			log.Error("Invalid message:", val)
 			return

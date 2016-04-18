@@ -1,13 +1,18 @@
 default: get integration
 
 integration:
+	cd ./src/tests
+	go get -t -d ./...
+	cd ../..
 	DEBUG_N=true go test -v ./src/tests/
 
 prep:
 	DEBUG_N=true go run scripts/prepareRethinkDb/main.go
 
 get:
-	go get -t -v -d ./src/...
+	echo "Installing glide..."
+	go get github.com/Masterminds/glide
+	glide install
 
 killapi:
 	-fuser -k 5000/tcp
@@ -28,10 +33,10 @@ build-realtime:
 	bash scripts/build.sh src/services/realtime/main.go build/realtime
 
 build-docker-api: build-api
-	docker build -f api-dockerfile -t gcr.io/neutrino-1073/api-service:v1 .
+	docker build -f api-dockerfile -t gcr.io/neutrino-1073/api-service:latest .
 
 build-docker-realtime: build-realtime
-	docker build -f realtime-dockerfile -t gcr.io/neutrino-1073/realtime-service:v1 .
+	docker build -f realtime-dockerfile -t gcr.io/neutrino-1073/realtime-service:latest .
 
 build-services: build-api build-realtime
 

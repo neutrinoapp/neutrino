@@ -36,7 +36,7 @@ type dbService struct {
 }
 
 func (d *dbService) setId(item models.JSON) string {
-	if item[ID_FIELD] == nil {
+	if item[ID_FIELD] == nil || item[ID_FIELD] == "" {
 		item[ID_FIELD] = utils.GetCleanUUID()
 	}
 

@@ -1,0 +1,122 @@
+hash: 92b224c485da028e47d2ba047be822b090393575358d6e0c737f61a2ade920c0
+updated: 2016-04-18T11:19:19.420437991+03:00
+imports:
+- name: github.com/BurntSushi/toml
+  version: bbd5bb678321a0d6e58f1099321dfa73391c1b6f
+- name: github.com/cenkalti/backoff
+  version: 32cd0c5b3aef12c76ed64aaf678f6c79736be7dc
+- name: github.com/dancannon/gorethink
+  version: ad8c73f4d0c888a1ea6f3f266115b545908799be
+- name: github.com/gin-gonic/gin
+  version: 542be2fe77724f800fcab7eb6c01a4e597fb8506
+  subpackages:
+  - binding
+  - render
+- name: github.com/gngeorgiev/gowamp
+  version: eb31665e54b066818e1b56d8262b4c4e7d954a13
+- name: github.com/golang/protobuf
+  version: 2402d76f3d41f928c7902a765dfc872356dd3aad
+  subpackages:
+  - proto
+- name: github.com/gorilla/websocket
+  version: e2e3d8414d0fbae04004f151979f4e27c6747fe7
+- name: github.com/hailocab/go-hostpool
+  version: e80d13ce29ede4452c43dea11e79b9bc8a15b478
+- name: github.com/hashicorp/hcl
+  version: 27a57f2605e04995c111273c263d51cee60d9bc4
+  subpackages:
+  - hcl/ast
+  - hcl/parser
+  - hcl/token
+  - json/parser
+  - hcl/scanner
+  - hcl/strconv
+  - json/scanner
+  - json/token
+- name: github.com/kr/pretty
+  version: add1dbc86daf0f983cd4a48ceb39deb95c729b67
+- name: github.com/kr/text
+  version: bb797dc4fb8320488f47bf11de07a733d7233e1f
+- name: github.com/magiconair/properties
+  version: c265cfa48dda6474e208715ca93e987829f572f8
+- name: github.com/manucorporat/sse
+  version: ee05b128a739a0fb76c7ebd3ae4810c1de808d6d
+- name: github.com/mitchellh/mapstructure
+  version: d2dd0262208475919e1a362f675cfc0e7c10e905
+- name: github.com/nats-io/nats
+  version: b258f90beb7c1e3a45037b4f9b5bdadcde9cc42d
+  subpackages:
+  - encoders/builtin
+- name: github.com/nats-io/nuid
+  version: a5152d67cf63cbfb5d992a395458722a45194715
+- name: github.com/neutrinoapp/neutrino
+  version: 42731c884d195f3c7899446a6ac36749cc3df6ee
+  subpackages:
+  - src/common/config
+  - src/common/db
+  - src/common/log
+  - src/common/models
+  - src/common/utils
+  - src/common/client
+  - src/services/api/api
+  - src/common/messaging
+  - src/common/utils/webUtils
+  - src/services/realtime/server
+  - src/common
+- name: github.com/Sirupsen/logrus
+  version: 081307d9bc1364753142d5962fc1d795c742baaf
+- name: github.com/spf13/cast
+  version: 27b586b42e29bec072fe7379259cc719e1289da6
+- name: github.com/spf13/jwalterweatherman
+  version: 33c24e77fb80341fe7130ee7c594256ff08ccc46
+- name: github.com/spf13/pflag
+  version: 8f6a28b0916586e7f22fe931ae2fcfc380b1c0e6
+- name: github.com/spf13/viper
+  version: c975dc1b4eacf4ec7fdbf0873638de5d090ba323
+- name: github.com/streamrail/concurrent-map
+  version: 788b276dc7eabf20890ea3fa280956664d58b329
+- name: github.com/twinj/uuid
+  version: 89173bcdda19db0eb88aef1e1cb1cb2505561d31
+- name: github.com/ugorji/go
+  version: a396ed22fc049df733440d90efe17475e3929ccb
+  subpackages:
+  - codec
+- name: golang.org/x/crypto
+  version: 1777f3ba8c1fed80fcaec3317e3aaa4f627764d2
+  subpackages:
+  - bcrypt
+  - pbkdf2
+  - blowfish
+- name: golang.org/x/net
+  version: f315505cf3349909cdf013ea56690da34e96a451
+  subpackages:
+  - context
+- name: golang.org/x/sys
+  version: f64b50fbea64174967a8882830d621a18ee1548e
+  subpackages:
+  - unix
+- name: gopkg.in/bsm/ratelimit.v1
+  version: db14e161995a5177acef654cb0dd785e8ee8bc22
+- name: gopkg.in/dancannon/gorethink.v2
+  version: 21cbabb74b5d8e0d1ff0338fdb6991ee107199e0
+  subpackages:
+  - encoding
+  - ql2
+  - types
+- name: gopkg.in/dgrijalva/jwt-go.v2
+  version: a2c85815a77d0f951e33ba4db5ae93629a1530af
+- name: gopkg.in/fatih/pool.v2
+  version: cba550ebf9bce999a02e963296d4bc7a486cb715
+- name: gopkg.in/fsnotify.v1
+  version: 836bfd95fecc0f1511dd66bdbf2b5b61ab8b00b6
+- name: gopkg.in/go-playground/validator.v8
+  version: c193cecd124b5cc722d7ee5538e945bdb3348435
+- name: gopkg.in/redis.v3
+  version: b3514029955f38f2a1120b5c3ad59f241d9eecca
+  subpackages:
+  - internal/consistenthash
+  - internal/hashtag
+  - internal/pool
+- name: gopkg.in/yaml.v2
+  version: a83829b6f1293c91addabc89d0571c246397bbf4
+devImports: []
