@@ -47,13 +47,13 @@ func (p MessageProcessor) shouldProcessMessage(m Message) bool {
 }
 
 func (p MessageProcessor) Process(m Message) (res interface{}, err error) {
-	shouldProcess := p.shouldProcessMessage(m)
-	if !shouldProcess {
-		log.Info("Skipping old message:", m)
-		return nil, nil
-	}
+	//shouldProcess := p.shouldProcessMessage(m)
+	//if !shouldProcess {
+	//	log.Info("Skipping old message:", m)
+	//	return nil, nil
+	//}
 
-	p.redisClient.Set(m.GetRedisKey(), m.Timestamp, 0)
+	//p.redisClient.Set(m.GetRedisKey(), m.Timestamp, 0)
 
 	if m.Operation == OP_CREATE {
 		return p.handleCreateMessage(m)
