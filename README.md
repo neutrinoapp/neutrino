@@ -6,7 +6,7 @@
 
 <p align="center">![Neutrino](http://v41.imgup.net/NEUTRINO-l3931.png)<p/>
 
-#### Note: The project is still in its alpha stage if you still want to see it running, check out the demo in the website.
+#### Note: The project is still in its alpha stage if you still want to see it running, check out the demo in the [website](http://neutrinoapp.com).
 
 ## Introduction
 
