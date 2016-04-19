@@ -1,3 +1,6 @@
+#takes the first 8 letters of a commit, e.g.
+#de1a3d902db01bf39c83020db1207ab1a3760750 -> de1a3d90
+
 BUILD_NUMBER := $(shell git rev-parse HEAD|rev|cut -c33-|rev)
 
 build-number:
@@ -47,6 +50,11 @@ build-services: build-api build-realtime
 build-docker: build-services build-docker-api build-docker-realtime
 	gcloud docker push gcr.io/neutrino-1073/realtime-service:$(BUILD_NUMBER)
 	gcloud docker push gcr.io/neutrino-1073/api-service:$(BUILD_NUMBER)
+
+	docker tag gcr.io/neutrino-1073/realtime-service:$(BUILD_NUMBER) gcr.io/neutrino-1073/realtime-service:latest
+	docker tag gcr.io/neutrino-1073/api-service:$(BUILD_NUMBER) gcr.io/neutrino-1073/api-service:latest
+	gcloud docker push gcr.io/neutrino-1073/realtime-service:latest
+	gcloud docker push gcr.io/neutrino-1073/api-service:latest
 
 dev:
 	bash scripts/dev-setup.sh
