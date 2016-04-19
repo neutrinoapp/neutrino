@@ -1,3 +1,7 @@
+
+#takes the first 8 letters of a commit, e.g.
+#de1a3d902db01bf39c83020db1207ab1a3760750 -> de1a3d90
+
 BUILD_NUMBER := $(shell git rev-parse HEAD|rev|cut -c33-|rev)
 
 build-number:

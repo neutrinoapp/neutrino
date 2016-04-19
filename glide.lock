@@ -1,12 +1,12 @@
 hash: 92b224c485da028e47d2ba047be822b090393575358d6e0c737f61a2ade920c0
-updated: 2016-04-19T01:10:55.71310414+03:00
+updated: 2016-04-19T19:39:00.255166056+03:00
 imports:
 - name: github.com/BurntSushi/toml
   version: bbd5bb678321a0d6e58f1099321dfa73391c1b6f
 - name: github.com/cenkalti/backoff
   version: 32cd0c5b3aef12c76ed64aaf678f6c79736be7dc
 - name: github.com/dancannon/gorethink
-  version: ad8c73f4d0c888a1ea6f3f266115b545908799be
+  version: 3742792da4bc279ccd6d807f24687009cbeda860
 - name: github.com/gin-gonic/gin
   version: 542be2fe77724f800fcab7eb6c01a4e597fb8506
   subpackages:
@@ -68,7 +68,7 @@ imports:
   subpackages:
   - codec
 - name: golang.org/x/crypto
-  version: 1777f3ba8c1fed80fcaec3317e3aaa4f627764d2
+  version: 2f6fccd33b9b1fc23ebb73ad4890698820f7174d
   subpackages:
   - bcrypt
   - pbkdf2
@@ -84,7 +84,7 @@ imports:
 - name: gopkg.in/bsm/ratelimit.v1
   version: db14e161995a5177acef654cb0dd785e8ee8bc22
 - name: gopkg.in/dancannon/gorethink.v2
-  version: 21cbabb74b5d8e0d1ff0338fdb6991ee107199e0
+  version: 3742792da4bc279ccd6d807f24687009cbeda860
   subpackages:
   - encoding
   - ql2

@@ -16,6 +16,7 @@ func main() {
 
 	defer utils.Recover()
 	utils.ListenSignals()
+	utils.Liveness()
 
 	if os.Getenv("DEBUG_N") != "true" {
 		gin.SetMode(gin.ReleaseMode)
