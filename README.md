@@ -6,7 +6,7 @@
 
 <p align="center">![Neutrino](http://v41.imgup.net/NEUTRINO-l3931.png)<p/>
 
-#### Note: The project is still in its alpha stage if you still want to see it running, check out the demo in the [website](http://neutrinoapp.com).
+#### Note: The project is still in its alpha stage, if you still want to see it running, check out the demo in the [website](http://neutrinoapp.com).
 
 ## Introduction
 
@@ -22,7 +22,7 @@ Neutrino gives you out-of-the-box solution to easily manage your application’s
 
 **Tested only on linux**
 
-Start rethinkdb by downloading it for your distribution or if you have docker install run `make dev`.
+Start rethinkdb by downloading it for your distribution or if you have docker installed, run `make dev`.
 
 Start the **api service** by running `make api`.
 
