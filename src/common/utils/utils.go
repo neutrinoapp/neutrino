@@ -8,6 +8,11 @@ import (
 
 	"syscall"
 
+	"time"
+
+	"path"
+	"strconv"
+
 	"github.com/neutrinoapp/neutrino/src/common/log"
 	"github.com/neutrinoapp/neutrino/src/common/models"
 	"github.com/twinj/uuid"
@@ -55,6 +60,43 @@ func ListenSignals() {
 		for si := range s {
 			log.Warn("OS signal received:", si)
 			os.Exit(0)
+		}
+	}()
+}
+
+func Liveness() {
+	interval := 1 * time.Second
+	pid := strconv.Itoa(os.Getpid())
+	filename := "hearthbeat"
+	cwd, err := os.Getwd()
+	filepath := path.Join(cwd, filename)
+	if err != nil {
+		panic(err)
+	}
+
+	go func() {
+		hearthbeat := func() {
+			if _, err := os.Stat(filepath); os.IsNotExist(err) {
+				f, createErr := os.Create(filepath)
+				if createErr != nil {
+					log.Error("Error creating hearthbeat:", createErr)
+					return
+				}
+
+				_, writeErr := f.WriteString(pid)
+				if writeErr != nil {
+					log.Error("Error writing heartbeat:", writeErr)
+					return
+				}
+			}
+		}
+
+		t := time.Tick(interval)
+		for {
+			select {
+			case <-t:
+				hearthbeat()
+			}
 		}
 	}()
 }

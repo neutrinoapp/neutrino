@@ -15,6 +15,7 @@ func main() {
 
 	defer utils.Recover()
 	utils.ListenSignals()
+	utils.Liveness()
 
 	err := server.Initialize()
 	if err != nil {
