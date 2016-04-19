@@ -22,13 +22,13 @@ Neutrino gives you out-of-the-box solution to easily manage your application’s
 
 **Tested only on linux**
 
-Start rethinkdb by downloading it for your distribution or if you have docker installed, run `make dev`.
+Start rethinkdb by downloading it for your distribution or if you have docker installed, run `make dev`
 
-Start the **api service** by running `make api`.
+Start the **api service** by running `make api`
 
-Start the **realtime service** by running `make realtime`.
+Start the **realtime service** by running `make realtime`
 
-You can use the **postman configurations** from the *postman* folder until docs come out.
+You can use the **postman configurations** from the *postman* folder until docs come out
 
 ## Related projects
 
