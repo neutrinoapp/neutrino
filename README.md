@@ -5,3 +5,32 @@
 <p/>
 
 <p align="center">![Neutrino](http://v41.imgup.net/NEUTRINO-l3931.png)<p/>
+
+#### Note: The project is still in its alpha stage if you still want to see it running, check out the demo in the website.
+
+## Introduction
+
+Neutrino is a service that allows developers to link their mobile and web applications with a real time cloud data storage. 
+Every time you create a new application, you need to write code to authenticate users, store data, manage infrastructure, handle scalability.
+Neutrino gives you out-of-the-box solution to easily manage your application’s users and data. You can be sure that your data will always be available and scale along with your application.
+
+## Documentation
+
+*Comming soon*
+
+## Local development
+
+**Tested only on linux**
+
+Start rethinkdb by downloading it for your distribution or if you have docker install run `make dev`.
+
+Start the **api service** by running `make api`.
+
+Start the **realtime service** by running `make realtime`.
+
+You can use the **postman configurations** from the *postman* folder until docs come out.
+
+## Related projects
+
+* [neutrino-javascript](https://github.com/neutrinoapp/neutrino-javascript)
+
