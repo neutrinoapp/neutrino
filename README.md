@@ -25,7 +25,7 @@ Neutrino gives you out-of-the-box solution to easily manage your application’s
 *  [Realtime Service](https://github.com/neutrinoapp/neutrino/tree/master/src/services/realtime) - This server handles WebSocket connections. It can perform CRUD operations on the data. It can notify clients for changes in the following scenarios:
   * When an item in a collection is added, changed, removed etc. This allows one to bind to a whole collection as an array on the client. E.g. if you want to list all **cars** you can be sure that they will always be up to date.
   * When a single item is updated - allows listening for changes on per-item-basis.
-  * Check the client (api)[https://github.com/neutrinoapp/neutrino#api] below to get a better idea of the API
+  * Check the [client api](https://github.com/neutrinoapp/neutrino#api) below to get a better idea of the API
 * [Redis cache](http://redis.io/) - Not mandatory
 * [RethinkDB](http://rethinkdb.com) - For storing the data and listening for changes.
 
