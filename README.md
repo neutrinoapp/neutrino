@@ -32,5 +32,5 @@ You can use the **postman configurations** from the *postman* folder until docs 
 
 ## Related projects
 
-* [neutrino-javascript](https://github.com/neutrinoapp/neutrino-javascript)
+* [neutrino-javascript](https://github.com/neutrinoapp/neutrino-javascript) - Javascript Client
 
