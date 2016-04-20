@@ -84,7 +84,7 @@ app.auth.login('demo', 'demo').then(function () {
 
 ## Documentation
 
-*Comming soon*
+*Coming soon*
 
 ## Local development
 
