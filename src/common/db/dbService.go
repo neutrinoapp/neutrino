@@ -23,7 +23,7 @@ type DbService interface {
 	UpdateItemById(id string, data interface{}) (err error)
 	DeleteItemById(id string) (err error)
 	DeleteAllItems(appId, t string) (err error)
-	GetTypes(appId string) (types []models.JSON, err error)
+	GetTypes(appId string) (types []string, err error)
 
 	GetUser(email string, isApp bool, appId string) (user models.JSON, err error)
 	CreateUser(user models.JSON, isApp bool) (err error)
@@ -201,15 +201,15 @@ func (d *dbService) DeleteAllItems(appId, t string) (err error) {
 	return
 }
 
-func (d *dbService) GetTypes(appId string) (types []models.JSON, err error) {
+func (d *dbService) GetTypes(appId string) (types []string, err error) {
 	c, err := d.Run(
-		d.Db().Table(APPS_TABLE).Get(appId).Field(TYPES_FIELD),
+		d.Db().Table(DATA_TABLE).Filter(models.JSON{APP_ID_FIELD: appId}).Map(r.Row.Field(TYPE_FIELD)).Distinct(),
 	)
 	if err != nil {
 		return
 	}
 
-	err = c.All(types)
+	err = c.All(&types)
 	return
 }
 
